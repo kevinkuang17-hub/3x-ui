@@ -21,6 +21,7 @@ import { sanitizePath, normalizePath } from './uriPath';
 import HappSettingsContent from './HappSettingsContent';
 import IncySettingsContent from './IncySettingsContent';
 import { remoteSourceBadge } from './subscriptionShared';
+import { CLASH_ROUTING_PRESETS, presetOf } from './clashRoutingPresets';
 
 interface SubscriptionGeneralTabProps {
   allSetting: AllSetting;
@@ -422,6 +423,40 @@ export default function SubscriptionGeneralTab({
           label: catTabLabel(<NodeIndexOutlined />, 'Clash / Mihomo', isMobile),
           children: (
             <>
+              <SettingListItem
+                paddings="small"
+                title={t('pages.settings.subClashPreset')}
+                description={t('pages.settings.subClashPresetDesc')}
+              >
+                <Select
+                  style={{ width: '100%' }}
+                  value={presetOf(allSetting.subClashRules)?.key}
+                  placeholder={t('pages.settings.subClashPresetPlaceholder')}
+                  options={CLASH_ROUTING_PRESETS.map((p) => ({
+                    value: p.key,
+                    label: t(`pages.settings.subClashPreset_${p.key}`),
+                  }))}
+                  onChange={(key: string) => {
+                    const preset = CLASH_ROUTING_PRESETS.find((p) => p.key === key);
+                    if (!preset) return;
+                    // One click turns on everything the preset needs; the page Save button persists it.
+                    updateSetting({
+                      subClashEnable: true,
+                      subClashEnableRouting: true,
+                      subClashRules: preset.url,
+                      subUpdates: Math.min(allSetting.subUpdates || 1, 1),
+                    });
+                  }}
+                />
+              </SettingListItem>
+              {presetOf(allSetting.subClashRules) && (
+                <Alert
+                  type="info"
+                  showIcon
+                  style={{ margin: '4px 0 8px' }}
+                  title={t('pages.settings.subClashPresetApplied')}
+                />
+              )}
               <SettingListItem
                 paddings="small"
                 title={t('pages.settings.subClashEnableRouting')}

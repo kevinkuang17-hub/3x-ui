@@ -1742,7 +1742,15 @@
       "subIncyResolveDnsDomainDesc": "DoH 伺服器 URL，通常以 /dns-query 結尾。",
       "subIncyResolveDnsIp": "DoH 伺服器 IP",
       "subIncyResolveDnsIpDesc": "用於引導的 DoH 伺服器 IP。",
-      "subIncyGroupRouting": "路由"
+      "subIncyGroupRouting": "路由",
+      "subClashPreset": "一鍵分流規則",
+      "subClashPresetDesc": "選一個現成的分流方案，自動開啟 Clash 訂閱和路由並填好規則地址（規則每天自動更新，客戶端每小時刷新），選完點頁面上的儲存",
+      "subClashPresetPlaceholder": "選擇分流方案",
+      "subClashPreset_standard": "Aethersailor 標準版（推薦：按服務分組 + 地區自動測速）",
+      "subClashPreset_lite": "Aethersailor 精簡版（分組少）",
+      "subClashPreset_full": "Aethersailor 全分組版（分組最細）",
+      "subClashPreset_gfw": "Aethersailor GFW 版（只代理被牆網站）",
+      "subClashPresetApplied": "已使用一鍵分流規則：規則由遠端地址提供，每天自動同步；節點名請帶地區旗幟或代碼（如 🇭🇰 HK A），地區組會自動歸類。記得點儲存。"
     },
     "xray": {
       "save": "儲存",

@@ -1742,7 +1742,15 @@
       "subIncyResolveDnsDomainDesc": "آدرس سرور DoH، معمولاً به /dns-query ختم میشود.",
       "subIncyResolveDnsIp": "آیپی سرور DoH",
       "subIncyResolveDnsIpDesc": "آیپی سرور DoH برای بوتاسترپ.",
-      "subIncyGroupRouting": "مسیریابی"
+      "subIncyGroupRouting": "مسیریابی",
+      "subClashPreset": "One-click routing preset",
+      "subClashPresetDesc": "Pick a ready-made routing profile: enables Clash subscription + routing and fills the rules URL (rules sync daily, clients refresh hourly). Click Save afterwards.",
+      "subClashPresetPlaceholder": "Choose a preset",
+      "subClashPreset_standard": "Aethersailor Standard (service groups + per-region auto select)",
+      "subClashPreset_lite": "Aethersailor Lite (fewer groups)",
+      "subClashPreset_full": "Aethersailor Full (most granular)",
+      "subClashPreset_gfw": "Aethersailor GFW (proxy blocked sites only)",
+      "subClashPresetApplied": "Using a one-click routing preset: rules come from a remote URL synced daily; include a region flag or code in node names (e.g. 🇭🇰 HK A) so region groups fill automatically. Remember to Save."
     },
     "xray": {
       "save": "ذخیره",

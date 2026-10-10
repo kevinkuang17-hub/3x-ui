@@ -1,0 +1,45 @@
+# 每天检查官方 3X-UI 有没有发新版本：有就合并到本仓库（保留我们的修改），打同名标签并编译发布，
+# 服务器上 x-ui update / 面板里的“更新”就能拿到“官方新版 + 我们的修改”。合并冲突时会失败并发邮件提醒。
+name: sync-upstream
+on:
+  schedule:
+    - cron: "23 21 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "手动指定要发布的版本标签（留空=官方最新版）"
+        required: false
+permissions:
+  contents: write
+  actions: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: 合并官方最新版本
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          git config user.name "sync-bot"
+          git config user.email "sync-bot@users.noreply.github.com"
+          git remote add upstream https://github.com/MHSanaei/3x-ui.git
+          git fetch upstream --tags --force
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG=$(curl -fsSL https://api.github.com/repos/MHSanaei/3x-ui/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+          fi
+          [ -n "$TAG" ] || { echo "取不到官方版本号"; exit 1; }
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 && [ -z "${{ github.event.inputs.tag }}" ]; then
+            echo "已经发布过 $TAG"; exit 0
+          fi
+          if ! git merge-base --is-ancestor "refs/tags/$TAG" HEAD; then
+            git merge --no-edit "refs/tags/$TAG" || { echo "合并 $TAG 有冲突，需要人工处理"; exit 1; }
+            git push origin HEAD:main
+          fi
+          git tag -f "$TAG"
+          git push -f origin "refs/tags/$TAG"
+          # GITHUB_TOKEN 推的标签不会自动触发编译，这里手动触发
+          gh workflow run release.yml -R "$GITHUB_REPOSITORY" --ref "$TAG"
