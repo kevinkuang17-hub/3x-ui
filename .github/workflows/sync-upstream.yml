@@ -4,6 +4,9 @@ name: sync-upstream
 on:
   schedule:
     - cron: "23 21 * * *"
+  push:
+    branches: [main]
+    paths: [".github/release-tag"]     # 改这个文件 = 用里面写的版本号重新发布本仓库的修改
   workflow_dispatch:
     inputs:
       tag:
@@ -28,14 +31,16 @@ jobs:
           git remote add upstream https://github.com/MHSanaei/3x-ui.git
           git fetch upstream --tags --force
           TAG="${{ github.event.inputs.tag }}"
+          FORCE="${{ github.event.inputs.tag }}"
+          if [ "${{ github.event_name }}" = "push" ]; then TAG=$(tr -d ' \r\n' < .github/release-tag); FORCE=1; fi
           if [ -z "$TAG" ]; then
             TAG=$(curl -fsSL https://api.github.com/repos/MHSanaei/3x-ui/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
           fi
           [ -n "$TAG" ] || { echo "取不到官方版本号"; exit 1; }
-          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 && [ -z "${{ github.event.inputs.tag }}" ]; then
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 && [ -z "$FORCE" ]; then
             echo "已经发布过 $TAG"; exit 0
           fi
-          if ! git merge-base --is-ancestor "refs/tags/$TAG" HEAD; then
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null && ! git merge-base --is-ancestor "refs/tags/$TAG" HEAD; then
             git merge --no-edit "refs/tags/$TAG" || { echo "合并 $TAG 有冲突，需要人工处理"; exit 1; }
             git push origin HEAD:main
           fi
