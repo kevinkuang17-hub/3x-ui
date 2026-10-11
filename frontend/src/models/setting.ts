@@ -74,7 +74,7 @@ export class AllSetting {
   subClashURI = '';
   subClashEnableRouting = false;
   subClashRules = '';
-  subLineHealth = true;
+  subLineHealth = false;
   crmWebhookEnable = false;
   crmWebhookUrl = '';
   crmWebhookSecret = '';

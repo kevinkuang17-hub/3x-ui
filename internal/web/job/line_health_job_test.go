@@ -44,6 +44,9 @@ func seedLineHealth(t *testing.T, ports ...int) (*LineHealthJob, *fakeDialer, ma
 	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
 	linehealth.Reset()
 	t.Cleanup(linehealth.Reset)
+	if err := database.GetDB().Create(&model.Setting{Key: "subLineHealth", Value: "true"}).Error; err != nil {
+		t.Fatal(err)
+	}
 	node := &model.Node{Name: "hk-a", Scheme: "https", Address: "hk.example.com", Port: 2053, ApiToken: "tok", Enable: true, Status: "online", XrayState: "running"}
 	if err := database.GetDB().Create(node).Error; err != nil {
 		t.Fatalf("create node: %v", err)
@@ -117,7 +120,7 @@ func TestLineHealthDisabledClearsMarks(t *testing.T) {
 	if !linehealth.IsDown(ids[10021]) {
 		t.Fatal("precondition: line should be hidden")
 	}
-	if err := database.GetDB().Create(&model.Setting{Key: "subLineHealth", Value: "false"}).Error; err != nil {
+	if err := database.GetDB().Model(&model.Setting{}).Where("key = ?", "subLineHealth").Update("value", "false").Error; err != nil {
 		t.Fatal(err)
 	}
 	j.Run()
@@ -146,5 +149,43 @@ func TestLineHealthUDPFollowsNodeXrayState(t *testing.T) {
 	}
 	if !lineIsUDP(&model.Inbound{Protocol: model.VLESS, StreamSettings: `{"network":"kcp"}`}) {
 		t.Fatal("kcp transport is UDP")
+	}
+}
+
+func TestLineProbeHostFollowsAdvertisedAddress(t *testing.T) {
+	node := &model.Node{Address: "hk.example.com"}
+	cases := []struct {
+		name string
+		ib   model.Inbound
+		node *model.Node
+		want string
+	}{
+		{"node address by default", model.Inbound{Listen: "0.0.0.0"}, node, "hk.example.com"},
+		{"custom share address", model.Inbound{ShareAddrStrategy: "custom", ShareAddr: "cdn.example.com"}, node, "cdn.example.com"},
+		{"public listen strategy", model.Inbound{ShareAddrStrategy: "listen", Listen: "203.0.113.9"}, node, "203.0.113.9"},
+		{"fallback child on loopback", model.Inbound{Listen: "127.0.0.1"}, node, ""},
+		{"unix socket", model.Inbound{Listen: "/run/xray.sock"}, node, ""},
+		{"external proxy", model.Inbound{StreamSettings: `{"externalProxy":[{"dest":"relay.example.com","port":443}]}`}, node, ""},
+		{"tailscale node address", model.Inbound{}, &model.Node{Address: "100.101.102.103"}, ""},
+		{"lan node address", model.Inbound{}, &model.Node{Address: "192.168.1.10"}, ""},
+	}
+	for _, c := range cases {
+		if got := lineProbeHost(&c.ib, c.node); got != c.want {
+			t.Errorf("%s: got %q want %q", c.name, got, c.want)
+		}
+	}
+}
+
+func TestLineHealthSkipsInboundsBehindManagedHosts(t *testing.T) {
+	j, fd, ids := seedLineHealth(t, 10031, 10032, 10033)
+	if err := database.GetDB().Create(&model.Host{InboundId: ids[10031], Remark: "cdn"}).Error; err != nil {
+		t.Fatal(err)
+	}
+	fd.set("hk.example.com:10031", true)
+	for range lineHealthFailThreshold + 1 {
+		j.Run()
+	}
+	if linehealth.IsDown(ids[10031]) {
+		t.Fatal("an inbound reached through managed hosts must not be judged by the node port")
 	}
 }

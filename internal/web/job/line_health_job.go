@@ -81,7 +81,23 @@ func (j *LineHealthJob) Run() {
 		logger.Warning("line health: load inbounds failed:", err)
 		return
 	}
-	verdicts := j.probeAll(inbounds, nodesByID)
+	// Inbounds fronted by managed hosts (CDN, relays) are reached through those, not the node itself.
+	var hosted []int
+	if err := database.GetDB().Model(&model.Host{}).Where("is_disabled = ?", false).Distinct("inbound_id").Pluck("inbound_id", &hosted).Error; err != nil {
+		logger.Warning("line health: load hosts failed:", err)
+		return
+	}
+	hostedSet := make(map[int]bool, len(hosted))
+	for _, id := range hosted {
+		hostedSet[id] = true
+	}
+	probe := inbounds[:0:0]
+	for _, ib := range inbounds {
+		if !hostedSet[ib.Id] {
+			probe = append(probe, ib)
+		}
+	}
+	verdicts := j.probeAll(probe, nodesByID)
 	j.apply(inbounds, verdicts)
 }
 
@@ -121,10 +137,7 @@ func (j *LineHealthJob) probeOne(ib *model.Inbound, node *model.Node) lineVerdic
 		}
 		return lineFail
 	}
-	host := strings.TrimSpace(node.Address)
-	if ib.ShareAddrStrategy == "custom" && strings.TrimSpace(ib.ShareAddr) != "" {
-		host = strings.TrimSpace(ib.ShareAddr)
-	}
+	host := lineProbeHost(ib, node)
 	if host == "" || ib.Port <= 0 {
 		return lineUnknown
 	}
@@ -134,6 +147,68 @@ func (j *LineHealthJob) probeOne(ib *model.Inbound, node *model.Node) lineVerdic
 		return lineFail
 	}
 	return lineOK
+}
+
+// lineProbeHost mirrors the subscription's own address choice (resolveInboundAddress) and returns ""
+// when clients reach the line some other way: fallback child, external proxy, or a private address.
+func lineProbeHost(ib *model.Inbound, node *model.Node) string {
+	listen := strings.TrimSpace(ib.Listen)
+	if strings.HasPrefix(listen, "@") || strings.HasPrefix(listen, "/") || lineHostIsInternal(listen) {
+		return ""
+	}
+	var stream map[string]any
+	_ = json.Unmarshal([]byte(ib.StreamSettings), &stream)
+	if proxies, ok := stream["externalProxy"].([]any); ok && len(proxies) > 0 {
+		return ""
+	}
+	nodeAddr := strings.TrimSpace(node.Address)
+	listenAddr := ""
+	if listen != "" && !lineHostIsWildcard(listen) {
+		listenAddr = listen
+	}
+	candidates := []string{nodeAddr, listenAddr}
+	switch ib.ShareAddrStrategy {
+	case "listen":
+		candidates = []string{listenAddr, nodeAddr}
+	case "custom":
+		candidates = []string{strings.TrimSpace(ib.ShareAddr), nodeAddr, listenAddr}
+	}
+	for _, c := range candidates {
+		if c == "" {
+			continue
+		}
+		if lineHostIsInternal(c) || lineHostIsPrivate(c) {
+			return ""
+		}
+		return c
+	}
+	return ""
+}
+
+func lineHostIsInternal(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && ip.IsLoopback()
+}
+
+func lineHostIsWildcard(host string) bool {
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && ip.IsUnspecified()
+}
+
+// A private/CGNAT node address (e.g. a Tailscale IP) is how the master reaches the panel, not users.
+func lineHostIsPrivate(host string) bool {
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	if ip == nil {
+		return false
+	}
+	if ip.IsPrivate() || ip.IsLinkLocalUnicast() {
+		return true
+	}
+	cgnat := net.IPNet{IP: net.IPv4(100, 64, 0, 0), Mask: net.CIDRMask(10, 32)}
+	return cgnat.Contains(ip)
 }
 
 func lineIsUDP(ib *model.Inbound) bool {

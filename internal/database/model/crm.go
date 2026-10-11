@@ -26,10 +26,11 @@ func (CrmWebhookOutbox) TableName() string { return "crm_webhook_outbox" }
 
 // SsoTicket is a single-use, short-lived login link minted for a CRM via the API.
 type SsoTicket struct {
-	Token     string `gorm:"primaryKey"`
-	Username  string `gorm:"not null"`
-	Redirect  string
-	ExpiresAt int64 `gorm:"index"`
+	Token      string `gorm:"primaryKey"`
+	Username   string `gorm:"not null"`
+	Redirect   string
+	ExpiresAt  int64 `gorm:"index"`
+	LoginEpoch int64
 }
 
 func (SsoTicket) TableName() string { return "sso_tickets" }

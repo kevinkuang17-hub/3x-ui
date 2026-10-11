@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"html"
 	"net/http"
 	"strings"
 	"time"
@@ -72,20 +73,36 @@ func (a *CrmController) testWebhook(c *gin.Context) {
 	jsonMsg(c, I18nWeb(c, "pages.settings.crmWebhookTestOk"), nil)
 }
 
+// SsoLanding answers GET /sso/:token with a page that POSTs the token back, so link-preview bots
+// that only fetch the URL never burn the ticket or receive the session cookie.
+func SsoLanding(c *gin.Context) {
+	c.Header("Cache-Control", "no-store")
+	c.Header("X-Robots-Tag", "noindex")
+	if !crm.NewService().PeekSSO(c.Param("token")) {
+		c.Redirect(http.StatusFound, basePathOf(c))
+		return
+	}
+	nonce := html.EscapeString(c.GetString("csp_nonce"))
+	page := `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+		`<title>3X-UI</title></head><body style="font-family:sans-serif;display:flex;min-height:90vh;align-items:center;justify-content:center">` +
+		`<form id="sso" method="post"><button type="submit" style="font-size:16px;padding:10px 24px">Continue to panel</button></form>` +
+		`<script nonce="` + nonce + `">document.getElementById("sso").submit()</script></body></html>`
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(page))
+}
+
 // SsoLogin redeems a CRM-minted single-use link: it sets the panel session and redirects.
 func SsoLogin(c *gin.Context) {
 	user, redirect, err := crm.NewService().ConsumeSSO(c.Param("token"))
 	c.Header("Cache-Control", "no-store")
-	c.Header("Referrer-Policy", "no-referrer")
 	base := basePathOf(c)
 	if err != nil {
 		logger.Warningf("sso login refused: IP=%q, reason=%q", getRemoteIp(c), err.Error())
-		c.Redirect(http.StatusFound, base)
+		c.Redirect(http.StatusSeeOther, base)
 		return
 	}
 	if err := session.SetLoginUser(c, user); err != nil {
 		logger.Warning("sso: unable to save session:", err)
-		c.Redirect(http.StatusFound, base)
+		c.Redirect(http.StatusSeeOther, base)
 		return
 	}
 	logger.Infof("logged in via CRM SSO: username=%q, IP=%q", user.Username, getRemoteIp(c))
@@ -93,5 +110,5 @@ func SsoLogin(c *gin.Context) {
 	if redirect != "" {
 		target = strings.TrimSuffix(base, "/") + redirect
 	}
-	c.Redirect(http.StatusFound, target)
+	c.Redirect(http.StatusSeeOther, target)
 }

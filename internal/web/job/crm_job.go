@@ -30,16 +30,10 @@ func (j *CrmJob) Run() {
 	if on, err := j.settingService.GetCrmWebhookEnable(); err != nil || !on {
 		return
 	}
-	events, err := j.crm.ScanLifecycle()
-	if err != nil {
+	// Lifecycle events go straight to the outbox, not the shared bus: a first-run burst would
+	// overflow subscriber queues and crowd out Telegram/Discord/email alerts.
+	if _, err := j.crm.ScanLifecycle(); err != nil {
 		logger.Warning("crm: lifecycle scan failed:", err)
-	}
-	for _, e := range events {
-		if EventBus != nil {
-			EventBus.Publish(e)
-		} else {
-			j.crm.HandleEvent(e)
-		}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()

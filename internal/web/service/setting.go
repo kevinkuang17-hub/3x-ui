@@ -186,7 +186,7 @@ var defaultValueMap = map[string]string{
 	"subClashURI":                 "",
 	"subClashEnableRouting":       "false",
 	"subClashRules":               "",
-	"subLineHealth":               "true",
+	"subLineHealth":               "false",
 	"crmWebhookEnable":            "false",
 	"crmWebhookUrl":               "",
 	"crmWebhookSecret":            "",

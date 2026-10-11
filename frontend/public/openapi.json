@@ -4902,7 +4902,7 @@
     },
     {
       "name": "CRM integration",
-      "description": "Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = \"sha256=\" + hex(HMAC-SHA256(secret, timestamp + \".\" + body)). Undelivered events are retried with backoff. These endpoints require an admin-scope API token."
+      "description": "Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = \"sha256=\" + hex(HMAC-SHA256(secret, timestamp + \".\" + body)). Undelivered events are retried with backoff for about three days, so order events by the payload time field. These endpoints require an admin-scope API token."
     },
     {
       "name": "Subscription Balancers",
@@ -15094,7 +15094,7 @@
         "tags": [
           "CRM integration"
         ],
-        "summary": "Public. Redeem a link minted by /panel/api/crm/sso: sets the session cookie and redirects into the panel. Used, expired or unknown tokens redirect to the login page.",
+        "summary": "Public. Landing page for a link minted by /panel/api/crm/sso. It does not redeem the token; it renders a page that POSTs it back, so link-preview bots cannot burn the ticket. Unknown or expired tokens redirect to the login page.",
         "operationId": "get_sso_token",
         "parameters": [
           {
@@ -15108,8 +15108,34 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Auto-submitting confirmation page."
+          },
           "302": {
-            "description": "Redirect into the panel, or to the login page when the link is invalid."
+            "description": "Redirect to the login page when the link is invalid."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CRM integration"
+        ],
+        "summary": "Public. Redeem the single-use token: sets the session cookie and redirects into the panel (or the redirect path given at mint time). Used, expired or revoked tokens redirect to the login page.",
+        "operationId": "post_sso_token",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Single-use SSO token.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect into the panel, or to the login page."
           }
         }
       }

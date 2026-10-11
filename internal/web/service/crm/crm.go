@@ -15,9 +15,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -29,7 +32,7 @@ import (
 const (
 	// EventPing is sent by the settings page "test" button only.
 	EventPing          = "crm.ping"
-	maxAttempts        = 12
+	maxAttempts        = 20
 	deliverBatch       = 50
 	deliverTimeout     = 10 * time.Second
 	expiringWindow     = 3 * 24 * time.Hour
@@ -116,6 +119,10 @@ func newID() string {
 }
 
 func (s *Service) Enqueue(e eventbus.Event) error {
+	return s.enqueueTx(database.GetDB(), e)
+}
+
+func (s *Service) enqueueTx(tx *gorm.DB, e eventbus.Event) error {
 	ts := e.Timestamp
 	if ts.IsZero() {
 		ts = s.now()
@@ -124,7 +131,7 @@ func (s *Service) Enqueue(e eventbus.Event) error {
 	if err != nil {
 		return err
 	}
-	return database.GetDB().Create(&model.CrmWebhookOutbox{Event: string(e.Type), Payload: string(body), NextAt: 0}).Error
+	return tx.Create(&model.CrmWebhookOutbox{Event: string(e.Type), Payload: string(body), NextAt: 0}).Error
 }
 
 // Sign returns the X-3xui-Signature value: HMAC-SHA256 over "<timestamp>.<body>".
@@ -181,7 +188,13 @@ func (s *Service) DeliverPending(ctx context.Context) (int, error) {
 	}
 	sent := 0
 	for _, row := range rows {
+		if ctx.Err() != nil {
+			break
+		}
 		if err := s.post(ctx, target, row.Event, []byte(row.Payload)); err != nil {
+			if ctx.Err() != nil {
+				break
+			}
 			row.Attempts++
 			if row.Attempts >= maxAttempts {
 				logger.Warningf("crm: dropping webhook %s after %d attempts: %v", row.Event, row.Attempts, err)
@@ -231,8 +244,8 @@ func lifecycleConditions(r lifecycleRow, now time.Time) map[eventbus.EventType]b
 	}
 }
 
-// ScanLifecycle returns client events whose condition newly became true, marking them so they
-// fire once; marks whose condition cleared are removed so a renewed client can fire again.
+// ScanLifecycle queues client events whose condition newly became true, marking them in the same
+// transaction so each fires once; marks whose condition cleared are removed so renewals fire again.
 func (s *Service) ScanLifecycle() ([]eventbus.Event, error) {
 	db := database.GetDB()
 	var rows []lifecycleRow
@@ -264,12 +277,22 @@ func (s *Service) ScanLifecycle() ([]eventbus.Event, error) {
 			id, has := marked[key]
 			switch {
 			case on && !has:
-				if err := db.Create(&model.CrmEventMark{Email: r.Email, Event: string(t)}).Error; err != nil {
+				e := eventbus.Event{Type: t, Source: r.Email, Timestamp: now, Data: &eventbus.ClientLifecycleData{
+					Email: r.Email, SubID: r.SubID, Group: r.GroupName, Up: r.Up, Down: r.Down, Total: r.Total, ExpiryTime: r.ExpiryTime,
+				}}
+				err := db.Transaction(func(tx *gorm.DB) error {
+					if err := tx.Create(&model.CrmEventMark{Email: r.Email, Event: string(t)}).Error; err != nil {
+						return err
+					}
+					if !s.wants(t) {
+						return nil
+					}
+					return s.enqueueTx(tx, e)
+				})
+				if err != nil {
 					return events, err
 				}
-				events = append(events, eventbus.Event{Type: t, Source: r.Email, Timestamp: now, Data: &eventbus.ClientLifecycleData{
-					Email: r.Email, SubID: r.SubID, Group: r.GroupName, Up: r.Up, Down: r.Down, Total: r.Total, ExpiryTime: r.ExpiryTime,
-				}})
+				events = append(events, e)
 			case !on && has:
 				db.Delete(&model.CrmEventMark{}, id)
 			}
@@ -288,11 +311,8 @@ func (s *Service) ScanLifecycle() ([]eventbus.Event, error) {
 // MintSSO creates a single-use login ticket; redirect must be a panel-relative path.
 func (s *Service) MintSSO(username, redirect string) (string, int64, error) {
 	redirect = strings.TrimSpace(redirect)
-	if redirect != "" {
-		u, err := url.Parse(redirect)
-		if err != nil || u.IsAbs() || u.Host != "" || strings.HasPrefix(redirect, "//") || !strings.HasPrefix(redirect, "/") {
-			return "", 0, errors.New("redirect must be a path inside the panel, e.g. /panel/clients")
-		}
+	if redirect != "" && !validRedirect(redirect) {
+		return "", 0, errors.New("redirect must be a path inside the panel, e.g. /panel/clients")
 	}
 	db := database.GetDB()
 	var user model.User
@@ -310,7 +330,7 @@ func (s *Service) MintSSO(username, redirect string) (string, int64, error) {
 	token := hex.EncodeToString(b)
 	exp := s.now().Add(ssoTTL).Unix()
 	db.Where("expires_at < ?", s.now().Unix()).Delete(&model.SsoTicket{})
-	if err := db.Create(&model.SsoTicket{Token: token, Username: user.Username, Redirect: redirect, ExpiresAt: exp}).Error; err != nil {
+	if err := db.Create(&model.SsoTicket{Token: token, Username: user.Username, Redirect: redirect, ExpiresAt: exp, LoginEpoch: user.LoginEpoch}).Error; err != nil {
 		return "", 0, err
 	}
 	return token, exp, nil
@@ -334,5 +354,25 @@ func (s *Service) ConsumeSSO(token string) (*model.User, string, error) {
 	if err := db.Where("username = ?", ticket.Username).First(&user).Error; err != nil {
 		return nil, "", errors.New("panel user not found")
 	}
+	if user.LoginEpoch != ticket.LoginEpoch {
+		return nil, "", errors.New("login link revoked by a password change or session reset")
+	}
 	return &user, ticket.Redirect, nil
+}
+
+// PeekSSO reports whether a ticket is currently redeemable without consuming it.
+func (s *Service) PeekSSO(token string) bool {
+	var count int64
+	database.GetDB().Model(&model.SsoTicket{}).Where("token = ? AND expires_at >= ?", token, s.now().Unix()).Count(&count)
+	return count == 1
+}
+
+var redirectRe = regexp.MustCompile(`^/panel(/[A-Za-z0-9._~\-/]*)?(\?[A-Za-z0-9._~\-=&%]*)?(#[A-Za-z0-9._~\-/=&%]*)?$`)
+
+func validRedirect(r string) bool {
+	if !redirectRe.MatchString(r) || strings.Contains(r, "//") || strings.Contains(r, "..") {
+		return false
+	}
+	u, err := url.Parse(r)
+	return err == nil && !u.IsAbs() && u.Host == ""
 }

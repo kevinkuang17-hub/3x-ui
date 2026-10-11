@@ -37,6 +37,7 @@ var contractExtraRoutes = map[string]bool{
 	"POST /getTwoFactorEnable": true,
 	"GET /ws":                  true,
 	"GET /sso/:token":          true,
+	"POST /sso/:token":         true,
 }
 
 func inContractScope(method, path string) bool {

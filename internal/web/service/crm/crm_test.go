@@ -157,6 +157,20 @@ func TestDeliverPendingSignsAndRetries(t *testing.T) {
 	}
 }
 
+func TestScanLifecycleQueuesWithMark(t *testing.T) {
+	s := setupCRM(t, map[string]string{"crmWebhookEnable": "true", "crmWebhookUrl": "https://crm.example", "crmWebhookEvents": "client.expired"})
+	seedTraffic(t, "gone", 0, 0, testNow.UnixMilli()-1000)
+	seedTraffic(t, "full", 100, 100, 0)
+	if _, err := s.ScanLifecycle(); err != nil {
+		t.Fatal(err)
+	}
+	var rows []model.CrmWebhookOutbox
+	database.GetDB().Find(&rows)
+	if len(rows) != 1 || rows[0].Event != "client.expired" {
+		t.Fatalf("outbox = %+v, want only the selected client.expired", rows)
+	}
+}
+
 func TestEventFilterSetting(t *testing.T) {
 	s := setupCRM(t, map[string]string{"crmWebhookEvents": "client.expired, line.down"})
 	if !s.wants(eventbus.EventLineDown) || s.wants(eventbus.EventNodeUp) {
@@ -169,7 +183,7 @@ func TestSSOTicketIsSingleUseAndShortLived(t *testing.T) {
 	if err := database.GetDB().Create(&model.User{Username: "crm-admin", Password: "x"}).Error; err != nil {
 		t.Fatal(err)
 	}
-	for _, bad := range []string{"https://evil.example/", "//evil.example/", "panel"} {
+	for _, bad := range []string{"https://evil.example/", "//evil.example/", "panel", "/\\evil.example", "/panel/../login", "/panel//evil", "/other"} {
 		if _, _, err := s.MintSSO("crm-admin", bad); err == nil {
 			t.Fatalf("redirect %q must be rejected", bad)
 		}
@@ -178,12 +192,21 @@ func TestSSOTicketIsSingleUseAndShortLived(t *testing.T) {
 	if err != nil || exp != testNow.Add(ssoTTL).Unix() || len(token) != 64 {
 		t.Fatalf("mint: token=%q exp=%d err=%v", token, exp, err)
 	}
+	if !s.PeekSSO(token) || !s.PeekSSO(token) {
+		t.Fatal("peeking must not consume the ticket")
+	}
 	user, redirect, err := s.ConsumeSSO(token)
 	if err != nil || user.Username != "crm-admin" || redirect != "/panel/clients" {
 		t.Fatalf("consume: user=%v redirect=%q err=%v", user, redirect, err)
 	}
 	if _, _, err := s.ConsumeSSO(token); err == nil {
 		t.Fatal("a ticket must not be reusable")
+	}
+
+	token, _, _ = s.MintSSO("crm-admin", "")
+	database.GetDB().Model(&model.User{}).Where("username = ?", "crm-admin").Update("login_epoch", 99)
+	if _, _, err := s.ConsumeSSO(token); err == nil {
+		t.Fatal("a session reset after minting must revoke the ticket")
 	}
 
 	token, _, _ = s.MintSSO("crm-admin", "")

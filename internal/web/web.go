@@ -257,7 +257,8 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g.GET("/service-worker.js", controller.ServePWAServiceWorker)
 	g.GET("/icons/:name", controller.ServePWAIcon)
 
-	g.GET("/sso/:token", controller.SsoLogin)
+	g.GET("/sso/:token", controller.SsoLanding)
+	g.POST("/sso/:token", controller.SsoLogin)
 	s.index = controller.NewIndexController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)
