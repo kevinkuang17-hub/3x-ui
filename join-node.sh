@@ -27,9 +27,11 @@ command -v curl > /dev/null || die "curl is required."
 CURL=(curl -4 -sS --connect-timeout 10 --max-time 90)
 [[ "${JOIN_INSECURE:-0}" == "1" ]] && CURL+=(-k)
 XUI_BIN="${XUI_BIN:-/usr/local/x-ui/x-ui}"
+RESULT_FILE="${RESULT_FILE:-/etc/x-ui/install-result.env}"
+STARTED_AT=$(date +%s)
 XUI_DIR="${XUI_DIR:-/usr/local/x-ui}"
 CRON_FILE="${CRON_FILE:-/etc/cron.d/x-ui-report-ip}"
-REPO_RAW=https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main
+REPO_RAW="${REPO_RAW:-https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main}"
 
 public_ip() {
     local ip svc
@@ -107,14 +109,26 @@ DOMAIN=$(echo "$PREP" | json_field domain)
 [[ -n "$NAME" ]] || die "Unexpected answer from master: $PREP"
 echo "    name: $NAME  domain: ${DOMAIN:-(none, using IP)}"
 
+FRESH_INSTALL=0
 if [[ -x "$XUI_BIN" ]]; then
-    info "[3/4] 3X-UI is already installed; keeping its settings."
+    info "[3/4] 3X-UI is already installed; keeping its settings (username, password and database unchanged)."
 else
+    # The installer runs unattended below, so ask its one real choice here, like a manual install does.
+    if [[ -z "${XUI_DB_TYPE:-}" && -t 0 ]]; then
+        echo "Database for the new panel:"
+        echo "  1) SQLite      (default, recommended below ~500 clients)"
+        echo "  2) PostgreSQL  (installed on this server; for many clients)"
+        read -rp "Choose [1]: " db_choice || db_choice=""
+        if [[ "${db_choice:-1}" == "2" ]]; then
+            export XUI_DB_TYPE=postgres
+        fi
+    fi
+    FRESH_INSTALL=1
     info "[3/4] Installing 3X-UI (takes a few minutes)..."
     if [[ -n "$DOMAIN" ]]; then
         export XUI_SSL_MODE=domain XUI_DOMAIN="$DOMAIN"
         # A brand-new record may take a moment to answer; Let's Encrypt asks the authoritative servers.
-        sleep 20
+        sleep "${JOIN_DNS_WAIT:-20}"
     else
         export XUI_SSL_MODE=ip
     fi
@@ -161,3 +175,22 @@ fi
 echo
 info "Done! This server is now node \"${NAME}\" (${ADDR:-$IP}) in the master panel."
 warn "Make sure port ${PORT}/tcp is open in your cloud provider's firewall/security group."
+
+# Repeat the login details the installer printed, which scrolled away above.
+if [[ "$FRESH_INSTALL" == "1" && -f "$RESULT_FILE" ]] && [[ $(stat -c %Y "$RESULT_FILE" 2> /dev/null || echo 0) -ge $STARTED_AT ]]; then
+    (
+        # shellcheck disable=SC1090
+        . "$RESULT_FILE"
+        echo
+        info "═══════════════ Panel login for this node ═══════════════"
+        echo "  Username:    ${XUI_USERNAME:-}"
+        echo "  Password:    ${XUI_PASSWORD:-}"
+        echo "  Port:        ${XUI_PANEL_PORT:-$PORT}"
+        echo "  WebBasePath: ${XUI_WEB_BASE_PATH:-$BASE}"
+        echo "  Access URL:  ${XUI_ACCESS_URL:-}"
+        echo "  API Token:   ${XUI_API_TOKEN:-}"
+        echo "  Database:    ${XUI_DB_TYPE:-sqlite}"
+        info "═════════════════════════════════════════════════════════"
+        warn "Save these now. They are also kept in ${RESULT_FILE} (root only)."
+    )
+fi
