@@ -72,6 +72,7 @@ func migrationModels() []any {
 		&model.IspProbeResult{},
 		&model.PanelRole{},
 		&model.PasskeyCredential{},
+		&model.RuleSet{},
 	}
 }
 

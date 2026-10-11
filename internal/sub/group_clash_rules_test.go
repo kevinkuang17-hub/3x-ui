@@ -6,6 +6,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 const groupClashTCP = `{"network":"tcp","security":"none"}`
@@ -75,5 +76,52 @@ func TestGetClash_GroupWithoutRulesFollowsGlobal(t *testing.T) {
 	}
 	if !strings.Contains(out, "global.test") {
 		t.Fatalf("group with empty rules must follow global, got:\n%s", out)
+	}
+}
+
+func TestGetClash_RuleLibraryGoesAheadOfTemplate(t *testing.T) {
+	seedSubDB(t)
+	seedSubInbound(t, "sub-lib", "lib-in", 20005, 0, groupClashTCP)
+	seedSubInbound(t, "sub-own", "own-in", 20006, 0, groupClashTCP)
+	db := database.GetDB()
+	if err := db.Model(&model.ClientRecord{}).Where("sub_id = ?", "sub-own").Update("group_name", "own").Error; err != nil {
+		t.Fatal(err)
+	}
+	rs := &service.RuleSetService{}
+	ships, err := rs.Save(model.RuleSet{Name: "ships", Rules: "maersk.com", DefaultPolicy: "PROXY"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := rs.SaveGlobalRouting(service.RoutingChoice{
+		RuleSets:   []service.RuleSetPick{{Id: ships.Id, Policy: "PROXY"}},
+		ExtraRules: "bank.example,DIRECT\nDOMAIN-SUFFIX,lost.example,Missing Group",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := (&service.ClientService{}).SetGroupRouting("own", "", &service.RoutingChoice{ExtraRules: "own.example,REJECT"}); err != nil {
+		t.Fatal(err)
+	}
+	clash := NewSubClashService(true, "DOMAIN-SUFFIX,template.test,DIRECT", NewSubService(""))
+
+	out, _, err := clash.GetClash("sub-lib", "sub.example.com")
+	if err != nil {
+		t.Fatalf("GetClash: %v", err)
+	}
+	bank := strings.Index(out, "DOMAIN-SUFFIX,bank.example,DIRECT")
+	ship := strings.Index(out, "DOMAIN-SUFFIX,maersk.com,PROXY")
+	tmpl := strings.Index(out, "DOMAIN-SUFFIX,template.test,DIRECT")
+	if bank < 0 || ship < bank || tmpl < ship {
+		t.Fatalf("want custom rules, then picked sets, then template rules:\n%s", out)
+	}
+	if strings.Contains(out, "lost.example") {
+		t.Fatalf("a rule naming an undefined policy group would break the profile and must be dropped:\n%s", out)
+	}
+
+	own, _, err := clash.GetClash("sub-own", "sub.example.com")
+	if err != nil {
+		t.Fatalf("GetClash own: %v", err)
+	}
+	if !strings.Contains(own, "DOMAIN-SUFFIX,own.example,REJECT") || strings.Contains(own, "maersk.com") || strings.Contains(own, "template.test") {
+		t.Fatalf("a group with its own routing gets only its own rules:\n%s", own)
 	}
 }

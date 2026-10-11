@@ -19,9 +19,11 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgnet"
 	"github.com/mhsanaei/3x-ui/v3/internal/config"
+	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
+	"github.com/mhsanaei/3x-ui/v3/internal/panelaccess"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/sys"
@@ -182,6 +184,15 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	const maxRequestBodyBytes = 10 << 20 // 10 MiB
 	engine.Use(middleware.MaxBodyBytes(maxRequestBodyBytes, "/panel/api/server/importDB"))
 
+	basePath, err := s.settingService.GetBasePath()
+	if err != nil {
+		return nil, err
+	}
+	(&service.ProtectService{}).ApplyStored()
+	// Outside systems call these without a panel login, so the allowlist leaves them open.
+	publicPaths := []string{basePath + "node-join/", basePath + "node-ip/", basePath + "probe/", basePath + "sso/"}
+	engine.Use(panelaccess.Middleware(publicPaths, denyPanelAccess))
+
 	webDomain, err := s.settingService.GetWebDomain()
 	if err != nil {
 		return nil, err
@@ -196,10 +207,6 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 		return nil, err
 	}
 
-	basePath, err := s.settingService.GetBasePath()
-	if err != nil {
-		return nil, err
-	}
 	engine.Use(gzip.Gzip(gzip.DefaultCompression))
 	assetsBasePath := basePath + "assets/"
 
@@ -265,6 +272,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g.GET("/probe/:token", controller.ProbeTargets)
 	g.POST("/probe/:token", controller.ProbeReport)
 	g.GET("/probe/:token/agent.sh", controller.ProbeAgent)
+	g.POST("/passkey/login/available", middleware.CSRFMiddleware(), controller.PasskeyLoginAvailable)
 	g.POST("/passkey/login/begin", middleware.CSRFMiddleware(), controller.PasskeyLoginBegin)
 	g.POST("/passkey/login/finish", middleware.CSRFMiddleware(), controller.PasskeyLoginFinish)
 	s.index = controller.NewIndexController(g)
@@ -290,6 +298,10 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	// non-SPA miss still returns a hard 404.
 	engine.NoRoute(func(c *gin.Context) {
 		if s.panel.HandleNoRoutePanelSPA(c) {
+			return
+		}
+		if decoy.Enabled() && !strings.HasPrefix(c.Request.URL.Path, basePath) {
+			decoy.Serve(c)
 			return
 		}
 		c.AbortWithStatus(http.StatusNotFound)
@@ -885,4 +897,13 @@ func (s *Server) GetWSHub() any {
 
 func (s *Server) RestartXray() error {
 	return s.xrayService.RestartXray(true)
+}
+
+// denyPanelAccess answers an address outside the panel allowlist like a plain web server would.
+func denyPanelAccess(c *gin.Context) {
+	if decoy.Enabled() {
+		decoy.Serve(c)
+		return
+	}
+	c.AbortWithStatus(http.StatusNotFound)
 }

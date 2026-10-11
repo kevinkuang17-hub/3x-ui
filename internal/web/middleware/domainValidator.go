@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 )
 
 // DomainValidatorMiddleware returns a Gin middleware that validates the request domain.
@@ -22,6 +24,11 @@ func DomainValidatorMiddleware(domain string) gin.HandlerFunc {
 		}
 
 		if host != domain {
+			// With the decoy on, a wrong host (a scan by IP) sees the decoy site instead of a telltale 403.
+			if decoy.Enabled() {
+				decoy.Serve(c)
+				return
+			}
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}

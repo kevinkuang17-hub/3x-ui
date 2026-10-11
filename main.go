@@ -625,6 +625,7 @@ func main() {
 	var tokenName string
 	var tokenScope string
 	var resetTwoFactor bool
+	var resetPanelAccess bool
 	settingCmd.BoolVar(&reset, "reset", false, "Reset all settings")
 	settingCmd.BoolVar(&show, "show", false, "Display current settings")
 	settingCmd.IntVar(&port, "port", 0, "Set panel port number")
@@ -633,6 +634,7 @@ func main() {
 	settingCmd.StringVar(&webBasePath, "webBasePath", "", "Set base path for Panel")
 	settingCmd.StringVar(&listenIP, "listenIP", "", "set panel listenIP IP")
 	settingCmd.BoolVar(&resetTwoFactor, "resetTwoFactor", false, "Reset two-factor authentication settings")
+	settingCmd.BoolVar(&resetPanelAccess, "resetPanelAccess", false, "Let every address open the panel again (clears the Protect & speed allowlist)")
 	settingCmd.BoolVar(&getListen, "getListen", false, "Display current panel listenIP IP")
 	settingCmd.BoolVar(&getCert, "getCert", false, "Display current certificate settings")
 	settingCmd.BoolVar(&getApiToken, "getApiToken", false, "Print an API token for CLI use, regenerating it and invalidating the previous one; on a panel with no tokens yet it mints one instead")
@@ -721,6 +723,13 @@ func main() {
 		} else {
 			if err = updateSetting(port, username, password, webBasePath, listenIP, resetTwoFactor); err != nil {
 				return
+			}
+		}
+		if resetPanelAccess {
+			if err := (&service.SettingService{}).ClearPanelAccess(); err != nil {
+				fmt.Println("Failed to clear the panel allowlist:", err)
+			} else {
+				fmt.Println("Panel allowlist cleared; run `x-ui restart` to apply it")
 			}
 		}
 		if webCertFile != "" || webKeyFile != "" {

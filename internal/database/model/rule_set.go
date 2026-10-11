@@ -1,0 +1,21 @@
+package model
+
+// RuleSet is a named list of Clash/Mihomo match lines (banks, shipping lines, …) that routing
+// profiles pick with a policy. Built-in sets are seeded by key and stay editable.
+type RuleSet struct {
+	Id       int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	Name     string `json:"name" gorm:"not null"`
+	Category string `json:"category"`
+	// Rules holds one match per line: a bare domain, or TYPE,value without the policy.
+	Rules         string `json:"rules" gorm:"type:text"`
+	DefaultPolicy string `json:"defaultPolicy" gorm:"column:default_policy;default:'PROXY'"`
+	BuiltinKey    string `json:"builtinKey" gorm:"column:builtin_key;index;default:''"`
+	// BuiltinVersion and Edited let an upgrade refresh a built-in list the admin never changed.
+	BuiltinVersion int   `json:"-" gorm:"column:builtin_version;default:0"`
+	Edited         bool  `json:"edited" gorm:"default:false"`
+	SortOrder      int   `json:"sortOrder" gorm:"default:0"`
+	CreatedAt      int64 `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt      int64 `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+}
+
+func (RuleSet) TableName() string { return "rule_sets" }

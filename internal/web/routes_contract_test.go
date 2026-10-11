@@ -44,6 +44,7 @@ var contractExtraRoutes = map[string]bool{
 	"GET /probe/:token":              true,
 	"POST /probe/:token":             true,
 	"GET /probe/:token/agent.sh":     true,
+	"POST /passkey/login/available":  true,
 	"POST /passkey/login/begin":      true,
 	"POST /passkey/login/finish":     true,
 }

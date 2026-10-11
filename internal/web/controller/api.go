@@ -216,6 +216,8 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	a.xraySettingController = NewXraySettingController(api)
 	NewConfigHistoryController(api.Group("/xray/history"))
 	NewAppTrafficController(api.Group("/apps"))
+	NewRuleSetController(api.Group("/ruleSets"))
+	NewProtectController(api.Group("/protect"))
 	NewPanelUserController(api.Group("/users"))
 	NewPasskeyController(api.Group("/passkeys"))
 

@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	yaml "github.com/goccy/go-yaml"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 // Surge, Loon and Quantumult X profiles are rendered from the Clash/Mihomo proxy list, so every
@@ -79,7 +81,8 @@ func (a *SUBController) subApple(c *gin.Context, format string) {
 	}
 	self := fmt.Sprintf("%s://%s%s", scheme, hostWithPort, c.Request.URL.EscapedPath())
 	hours, _ := strconv.Atoi(a.updateInterval)
-	body := renderAppleProfile(format, doc.Proxies, self, hours)
+	rules, _ := (&service.RuleSetService{}).BuildRules(libraryChoiceForSub(subID))
+	body := renderAppleProfile(format, doc.Proxies, self, hours, appleRules(rules))
 	a.ApplyCommonHeaders(c, header, a.updateInterval, "", "", "", "", false, "", false)
 	c.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(body))
 	a.recordSubscriptionFetch(c)
@@ -320,7 +323,7 @@ func qxLine(p map[string]any) string {
 
 // renderAppleProfile builds a Surge/Loon managed profile or a Quantumult X server list.
 // Proxies the target app cannot express (grpc, xhttp, wireguard, ...) are skipped.
-func renderAppleProfile(format string, proxies []map[string]any, selfURL string, updateHours int) string {
+func renderAppleProfile(format string, proxies []map[string]any, selfURL string, updateHours int, rules []string) string {
 	var lines, names []string
 	seen := map[string]bool{}
 	for _, p := range proxies {
@@ -379,6 +382,35 @@ func renderAppleProfile(format string, proxies []map[string]any, selfURL string,
 		}
 		b.WriteString(auto + "\n")
 	}
-	b.WriteString("\n[Rule]\nGEOIP,CN,DIRECT\nFINAL,Proxy\n")
+	b.WriteString("\n[Rule]\n")
+	for _, r := range rules {
+		b.WriteString(r + "\n")
+	}
+	b.WriteString("GEOIP,CN,DIRECT\nFINAL,Proxy\n")
 	return b.String()
+}
+
+// appleRules keeps the rule-library rules Surge and Loon understand, renaming PROXY to their group.
+func appleRules(rules []string) []string {
+	out := make([]string, 0, len(rules))
+	for _, r := range rules {
+		parts := strings.Split(r, ",")
+		switch parts[0] {
+		case "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "IP-CIDR", "IP-CIDR6":
+		default:
+			continue
+		}
+		if len(parts) < 3 {
+			continue
+		}
+		switch parts[2] {
+		case "PROXY":
+			parts[2] = "Proxy"
+		case "DIRECT", "REJECT":
+		default:
+			continue
+		}
+		out = append(out, strings.Join(parts, ","))
+	}
+	return out
 }

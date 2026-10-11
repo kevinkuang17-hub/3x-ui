@@ -296,6 +296,12 @@ export const GroupSummarySchema = z.object({
     .nullable()
     .transform((v) => v ?? 0),
   clashRules: z.string().optional().default(''),
+  clashRuleSets: z
+    .array(z.object({ id: z.number(), policy: z.enum(['DIRECT', 'PROXY', 'REJECT']) }))
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  clashExtraRules: z.string().optional().default(''),
 });
 
 export const GroupSummaryListSchema = z

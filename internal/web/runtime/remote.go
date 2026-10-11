@@ -678,6 +678,19 @@ func (r *Remote) UpdatePanel(ctx context.Context, dev bool) error {
 	return err
 }
 
+// ProtectCall runs one of the node's own Protect & speed endpoints (network tuning, panel
+// allowlist) for the master's admin. Paths outside that area are refused.
+func (r *Remote) ProtectCall(ctx context.Context, method, path string, body any) (json.RawMessage, error) {
+	if strings.Contains(path, "..") || strings.HasPrefix(path, "/") {
+		return nil, fmt.Errorf("invalid protect path %q", path)
+	}
+	env, err := r.do(ctx, method, "panel/api/protect/"+path, body)
+	if err != nil {
+		return nil, err
+	}
+	return env.Obj, nil
+}
+
 // WebCertFiles holds a node's own web TLS certificate and key file paths.
 type WebCertFiles struct {
 	WebCertFile string `json:"webCertFile"`
