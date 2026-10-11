@@ -190,6 +190,8 @@ var defaultValueMap = map[string]string{
 	"subClashExtraRules":          "",
 	"decoyMode":                   "off",
 	"decoyTitle":                  "",
+	"decoyTagline":                "",
+	"decoyEmail":                  "",
 	"panelAllowIps":               "",
 	"subLineHealth":               "false",
 	"crmWebhookEnable":            "false",

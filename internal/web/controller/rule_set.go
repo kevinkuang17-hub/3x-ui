@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/sub"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
@@ -23,6 +24,7 @@ func NewRuleSetController(g *gin.RouterGroup) *RuleSetController {
 	g.GET("/routing", a.routing)
 	g.POST("/routing", a.saveRouting)
 	g.POST("/preview", a.preview)
+	g.GET("/groups", a.groups)
 	return a
 }
 
@@ -68,18 +70,40 @@ func (a *RuleSetController) reset(c *gin.Context) {
 }
 
 func (a *RuleSetController) routing(c *gin.Context) {
-	ch, err := a.ruleSets.GlobalRouting()
-	jsonObj(c, ch, err)
+	v, err := a.ruleSets.GlobalRoutingView()
+	jsonObj(c, v, err)
 }
 
 func (a *RuleSetController) saveRouting(c *gin.Context) {
-	var body service.RoutingChoice
+	var body struct {
+		service.RoutingChoice
+		// Template is optional so older callers that send only the picks keep the template.
+		Template *string `json:"template"`
+	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	err := a.ruleSets.SaveGlobalRouting(body)
-	jsonMsg(c, I18nWeb(c, "pages.ruleSets.saved"), err)
+	if err := a.ruleSets.SaveGlobalRouting(body.RoutingChoice); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if body.Template != nil {
+		if err := a.ruleSets.SaveTemplate(*body.Template); err != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+			return
+		}
+	}
+	jsonMsg(c, I18nWeb(c, "pages.ruleSets.saved"), nil)
+}
+
+// groups lists the policy groups of a template so picks can send traffic to them.
+func (a *RuleSetController) groups(c *gin.Context) {
+	names, err := sub.ClashTemplateGroups(c.Query("template"))
+	if names == nil {
+		names = []string{}
+	}
+	jsonObj(c, names, err)
 }
 
 // preview shows the rules a choice adds in front of the template, so the admin can check them before saving.

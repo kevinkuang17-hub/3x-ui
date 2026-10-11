@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<meta name="description" content="{{.Tagline}}">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #0f0f10; color: #e9e7e3; font-family: Georgia, "Times New Roman", serif; }
+header { text-align: center; padding: 64px 20px 34px; }
+header h1 { font-weight: 400; font-size: clamp(28px, 4.6vw, 40px); letter-spacing: 1px; margin: 0 0 8px; }
+header p { color: #a7a39c; margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 15px; }
+.gallery { max-width: 1180px; margin: 0 auto; padding: 0 16px 56px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.ph { aspect-ratio: 4 / 3; border-radius: 4px; }
+.ph:nth-child(1) { background: linear-gradient(160deg, #3b4a5c, #c58f62); }
+.ph:nth-child(2) { background: linear-gradient(200deg, #1f3d2f, #9db08a); aspect-ratio: 3 / 4; }
+.ph:nth-child(3) { background: linear-gradient(140deg, #5d5470, #e1b9a1); }
+.ph:nth-child(4) { background: linear-gradient(180deg, #24364f, #7fa4c4); }
+.ph:nth-child(5) { background: linear-gradient(120deg, #4a3527, #d8b27d); aspect-ratio: 3 / 4; }
+.ph:nth-child(6) { background: linear-gradient(170deg, #263238, #90a4ae); }
+.ph:nth-child(7) { background: linear-gradient(150deg, #402a3d, #c78ca3); }
+.ph:nth-child(8) { background: linear-gradient(210deg, #2e3b2c, #b8c4a0); }
+footer { text-align: center; color: #85817b; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 13px; padding: 0 20px 40px; }
+footer a { color: #b9b5ae; }
+</style>
+</head>
+<body>
+<header><h1>{{.Title}}</h1><p>{{.Tagline}}</p></header>
+<main class="gallery" aria-label="Portfolio">
+<div class="ph"></div><div class="ph"></div><div class="ph"></div><div class="ph"></div>
+<div class="ph"></div><div class="ph"></div><div class="ph"></div><div class="ph"></div>
+</main>
+<footer>&copy; {{.Year}} {{.Title}}{{if .Email}} · Bookings: <a href="mailto:{{.Email}}">{{.Email}}</a>{{end}}</footer>
+</body>
+</html>

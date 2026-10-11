@@ -53,7 +53,20 @@ var domainPattern = regexp.MustCompile(`^(\*\.|\.)?([a-z0-9]([a-z0-9-]*[a-z0-9])
 
 var ruleSetSeedMu sync.Mutex
 
+// NormalizePolicy accepts DIRECT/PROXY/REJECT in any case or the name of a template policy group;
+// whether that group exists is checked when a profile is built.
 func NormalizePolicy(p string) (string, bool) {
+	p = strings.TrimSpace(p)
+	if up := strings.ToUpper(p); routingPolicies[up] {
+		return up, true
+	}
+	if p == "" || len(p) > 64 || strings.ContainsAny(p, ",\r\n") {
+		return "", false
+	}
+	return p, true
+}
+
+func basicPolicy(p string) (string, bool) {
 	p = strings.ToUpper(strings.TrimSpace(p))
 	return p, routingPolicies[p]
 }
@@ -139,7 +152,7 @@ func extraRule(line string) (string, error) {
 		}
 		return withPolicy(m, "PROXY"), nil
 	}
-	if len(parts) == 2 {
+	if len(parts) == 2 && !ruleSetMatchTypes[strings.ToUpper(parts[0])] {
 		if policy, ok := NormalizePolicy(parts[1]); ok {
 			m, err := bareMatch(parts[0])
 			if err != nil {
@@ -245,9 +258,9 @@ func (s *RuleSetService) Save(in model.RuleSet) (*model.RuleSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	policy, ok := NormalizePolicy(in.DefaultPolicy)
+	policy, ok := basicPolicy(in.DefaultPolicy)
 	if !ok {
-		return nil, common.NewError("policy must be DIRECT, PROXY or REJECT")
+		return nil, common.NewError("the default destination must be DIRECT, PROXY or REJECT")
 	}
 	db := database.GetDB()
 	if in.Id == 0 {
@@ -321,7 +334,7 @@ func NormalizeChoice(ch RoutingChoice) (picksJSON, extra string, err error) {
 	for _, p := range ch.RuleSets {
 		policy, ok := NormalizePolicy(p.Policy)
 		if !ok {
-			return "", "", common.NewError("policy must be DIRECT, PROXY or REJECT")
+			return "", "", common.NewError("invalid destination:", p.Policy)
 		}
 		if p.Id <= 0 || seen[p.Id] {
 			continue
@@ -337,6 +350,51 @@ func NormalizeChoice(ch RoutingChoice) (picksJSON, extra string, err error) {
 		picksJSON = string(b)
 	}
 	return picksJSON, extra, nil
+}
+
+// GlobalRoutingView is the global routing as the rule-library page edits it: the one-click
+// template (subClashRules) together with the picks and custom rules placed before it.
+type GlobalRoutingView struct {
+	RoutingChoice
+	Template     string `json:"template"`
+	TemplateOn   bool   `json:"templateOn"`
+	ClashEnabled bool   `json:"clashEnabled"`
+}
+
+func (s *RuleSetService) GlobalRoutingView() (*GlobalRoutingView, error) {
+	ch, err := s.GlobalRouting()
+	if err != nil {
+		return nil, err
+	}
+	v := &GlobalRoutingView{RoutingChoice: ch}
+	v.Template, _ = s.settingService.GetSubClashRules()
+	v.TemplateOn, _ = s.settingService.GetSubClashEnableRouting()
+	v.ClashEnabled, _ = s.settingService.GetSubClashEnable()
+	return v, nil
+}
+
+// SaveTemplate sets the global one-click template; an empty one turns template routing off. The
+// Clash subscription is switched on too, which needs a panel restart if it was off.
+func (s *RuleSetService) SaveTemplate(template string) error {
+	template = strings.TrimSpace(template)
+	canonical, remote, err := common.ParseRemoteRoutingURL(template)
+	if err != nil {
+		return common.NewError("Clash/Mihomo routing source", err.Error())
+	}
+	if remote {
+		template = canonical
+	}
+	// Choosing no template only switches template routing off; the stored source is kept.
+	if template == "" {
+		return s.settingService.setString("subClashEnableRouting", "false")
+	}
+	if err := s.settingService.setString("subClashRules", template); err != nil {
+		return err
+	}
+	if err := s.settingService.setString("subClashEnableRouting", "true"); err != nil {
+		return err
+	}
+	return s.settingService.setString("subClashEnable", "true")
 }
 
 func (s *RuleSetService) GlobalRouting() (RoutingChoice, error) {

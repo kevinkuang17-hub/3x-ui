@@ -12,6 +12,7 @@ import {
   type RoutingPolicy,
   type RuleSet,
   ruleCount,
+  suggestPolicy,
 } from './ruleSetApi';
 
 interface Props {
@@ -19,15 +20,23 @@ interface Props {
   loading?: boolean;
   value: RoutingChoice;
   onChange: (next: RoutingChoice) => void;
+  // Policy groups of the template in use; empty when there is no template.
+  groups?: string[];
 }
 
-const POLICY_COLORS: Record<RoutingPolicy, string> = {
+const POLICY_COLORS: Record<string, string> = {
   DIRECT: 'green',
   PROXY: 'blue',
   REJECT: 'red',
 };
 
-export default function RoutingChoiceEditor({ sets, loading, value, onChange }: Props) {
+export default function RoutingChoiceEditor({
+  sets,
+  loading,
+  value,
+  onChange,
+  groups = [],
+}: Props) {
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string[] | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -59,10 +68,28 @@ export default function RoutingChoiceEditor({ sets, loading, value, onChange }: 
     }
   }
 
-  const policyOptions = ROUTING_POLICIES.map((p) => ({
-    value: p,
-    label: t(`pages.ruleSets.policy_${p}`),
-  }));
+  const basicLabel = (p: string) =>
+    p === 'PROXY' && groups.length > 0
+      ? t('pages.ruleSets.policyProxyGroup', { group: groups[0] })
+      : t(`pages.ruleSets.policy_${p}`);
+  const policyLabel = (p: string) =>
+    (ROUTING_POLICIES as string[]).includes(p) ? basicLabel(p) : p;
+  const templateGroups = groups.filter((g) => g !== 'PROXY' && g !== groups[0]);
+  const policyOptions = [
+    {
+      label: t('pages.ruleSets.policyBasic'),
+      options: ROUTING_POLICIES.map((p) => ({ value: p, label: basicLabel(p) })),
+    },
+    ...(templateGroups.length > 0
+      ? [
+          {
+            label: t('pages.ruleSets.policyTemplateGroups'),
+            options: templateGroups.map((g) => ({ value: g, label: g })),
+          },
+        ]
+      : []),
+  ];
+  const isKnown = (p: string) => (ROUTING_POLICIES as string[]).includes(p) || groups.includes(p);
 
   const columns: TableColumnsType<RuleSet> = [
     {
@@ -73,7 +100,7 @@ export default function RoutingChoiceEditor({ sets, loading, value, onChange }: 
         <Switch
           size="small"
           checked={picked.has(row.id)}
-          onChange={(on) => setPick(row, on ? row.defaultPolicy : null)}
+          onChange={(on) => setPick(row, on ? suggestPolicy(row, groups) : null)}
         />
       ),
     },
@@ -100,21 +127,37 @@ export default function RoutingChoiceEditor({ sets, loading, value, onChange }: 
     {
       title: t('pages.ruleSets.policy'),
       key: 'policy',
-      width: 140,
+      width: 220,
       render: (_v, row) => {
         const policy = picked.get(row.id);
-        return policy ? (
-          <Select
-            size="small"
-            style={{ width: 120 }}
-            value={policy}
-            options={policyOptions}
-            onChange={(p: RoutingPolicy) => setPick(row, p)}
-          />
-        ) : (
-          <Tag bordered={false} color={POLICY_COLORS[row.defaultPolicy]} style={{ opacity: 0.5 }}>
-            {t(`pages.ruleSets.policy_${row.defaultPolicy}`)}
-          </Tag>
+        if (!policy) {
+          const suggested = suggestPolicy(row, groups);
+          return (
+            <Tag
+              bordered={false}
+              color={POLICY_COLORS[suggested] ?? 'purple'}
+              style={{ opacity: 0.5 }}
+            >
+              {policyLabel(suggested)}
+            </Tag>
+          );
+        }
+        return (
+          <>
+            <Select
+              size="small"
+              style={{ width: 200 }}
+              value={policy}
+              options={policyOptions}
+              popupMatchSelectWidth={false}
+              onChange={(p: RoutingPolicy) => setPick(row, p)}
+            />
+            {!isKnown(policy) && (
+              <Typography.Text type="warning" style={{ display: 'block', fontSize: 12 }}>
+                {t('pages.ruleSets.policyMissing')}
+              </Typography.Text>
+            )}
+          </>
         );
       },
     },

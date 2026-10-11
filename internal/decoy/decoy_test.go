@@ -23,8 +23,8 @@ func serve(t *testing.T, method, path string) *httptest.ResponseRecorder {
 }
 
 func TestServeTemplates(t *testing.T) {
-	t.Cleanup(func() { Configure(ModeOff, "", "") })
-	Configure(ModeCompany, `<script>alert(1)</script> & Co`, "")
+	t.Cleanup(func() { Configure(ModeOff, Site{}, "") })
+	Configure(ModeCompany, Site{Title: `<script>alert(1)</script> & Co`, Email: "sales@example.com"}, "")
 	w := serve(t, http.MethodGet, "/")
 	body := w.Body.String()
 	if w.Code != http.StatusOK || w.Header().Get("Server") != "nginx" {
@@ -33,6 +33,9 @@ func TestServeTemplates(t *testing.T) {
 	if strings.Contains(body, "<script>alert(1)</script>") || !strings.Contains(body, "&lt;script&gt;") {
 		t.Fatal("the admin's site name must be HTML-escaped")
 	}
+	if !strings.Contains(body, `href="mailto:sales@example.com"`) || !strings.Contains(body, defaults[ModeCompany].Tagline) {
+		t.Fatal("the contact email and the template's default slogan must appear")
+	}
 	if w := serve(t, http.MethodGet, "/wp-login.php"); w.Code != http.StatusNotFound || !strings.Contains(w.Body.String(), "404 Not Found") {
 		t.Fatalf("unknown paths must get an nginx-style 404, got %d", w.Code)
 	}
@@ -40,18 +43,28 @@ func TestServeTemplates(t *testing.T) {
 		t.Fatalf("non-GET must not render the site, got %d", w.Code)
 	}
 
-	Configure(ModeBlog, "", "")
+	for _, mode := range templated {
+		Configure(mode, Site{Title: "Acme Trading"}, "")
+		w := serve(t, http.MethodGet, "/index.html")
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s template = %d", mode, w.Code)
+		}
+		if mode != ModeNginx && !strings.Contains(w.Body.String(), "Acme Trading") {
+			t.Errorf("%s template must show the site name", mode)
+		}
+	}
+	Configure(ModeBlog, Site{}, "")
 	if body := serve(t, http.MethodGet, "/index.html").Body.String(); !strings.Contains(body, DefaultTitle(ModeBlog)) {
 		t.Fatal("an empty site name falls back to the template default")
 	}
-	Configure("bogus", "", "")
+	Configure("bogus", Site{}, "")
 	if Enabled() {
 		t.Fatal("an unknown mode must switch the decoy off")
 	}
 }
 
 func TestServeCustomSite(t *testing.T) {
-	t.Cleanup(func() { Configure(ModeOff, "", "") })
+	t.Cleanup(func() { Configure(ModeOff, Site{}, "") })
 	dir := t.TempDir()
 	for name, content := range map[string]string{
 		"index.html":       "home",
@@ -68,7 +81,7 @@ func TestServeCustomSite(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	Configure(ModeCustom, "", dir)
+	Configure(ModeCustom, Site{}, dir)
 	cases := []struct {
 		path string
 		code int

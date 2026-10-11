@@ -25,6 +25,9 @@ type SubClashService struct {
 	enableRouting bool
 	clashRules    string
 	SubService    *SubService
+	// live reads the global template from settings on every request, so a template picked in the
+	// rule library applies without restarting the subscription server.
+	live bool
 }
 
 var errNoLegacyClashProxies = errors.New("no Clash for Windows-compatible proxies found; use the Mihomo subscription for modern proxy types")
@@ -169,6 +172,9 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
 	// top-level proxies key — exactly what the legacy filter just removed.
 	clashRules, enableRouting := s.clashRules, s.enableRouting
+	if s.live {
+		clashRules, enableRouting = liveClashTemplate(clashRules, enableRouting)
+	}
 	group := service.GroupRoutingBySubID(subId)
 	if group.Override {
 		clashRules, enableRouting = group.Template, group.Template != ""
@@ -197,6 +203,17 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	}
 
 	return string(finalYAML), header, nil
+}
+
+func liveClashTemplate(rules string, enabled bool) (string, bool) {
+	settings := service.SettingService{}
+	if v, err := settings.GetSubClashRules(); err == nil {
+		rules = v
+	}
+	if v, err := settings.GetSubClashEnableRouting(); err == nil {
+		enabled = v
+	}
+	return rules, enabled
 }
 
 // libraryChoice is the group's own rule-library choice, or the global one when the group follows it.
@@ -229,9 +246,13 @@ func prependLibraryRules(config map[string]any, choice service.RoutingChoice) {
 		return
 	}
 	known := clashRuleTargets(config)
+	primary := primaryProxyGroup(config)
 	added := make([]any, 0, len(rules))
 	skipped := 0
 	for _, r := range rules {
+		if clashRuleTarget(r) == "PROXY" && primary != "PROXY" {
+			r = retargetClashRule(r, primary)
+		}
 		if _, ok := known[clashRuleTarget(r)]; !ok {
 			skipped++
 			continue
@@ -243,6 +264,28 @@ func prependLibraryRules(config map[string]any, choice service.RoutingChoice) {
 	}
 	existing, _ := asAnySlice(config["rules"])
 	config["rules"] = append(added, existing...)
+}
+
+// primaryProxyGroup is the group "proxy" means in this profile: a template's first group (its
+// manual node choice) when one is merged in, else the built-in PROXY group.
+func primaryProxyGroup(config map[string]any) string {
+	groups, _ := asAnySlice(config["proxy-groups"])
+	for _, g := range groups {
+		if name := clashProxyGroupName(g); name != "" {
+			return name
+		}
+	}
+	return "PROXY"
+}
+
+func retargetClashRule(rule, policy string) string {
+	parts := strings.Split(rule, ",")
+	i := len(parts) - 1
+	for i >= 1 && (strings.EqualFold(strings.TrimSpace(parts[i]), "no-resolve") || strings.EqualFold(strings.TrimSpace(parts[i]), "src")) {
+		i--
+	}
+	parts[i] = policy
+	return strings.Join(parts, ",")
 }
 
 // clashRuleTargets lists the policies a rule may name: built-ins, proxies and proxy groups.
