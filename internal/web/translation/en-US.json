@@ -1011,7 +1011,14 @@
       "removeFromGroup": "Remove clients…",
       "removeFromGroupTitle": "Remove clients from group \"{name}\"",
       "removeFromGroupDesc": "Select members to remove from this group. Clients themselves are kept (use \"Delete clients in group\" to remove them entirely).",
-      "removeFromGroupResult": "Removed {count} client(s) from {name}."
+      "removeFromGroupResult": "Removed {count} client(s) from {name}.",
+      "clashRules": "Routing rules",
+      "clashRulesTitle": "Routing rules for {name}",
+      "clashRulesDesc": "Members of this group get these Clash/Mihomo routing rules instead of the global ones. Clients pick up changes on their next subscription refresh.",
+      "clashRulesFollowGlobal": "Follow global setting",
+      "clashRulesCustom": "Custom URL or rules",
+      "clashRulesCustomPlaceholder": "HTTPS URL of a routing YAML, or one rule per line, e.g. DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "Routing rules for {name} saved"
     },
     "hosts": {
       "addHost": "Add Host",

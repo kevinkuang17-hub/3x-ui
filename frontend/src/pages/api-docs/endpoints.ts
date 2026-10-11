@@ -1514,6 +1514,14 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/clients/groups/clashRules',
+        summary:
+          "Set the Clash/Mihomo routing source used by the group's members, overriding the global subscription routing. Accepts an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules; an empty value makes the group follow the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+        body: '{\n  "name": "customer-a",\n  "clashRules": "https://example.com/rules/standard.yaml"\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "name": "customer-a"\n  }\n}',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/clients/resetTraffic/:email',
         summary:
           'Zero out a single client’s up/down counters. Re-enables the client across every attached inbound and pushes the change to Xray (or the remote node) so depleted users can connect again immediately.',

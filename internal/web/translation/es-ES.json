@@ -1011,7 +1011,14 @@
       "removeFromGroup": "Quitar clientes…",
       "removeFromGroupTitle": "Quitar clientes del grupo «{name}»",
       "removeFromGroupDesc": "Selecciona miembros para quitar de este grupo. Los clientes se conservan (usa «Eliminar clientes del grupo» para eliminarlos por completo).",
-      "removeFromGroupResult": "Quitados {count} cliente(s) de {name}."
+      "removeFromGroupResult": "Quitados {count} cliente(s) de {name}.",
+      "clashRules": "Reglas de enrutamiento",
+      "clashRulesTitle": "Reglas de enrutamiento de {name}",
+      "clashRulesDesc": "Los miembros de este grupo reciben estas reglas de Clash/Mihomo en lugar de las globales. Los clientes aplican los cambios en la próxima actualización de la suscripción.",
+      "clashRulesFollowGlobal": "Seguir la configuración global",
+      "clashRulesCustom": "URL o reglas personalizadas",
+      "clashRulesCustomPlaceholder": "URL HTTPS de un YAML de enrutamiento, o una regla por línea, p. ej. DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "Reglas de enrutamiento de {name} guardadas"
     },
     "nodes": {
       "addNode": "Agregar nodo",

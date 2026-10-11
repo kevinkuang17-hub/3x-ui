@@ -1011,7 +1011,14 @@
       "removeFromGroup": "移除客戶端…",
       "removeFromGroupTitle": "從群組「{name}」移除客戶端",
       "removeFromGroupDesc": "選擇要從此群組移除的成員。客戶端本身保留(用「刪除群組中的客戶端」完全移除)。",
-      "removeFromGroupResult": "已從 {name} 移除 {count} 個客戶端。"
+      "removeFromGroupResult": "已從 {name} 移除 {count} 個客戶端。",
+      "clashRules": "分流規則",
+      "clashRulesTitle": "{name} 的分流規則",
+      "clashRulesDesc": "此群組用戶使用這裡的 Clash/Mihomo 分流規則，取代全域規則。用戶端下次重新整理訂閱時自動生效。",
+      "clashRulesFollowGlobal": "跟隨全域設定",
+      "clashRulesCustom": "自訂網址或規則",
+      "clashRulesCustomPlaceholder": "填寫分流 YAML 的 HTTPS 網址，或每行一條規則，如 DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "{name} 的分流規則已儲存"
     },
     "nodes": {
       "addNode": "新增節點",

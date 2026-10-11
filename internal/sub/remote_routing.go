@@ -194,6 +194,15 @@ func RefreshRemoteRoutingSources(happ, clash, jsonRouting string) {
 	}
 }
 
+// RefreshRemoteClashRoutingSources warms per-group Clash/Mihomo routing URLs alongside the global one.
+func RefreshRemoteClashRoutingSources(sources []string) {
+	for _, source := range sources {
+		if _, remote, err := common.ParseRemoteRoutingURL(source); err == nil && remote {
+			_ = routingSourceResolver.refreshSource(remoteRoutingClash, source)
+		}
+	}
+}
+
 func (r *remoteRoutingResolver) refreshSource(kind remoteRoutingKind, raw string) error {
 	source, remote, err := common.ParseRemoteRoutingURL(raw)
 	if err != nil || !remote {

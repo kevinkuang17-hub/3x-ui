@@ -1011,7 +1011,14 @@
       "removeFromGroup": "Hapus klien…",
       "removeFromGroupTitle": "Hapus klien dari grup «{name}»",
       "removeFromGroupDesc": "Pilih anggota untuk dihapus dari grup ini. Klien tetap dipertahankan (gunakan «Hapus klien di grup» untuk menghapus sepenuhnya).",
-      "removeFromGroupResult": "{count} klien dihapus dari {name}."
+      "removeFromGroupResult": "{count} klien dihapus dari {name}.",
+      "clashRules": "Aturan routing",
+      "clashRulesTitle": "Aturan routing untuk {name}",
+      "clashRulesDesc": "Anggota grup ini memakai aturan Clash/Mihomo ini, bukan aturan global. Klien menerapkan perubahan saat langganan diperbarui berikutnya.",
+      "clashRulesFollowGlobal": "Ikuti pengaturan global",
+      "clashRulesCustom": "URL atau aturan kustom",
+      "clashRulesCustomPlaceholder": "URL HTTPS YAML routing, atau satu aturan per baris, mis. DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "Aturan routing untuk {name} disimpan"
     },
     "nodes": {
       "addNode": "Tambah Node",

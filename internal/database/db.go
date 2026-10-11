@@ -115,6 +115,14 @@ func migrateInboundExcludeFromSubColumn() error {
 	return migrator.AddColumn(&model.Inbound{}, "ExcludeFromSub")
 }
 
+func migrateClientGroupClashRulesColumn() error {
+	migrator := db.Migrator()
+	if !migrator.HasTable(&model.ClientGroup{}) || migrator.HasColumn(&model.ClientGroup{}, "clash_rules") {
+		return nil
+	}
+	return migrator.AddColumn(&model.ClientGroup{}, "ClashRules")
+}
+
 func initModels() error {
 	if err := migrateClientTrafficLastSubFetchColumn(); err != nil {
 		return err
@@ -123,6 +131,9 @@ func initModels() error {
 		return err
 	}
 	if err := migrateInboundExcludeFromSubColumn(); err != nil {
+		return err
+	}
+	if err := migrateClientGroupClashRulesColumn(); err != nil {
 		return err
 	}
 	models := allModels()

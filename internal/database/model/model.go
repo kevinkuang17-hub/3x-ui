@@ -962,8 +962,10 @@ type ClientGroup struct {
 	Name      string `json:"name" gorm:"uniqueIndex;not null"`
 	ResetUp   int64  `json:"resetUp" gorm:"column:reset_up;default:0"`
 	ResetDown int64  `json:"resetDown" gorm:"column:reset_down;default:0"`
-	CreatedAt int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
-	UpdatedAt int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+	// Overrides the global Clash/Mihomo routing source for the group's members; empty follows the global one.
+	ClashRules string `json:"clashRules" gorm:"column:clash_rules;type:text;default:''"`
+	CreatedAt  int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt  int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
 }
 
 func (ClientGroup) TableName() string { return "client_groups" }

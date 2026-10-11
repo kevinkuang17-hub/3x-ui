@@ -1011,7 +1011,14 @@
       "removeFromGroup": "حذف کاربران…",
       "removeFromGroupTitle": "حذف کاربران از گروه «{name}»",
       "removeFromGroupDesc": "اعضایی را برای حذف از این گروه انتخاب کنید. خود کاربران حفظ می‌شوند (برای حذف کامل از «حذف کاربران گروه» استفاده کنید).",
-      "removeFromGroupResult": "{count} کاربر از {name} حذف شد."
+      "removeFromGroupResult": "{count} کاربر از {name} حذف شد.",
+      "clashRules": "قوانین مسیریابی",
+      "clashRulesTitle": "قوانین مسیریابی برای {name}",
+      "clashRulesDesc": "اعضای این گروه به‌جای قوانین سراسری، این قوانین Clash/Mihomo را دریافت می‌کنند. کلاینت‌ها در به‌روزرسانی بعدی اشتراک تغییرات را می‌گیرند.",
+      "clashRulesFollowGlobal": "پیروی از تنظیم سراسری",
+      "clashRulesCustom": "آدرس یا قوانین سفارشی",
+      "clashRulesCustomPlaceholder": "آدرس HTTPS فایل YAML مسیریابی، یا هر خط یک قانون، مثلاً DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "قوانین مسیریابی برای {name} ذخیره شد"
     },
     "nodes": {
       "addNode": "افزودن نود",

@@ -27,6 +27,7 @@ func (a *GroupController) initRouter(g *gin.RouterGroup) {
 	g.POST("/groups/rename", a.rename)
 	g.POST("/groups/delete", a.delete)
 	g.POST("/groups/resetTraffic", a.resetTraffic)
+	g.POST("/groups/clashRules", a.setClashRules)
 	g.POST("/groups/bulkAdd", a.bulkAdd)
 	g.POST("/groups/bulkRemove", a.bulkRemove)
 }
@@ -168,5 +169,24 @@ func (a *GroupController) bulkRemove(c *gin.Context) {
 	}
 	jsonObj(c, gin.H{"affected": affected}, nil)
 	a.xrayService.SetToNeedRestart()
+	notifyClientsChanged()
+}
+
+type groupClashRulesBody struct {
+	Name       string `json:"name"`
+	ClashRules string `json:"clashRules"`
+}
+
+func (a *GroupController) setClashRules(c *gin.Context) {
+	var body groupClashRulesBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if err := a.clientService.SetGroupClashRules(body.Name, body.ClashRules); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonObj(c, gin.H{"name": strings.TrimSpace(body.Name)}, nil)
 	notifyClientsChanged()
 }

@@ -10,6 +10,7 @@ import (
 // network work runs here (cron + startup warm), never in a request handler.
 type RemoteRoutingJob struct {
 	settingService service.SettingService
+	clientService  service.ClientService
 }
 
 func NewRemoteRoutingJob() *RemoteRoutingJob {
@@ -33,4 +34,10 @@ func (j *RemoteRoutingJob) Run() {
 		return
 	}
 	sub.RefreshRemoteRoutingSources(happ, clash, jsonRouting)
+	groupSources, err := j.clientService.GroupClashRoutingSources()
+	if err != nil {
+		logger.Warning("Could not read client group Clash routing sources:", err)
+		return
+	}
+	sub.RefreshRemoteClashRoutingSources(groupSources)
 }

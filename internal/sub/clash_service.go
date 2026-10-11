@@ -13,6 +13,7 @@ import (
 	yaml "github.com/goccy/go-yaml"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
@@ -165,8 +166,12 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
 	// top-level proxies key — exactly what the legacy filter just removed.
-	if s.enableRouting && !legacy {
-		resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(s.clashRules)
+	clashRules, enableRouting := s.clashRules, s.enableRouting
+	if groupRules := groupClashRulesBySubID(subId); groupRules != "" {
+		clashRules, enableRouting = groupRules, true
+	}
+	if enableRouting && !legacy {
+		resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(clashRules)
 		if resolveErr == nil && strings.TrimSpace(resolved) != "" {
 			if remote {
 				if err := mergeRemoteClashRules(config, remoteDocument); err != nil {
@@ -1591,4 +1596,22 @@ func linesToClashRules(raw string) []any {
 		rules = append(rules, line)
 	}
 	return rules
+}
+
+// groupClashRulesBySubID returns the routing source of the subscriber's client group. A subId shared by
+// clients in several groups follows its oldest client, matching subscriptionTemplateContextBySubID.
+func groupClashRulesBySubID(subID string) string {
+	if subID == "" {
+		return ""
+	}
+	db := database.GetDB()
+	var rec model.ClientRecord
+	if err := db.Where("sub_id = ?", subID).Order("id ASC").First(&rec).Error; err != nil || rec.Group == "" {
+		return ""
+	}
+	var group model.ClientGroup
+	if err := db.Where("name = ?", rec.Group).First(&group).Error; err != nil {
+		return ""
+	}
+	return strings.TrimSpace(group.ClashRules)
 }

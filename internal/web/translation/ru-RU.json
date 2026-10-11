@@ -1011,7 +1011,14 @@
       "removeFromGroup": "Удалить клиентов…",
       "removeFromGroupTitle": "Удалить клиентов из группы «{name}»",
       "removeFromGroupDesc": "Выберите участников для удаления из этой группы. Сами клиенты сохраняются (используйте «Удалить клиентов группы» для полного удаления).",
-      "removeFromGroupResult": "Удалено {count} клиент(ов) из {name}."
+      "removeFromGroupResult": "Удалено {count} клиент(ов) из {name}.",
+      "clashRules": "Правила маршрутизации",
+      "clashRulesTitle": "Правила маршрутизации для {name}",
+      "clashRulesDesc": "Участники группы получают эти правила Clash/Mihomo вместо глобальных. Клиенты применят изменения при следующем обновлении подписки.",
+      "clashRulesFollowGlobal": "Как в глобальных настройках",
+      "clashRulesCustom": "Свой URL или правила",
+      "clashRulesCustomPlaceholder": "HTTPS-URL YAML маршрутизации или по одному правилу на строку, например DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "Правила маршрутизации для {name} сохранены"
     },
     "nodes": {
       "addNode": "Добавить узел",

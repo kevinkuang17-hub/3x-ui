@@ -1011,7 +1011,14 @@
       "removeFromGroup": "移除客户端…",
       "removeFromGroupTitle": "从分组 “{name}” 移除客户端",
       "removeFromGroupDesc": "选择要从此分组中移除的成员。客户端本身保留(使用 “删除分组中的客户端” 完全移除)。",
-      "removeFromGroupResult": "已从 {name} 移除 {count} 个客户端。"
+      "removeFromGroupResult": "已从 {name} 移除 {count} 个客户端。",
+      "clashRules": "分流规则",
+      "clashRulesTitle": "{name} 的分流规则",
+      "clashRulesDesc": "该组用户使用这里的 Clash/Mihomo 分流规则，替代全局规则。客户端下次刷新订阅时自动生效。",
+      "clashRulesFollowGlobal": "跟随全局设置",
+      "clashRulesCustom": "自定义地址或规则",
+      "clashRulesCustomPlaceholder": "填写分流 YAML 的 HTTPS 地址，或每行一条规则，如 DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "{name} 的分流规则已保存"
     },
     "nodes": {
       "addNode": "添加节点",

@@ -295,6 +295,7 @@ export const GroupSummarySchema = z.object({
     .number()
     .nullable()
     .transform((v) => v ?? 0),
+  clashRules: z.string().optional().default(''),
 });
 
 export const GroupSummaryListSchema = z

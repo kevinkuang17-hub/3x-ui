@@ -1011,7 +1011,14 @@
       "removeFromGroup": "Xóa client…",
       "removeFromGroupTitle": "Xóa client khỏi nhóm «{name}»",
       "removeFromGroupDesc": "Chọn thành viên để xóa khỏi nhóm này. Bản thân client được giữ lại (dùng «Xóa client trong nhóm» để xóa hoàn toàn).",
-      "removeFromGroupResult": "Đã xóa {count} client khỏi {name}."
+      "removeFromGroupResult": "Đã xóa {count} client khỏi {name}.",
+      "clashRules": "Quy tắc định tuyến",
+      "clashRulesTitle": "Quy tắc định tuyến cho {name}",
+      "clashRulesDesc": "Thành viên nhóm này dùng các quy tắc Clash/Mihomo này thay cho quy tắc chung. Ứng dụng khách nhận thay đổi ở lần làm mới gói đăng ký tiếp theo.",
+      "clashRulesFollowGlobal": "Theo cài đặt chung",
+      "clashRulesCustom": "URL hoặc quy tắc tùy chỉnh",
+      "clashRulesCustomPlaceholder": "URL HTTPS của YAML định tuyến, hoặc mỗi dòng một quy tắc, vd. DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "Đã lưu quy tắc định tuyến cho {name}"
     },
     "nodes": {
       "addNode": "Thêm nút",

@@ -18,6 +18,7 @@ type GroupSummary struct {
 	TrafficUsed int64  `json:"trafficUsed"`
 	Up          int64  `json:"up"`
 	Down        int64  `json:"down"`
+	ClashRules  string `json:"clashRules"`
 }
 
 func (s *ClientService) ListGroups() ([]GroupSummary, error) {
@@ -44,11 +45,13 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 	}
 	baseUp := make(map[string]int64, len(stored))
 	baseDown := make(map[string]int64, len(stored))
+	clashRules := make(map[string]string, len(stored))
 	merged := make(map[string]groupAgg, len(derived)+len(stored))
 	for _, g := range stored {
 		merged[g.Name] = groupAgg{}
 		baseUp[g.Name] = g.ResetUp
 		baseDown[g.Name] = g.ResetDown
+		clashRules[g.Name] = g.ClashRules
 	}
 	for _, g := range derived {
 		merged[g.Name] = groupAgg{count: g.ClientCount, up: g.Up, down: g.Down}
@@ -57,7 +60,7 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 	for name, agg := range merged {
 		up := max(agg.up-baseUp[name], 0)
 		down := max(agg.down-baseDown[name], 0)
-		out = append(out, GroupSummary{Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down})
+		out = append(out, GroupSummary{Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down, ClashRules: clashRules[name]})
 	}
 	sort.Slice(out, func(i, j int) bool {
 		return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
@@ -171,6 +174,40 @@ func (s *ClientService) ResetGroupTraffic(name string) error {
 	}
 	return db.Model(&model.ClientGroup{}).Where("name = ?", name).
 		Updates(map[string]any{"reset_up": agg.Up, "reset_down": agg.Down}).Error
+}
+
+// SetGroupClashRules stores the group's Clash/Mihomo routing source (an HTTPS URL or inline rules);
+// a label-only group gets its client_groups row created on the way.
+func (s *ClientService) SetGroupClashRules(name, rules string) error {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return common.NewError("group name is required")
+	}
+	rules = strings.TrimSpace(rules)
+	canonical, remote, err := common.ParseRemoteRoutingURL(rules)
+	if err != nil {
+		return common.NewError("Clash/Mihomo routing source", err.Error())
+	}
+	if remote {
+		rules = canonical
+	}
+	db := database.GetDB()
+	var count int64
+	if err := db.Model(&model.ClientGroup{}).Where("name = ?", name).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return db.Create(&model.ClientGroup{Name: name, ClashRules: rules}).Error
+	}
+	return db.Model(&model.ClientGroup{}).Where("name = ?", name).Update("clash_rules", rules).Error
+}
+
+// GroupClashRoutingSources lists the distinct non-empty per-group routing sources, for cache warm-up.
+func (s *ClientService) GroupClashRoutingSources() ([]string, error) {
+	var sources []string
+	err := database.GetDB().Model(&model.ClientGroup{}).Where("clash_rules <> ''").
+		Distinct("clash_rules").Pluck("clash_rules", &sources).Error
+	return sources, err
 }
 
 func (s *ClientService) CreateGroup(name string) error {

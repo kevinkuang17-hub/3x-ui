@@ -1011,7 +1011,14 @@
       "removeFromGroup": "クライアントを削除…",
       "removeFromGroupTitle": "グループ「{name}」からクライアントを削除",
       "removeFromGroupDesc": "このグループから外すメンバーを選択してください。クライアント自体は保持されます (完全に削除するには「グループのクライアントを削除」を使用)。",
-      "removeFromGroupResult": "{count} クライアントを {name} から外しました。"
+      "removeFromGroupResult": "{count} クライアントを {name} から外しました。",
+      "clashRules": "ルーティングルール",
+      "clashRulesTitle": "{name} のルーティングルール",
+      "clashRulesDesc": "このグループのメンバーはグローバル設定の代わりにこの Clash/Mihomo ルールを使います。次回の購読更新時に反映されます。",
+      "clashRulesFollowGlobal": "グローバル設定に従う",
+      "clashRulesCustom": "カスタム URL またはルール",
+      "clashRulesCustomPlaceholder": "ルーティング YAML の HTTPS URL、または 1 行に 1 ルール（例: DOMAIN-SUFFIX,example.com,DIRECT）",
+      "clashRulesSaved": "{name} のルーティングルールを保存しました"
     },
     "nodes": {
       "addNode": "ノードを追加",

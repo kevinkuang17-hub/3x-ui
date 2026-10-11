@@ -24,6 +24,7 @@ import type { MenuProps, TableColumnsType } from 'antd';
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
+  BranchesOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -56,6 +57,7 @@ import {
   type GroupSummary,
 } from '@/schemas/client';
 import { parseMsg } from '@/utils/zodValidate';
+import { presetOf } from '@/pages/settings/clashRoutingPresets';
 
 const ClientRecordListSchema = z
   .array(ClientRecordSchema)
@@ -66,6 +68,7 @@ const SubLinksModal = lazy(() => import('../clients/SubLinksModal'));
 const ClientBulkAdjustModal = lazy(() => import('../clients/ClientBulkAdjustModal'));
 const GroupAddClientsModal = lazy(() => import('./GroupAddClientsModal'));
 const GroupRemoveClientsModal = lazy(() => import('./GroupRemoveClientsModal'));
+const GroupClashRulesModal = lazy(() => import('./GroupClashRulesModal'));
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
 
@@ -146,6 +149,15 @@ export default function GroupsPage() {
       if (msg?.success) invalidate();
     },
   });
+
+  const clashRulesMut = useMutation({
+    mutationFn: (body: { name: string; clashRules: string }) =>
+      HttpUtil.post('/panel/api/clients/groups/clashRules', body, JSON_HEADERS),
+    onSuccess: (msg) => {
+      if (msg?.success) invalidate();
+    },
+  });
+  const [clashRulesTarget, setClashRulesTarget] = useState<GroupSummary | null>(null);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState('');
@@ -373,6 +385,12 @@ export default function GroupsPage() {
         onClick: () => onResetTraffic(row),
       },
       {
+        key: 'clashRules',
+        icon: <BranchesOutlined />,
+        label: t('pages.groups.clashRules'),
+        onClick: () => setClashRulesTarget(row),
+      },
+      {
         key: 'addClients',
         icon: <UsergroupAddOutlined />,
         label: t('pages.groups.addToGroup'),
@@ -456,6 +474,36 @@ export default function GroupsPage() {
       key: 'clientCount',
       width: 180,
       render: (count: number) => <span>{count || 0}</span>,
+    },
+    {
+      title: t('pages.groups.clashRules'),
+      dataIndex: 'clashRules',
+      key: 'clashRules',
+      width: 200,
+      render: (rules: string, row) => {
+        const preset = presetOf(rules);
+        const label = !rules
+          ? t('pages.groups.clashRulesFollowGlobal')
+          : preset
+            ? t(`pages.settings.subClashPreset_${preset.key}`)
+            : t('pages.groups.clashRulesCustom');
+        return (
+          <Tag
+            color={rules ? 'green' : 'default'}
+            style={{
+              margin: 0,
+              cursor: 'pointer',
+              maxWidth: 180,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            title={rules || undefined}
+            onClick={() => setClashRulesTarget(row)}
+          >
+            {label}
+          </Tag>
+        );
+      },
     },
     {
       title: t('pages.groups.upload'),
@@ -646,6 +694,23 @@ export default function GroupsPage() {
             clients={allClients}
             subSettings={subSettings}
             onOpenChange={setSubLinksOpen}
+          />
+        </LazyMount>
+
+        <LazyMount when={clashRulesTarget !== null}>
+          <GroupClashRulesModal
+            key={clashRulesTarget?.name ?? ''}
+            open={clashRulesTarget !== null}
+            groupName={clashRulesTarget?.name ?? null}
+            initialRules={clashRulesTarget?.clashRules ?? ''}
+            saving={clashRulesMut.isPending}
+            onClose={() => setClashRulesTarget(null)}
+            onSubmit={async (rules) => {
+              const name = clashRulesTarget?.name ?? '';
+              const msg = await clashRulesMut.mutateAsync({ name, clashRules: rules });
+              if (msg?.success) messageApi.success(t('pages.groups.clashRulesSaved', { name }));
+              return !!msg?.success;
+            }}
           />
         </LazyMount>
 

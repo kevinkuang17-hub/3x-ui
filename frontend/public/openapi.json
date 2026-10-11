@@ -10181,6 +10181,56 @@
         }
       }
     },
+    "/panel/api/clients/groups/clashRules": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Set the Clash/Mihomo routing source used by the group's members, overriding the global subscription routing. Accepts an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules; an empty value makes the group follow the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+        "operationId": "post_panel_api_clients_groups_clashRules",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "customer-a",
+                "clashRules": "https://example.com/rules/standard.yaml"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "name": "customer-a"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/clients/resetTraffic/{email}": {
       "post": {
         "tags": [

@@ -1011,7 +1011,14 @@
       "removeFromGroup": "Remover clientes…",
       "removeFromGroupTitle": "Remover clientes do grupo «{name}»",
       "removeFromGroupDesc": "Selecione membros para remover deste grupo. Os clientes em si são mantidos (use «Excluir clientes do grupo» para removê-los por completo).",
-      "removeFromGroupResult": "Removidos {count} cliente(s) de {name}."
+      "removeFromGroupResult": "Removidos {count} cliente(s) de {name}.",
+      "clashRules": "Regras de roteamento",
+      "clashRulesTitle": "Regras de roteamento de {name}",
+      "clashRulesDesc": "Os membros deste grupo recebem estas regras Clash/Mihomo em vez das globais. Os clientes aplicam as mudanças na próxima atualização da assinatura.",
+      "clashRulesFollowGlobal": "Seguir configuração global",
+      "clashRulesCustom": "URL ou regras personalizadas",
+      "clashRulesCustomPlaceholder": "URL HTTPS de um YAML de roteamento, ou uma regra por linha, ex.: DOMAIN-SUFFIX,example.com,DIRECT",
+      "clashRulesSaved": "Regras de roteamento de {name} salvas"
     },
     "nodes": {
       "addNode": "Adicionar nó",
