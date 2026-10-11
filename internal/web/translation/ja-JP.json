@@ -140,7 +140,8 @@
         "emptyPassword": "パスワードを入力してください",
         "wrongUsernameOrPassword": "ユーザー名、パスワード、または二段階認証コードが無効です。",
         "successLogin": "アカウントに正常にログインしました。"
-      }
+      },
+      "passkey": "パスキーでサインイン"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "ユーザー {name} を削除しますか？",
         "saved": "ユーザーを保存しました",
         "deleted": "ユーザーを削除しました"
+      },
+      "passkeys": {
+        "title": "自分のパスキー",
+        "intro": "パスワードの代わりに Face ID、Touch ID、Windows Hello、セキュリティキーでサインインできます。パスキーはこのパネルのドメインに紐付きます。",
+        "unsupported": "パスキーを使うにはドメイン名と https でパネルを開く必要があります。",
+        "namePlaceholder": "名前（例：自分の iPhone）",
+        "add": "パスキーを追加",
+        "empty": "パスキーはまだありません",
+        "deleteConfirm": "パスキー {name} を削除しますか？",
+        "meta": "追加 {created} · 最終使用 {used}",
+        "cancelled": "パスキーの作成をキャンセルしました",
+        "failed": "パスキーの操作に失敗しました",
+        "added": "パスキーを追加しました",
+        "deleted": "パスキーを削除しました"
       }
     },
     "xray": {

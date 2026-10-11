@@ -140,7 +140,8 @@
         "emptyPassword": "请输入密码",
         "wrongUsernameOrPassword": "用户名、密码或双重验证码无效。",
         "successLogin": "您已成功登录您的账户。"
-      }
+      },
+      "passkey": "使用通行密钥登录"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "删除账号 {name}？",
         "saved": "账号已保存",
         "deleted": "账号已删除"
+      },
+      "passkeys": {
+        "title": "我的通行密钥",
+        "intro": "用面容 ID、触控 ID、Windows Hello 或安全密钥登录，不用输密码。通行密钥绑定在这个面板的域名上。",
+        "unsupported": "需要用域名并通过 https 打开面板才能使用通行密钥。",
+        "namePlaceholder": "名称，如：我的 iPhone",
+        "add": "添加通行密钥",
+        "empty": "还没有通行密钥",
+        "deleteConfirm": "删除通行密钥 {name}？",
+        "meta": "添加于 {created} · 最近使用 {used}",
+        "cancelled": "已取消创建通行密钥",
+        "failed": "通行密钥操作失败",
+        "added": "通行密钥已添加",
+        "deleted": "通行密钥已删除"
       }
     },
     "xray": {

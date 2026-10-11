@@ -12,8 +12,8 @@ import (
 )
 
 // operatorWritePrefixes are the /panel/api areas an operator may change: clients and their
-// groups, plans, and their own account view.
-var operatorWritePrefixes = []string{"/clients/", "/plans/", "/users/me"}
+// groups, plans, and their own account and passkeys.
+var operatorWritePrefixes = []string{"/clients/", "/plans/", "/users/me", "/passkeys/"}
 
 // operatorWriteExact are read-style POST endpoints the client pages depend on.
 var operatorWriteExact = map[string]bool{

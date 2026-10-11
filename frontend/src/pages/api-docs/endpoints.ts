@@ -2724,6 +2724,50 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'passkeys',
+    title: 'Passkeys',
+    description:
+      'WebAuthn passkeys for password-less sign-in. The relying party is the host the panel is opened on, so passkeys need a domain name and https. Ceremonies run in two steps; the begin step returns a flow id that the finish step passes back as ?flow=.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/passkeys/list',
+        summary: 'Passkeys of the signed-in user.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/passkeys/register/begin',
+        summary:
+          'Start registering a passkey; returns { flow, options } for navigator.credentials.create.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/passkeys/register/finish',
+        summary:
+          'Finish registration with the browser credential as the JSON body; query: flow, name.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/passkeys/del/:id',
+        summary: 'Remove one of the signed-in user’s passkeys.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Passkey id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/passkey/login/begin',
+        summary:
+          'Public (CSRF token required): start a username-less sign-in; returns { flow, options }.',
+      },
+      {
+        method: 'POST',
+        path: '/passkey/login/finish',
+        summary:
+          'Public (CSRF token required): verify the assertion (JSON body, ?flow=) and set the session cookie. Failed attempts count toward the login rate limit.',
+      },
+    ],
+  },
+
+  {
     id: 'app-traffic',
     title: 'App traffic',
     description:

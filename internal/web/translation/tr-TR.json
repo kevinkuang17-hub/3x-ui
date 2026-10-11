@@ -140,7 +140,8 @@
         "emptyPassword": "Şifre zorunludur",
         "wrongUsernameOrPassword": "Geçersiz kullanıcı adı, şifre veya iki adımlı doğrulama kodu.",
         "successLogin": "Hesabınıza başarıyla giriş yaptınız."
-      }
+      },
+      "passkey": "Geçiş anahtarıyla giriş"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "{name} kullanıcısı silinsin mi?",
         "saved": "Kullanıcı kaydedildi",
         "deleted": "Kullanıcı silindi"
+      },
+      "passkeys": {
+        "title": "Geçiş anahtarlarım",
+        "intro": "Parola yerine Face ID, Touch ID, Windows Hello veya güvenlik anahtarıyla giriş yapın. Geçiş anahtarları bu panelin alan adına bağlıdır.",
+        "unsupported": "Geçiş anahtarları için panelin alan adıyla ve https üzerinden açılması gerekir.",
+        "namePlaceholder": "Ad, ör. iPhone'um",
+        "add": "Geçiş anahtarı ekle",
+        "empty": "Henüz geçiş anahtarı yok",
+        "deleteConfirm": "{name} geçiş anahtarı kaldırılsın mı?",
+        "meta": "Eklendi {created} · son kullanım {used}",
+        "cancelled": "Geçiş anahtarı oluşturma iptal edildi",
+        "failed": "Geçiş anahtarı işlemi başarısız",
+        "added": "Geçiş anahtarı eklendi",
+        "deleted": "Geçiş anahtarı kaldırıldı"
       }
     },
     "xray": {

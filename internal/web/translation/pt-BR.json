@@ -140,7 +140,8 @@
         "emptyPassword": "Senha é obrigatória",
         "wrongUsernameOrPassword": "Nome de usuário, senha ou código de dois fatores inválido.",
         "successLogin": "Você entrou na sua conta com sucesso."
-      }
+      },
+      "passkey": "Entrar com chave de acesso"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "Excluir o usuário {name}?",
         "saved": "Usuário salvo",
         "deleted": "Usuário excluído"
+      },
+      "passkeys": {
+        "title": "Minhas chaves de acesso",
+        "intro": "Entre com Face ID, Touch ID, Windows Hello ou chave de segurança em vez da senha. As chaves ficam vinculadas ao domínio deste painel.",
+        "unsupported": "Chaves de acesso exigem abrir o painel pelo domínio e via https.",
+        "namePlaceholder": "Nome, ex.: Meu iPhone",
+        "add": "Adicionar chave",
+        "empty": "Nenhuma chave ainda",
+        "deleteConfirm": "Remover a chave {name}?",
+        "meta": "Adicionada {created} · último uso {used}",
+        "cancelled": "A criação da chave foi cancelada",
+        "failed": "A operação com a chave falhou",
+        "added": "Chave adicionada",
+        "deleted": "Chave removida"
       }
     },
     "xray": {

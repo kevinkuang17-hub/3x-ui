@@ -265,6 +265,8 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g.GET("/probe/:token", controller.ProbeTargets)
 	g.POST("/probe/:token", controller.ProbeReport)
 	g.GET("/probe/:token/agent.sh", controller.ProbeAgent)
+	g.POST("/passkey/login/begin", middleware.CSRFMiddleware(), controller.PasskeyLoginBegin)
+	g.POST("/passkey/login/finish", middleware.CSRFMiddleware(), controller.PasskeyLoginFinish)
 	s.index = controller.NewIndexController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)

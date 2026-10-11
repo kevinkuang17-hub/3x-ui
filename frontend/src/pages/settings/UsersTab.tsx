@@ -1,11 +1,24 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import {
+  Alert,
+  Button,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Typography,
+} from 'antd';
 import type { TableColumnsType } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 
 import { HttpUtil } from '@/utils';
+import PasskeysSection from './PasskeysSection';
 
 interface PanelUser {
   id: number;
@@ -110,6 +123,8 @@ export default function UsersTab() {
 
   return (
     <>
+      <PasskeysSection />
+      <Typography.Title level={5}>{t('pages.settings.users.title')}</Typography.Title>
       <Alert
         type="info"
         showIcon

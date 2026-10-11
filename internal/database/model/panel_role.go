@@ -14,3 +14,16 @@ type PanelRole struct {
 }
 
 func (PanelRole) TableName() string { return "panel_roles" }
+
+// PasskeyCredential is a WebAuthn credential (passkey) a panel user registered for password-less login.
+type PasskeyCredential struct {
+	Id           int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserId       int    `json:"userId" gorm:"index;not null"`
+	CredentialId string `json:"-" gorm:"uniqueIndex;not null"` // base64url
+	Data         string `json:"-" gorm:"type:text;not null"`   // webauthn.Credential as JSON
+	Name         string `json:"name"`
+	CreatedAt    int64  `json:"createdAt" gorm:"autoCreateTime"`
+	LastUsedAt   int64  `json:"lastUsedAt"`
+}
+
+func (PasskeyCredential) TableName() string { return "passkey_credentials" }

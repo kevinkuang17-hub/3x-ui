@@ -140,7 +140,8 @@
         "emptyPassword": "Password is required",
         "wrongUsernameOrPassword": "Invalid username or password or two-factor code.",
         "successLogin": "You have successfully logged into your account."
-      }
+      },
+      "passkey": "Sign in with a passkey"
     },
     "index": {
       "cpu": "CPU",
@@ -1976,6 +1977,20 @@
         "deleteConfirm": "Delete user {name}?",
         "saved": "User saved",
         "deleted": "User deleted"
+      },
+      "passkeys": {
+        "title": "My passkeys",
+        "intro": "Sign in with Face ID, Touch ID, Windows Hello or a security key instead of a password. Passkeys are tied to this panel's domain.",
+        "unsupported": "Passkeys need the panel opened by its domain name over https.",
+        "namePlaceholder": "Name, e.g. My iPhone",
+        "add": "Add passkey",
+        "empty": "No passkeys yet",
+        "deleteConfirm": "Remove passkey {name}?",
+        "meta": "Added {created} · last used {used}",
+        "cancelled": "Passkey creation was cancelled",
+        "failed": "Passkey operation failed",
+        "added": "Passkey added",
+        "deleted": "Passkey removed"
       }
     },
     "xray": {

@@ -140,7 +140,8 @@
         "emptyPassword": "Kata Sandi diperlukan",
         "wrongUsernameOrPassword": "Username, kata sandi, atau kode dua faktor tidak valid.",
         "successLogin": "Anda telah berhasil masuk ke akun Anda."
-      }
+      },
+      "passkey": "Masuk dengan passkey"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "Hapus pengguna {name}?",
         "saved": "Pengguna disimpan",
         "deleted": "Pengguna dihapus"
+      },
+      "passkeys": {
+        "title": "Passkey saya",
+        "intro": "Masuk dengan Face ID, Touch ID, Windows Hello atau kunci keamanan tanpa kata sandi. Passkey terikat ke domain panel ini.",
+        "unsupported": "Passkey memerlukan panel dibuka lewat nama domain dengan https.",
+        "namePlaceholder": "Nama, mis. iPhone saya",
+        "add": "Tambah passkey",
+        "empty": "Belum ada passkey",
+        "deleteConfirm": "Hapus passkey {name}?",
+        "meta": "Ditambahkan {created} · terakhir dipakai {used}",
+        "cancelled": "Pembuatan passkey dibatalkan",
+        "failed": "Operasi passkey gagal",
+        "added": "Passkey ditambahkan",
+        "deleted": "Passkey dihapus"
       }
     },
     "xray": {

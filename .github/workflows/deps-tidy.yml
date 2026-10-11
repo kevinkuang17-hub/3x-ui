@@ -1,0 +1,30 @@
+# Runs `go mod tidy` for dev branches whose code imports a new module (the dev sandbox cannot
+# reach the module proxy) and commits go.mod/go.sum back. Triggered by touching .github/tidy-request.
+name: deps-tidy
+on:
+  push:
+    branches: ["dev/**"]
+    paths: [".github/tidy-request"]
+permissions:
+  contents: write
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Stub dist
+        run: mkdir -p internal/web/dist && touch internal/web/dist/.gitkeep
+      - name: go mod tidy
+        run: |
+          for m in $(cat .github/tidy-request); do go get "$m"; done
+          go mod tidy
+          git rm -q .github/tidy-request
+          git config user.name "Claude"
+          git config user.email "noreply@anthropic.com"
+          git add go.mod go.sum
+          git commit -m "chore(deps): go mod tidy for new imports" || exit 0
+          git push origin HEAD:${GITHUB_REF_NAME}

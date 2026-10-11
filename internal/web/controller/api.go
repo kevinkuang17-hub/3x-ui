@@ -217,6 +217,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	NewConfigHistoryController(api.Group("/xray/history"))
 	NewAppTrafficController(api.Group("/apps"))
 	NewPanelUserController(api.Group("/users"))
+	NewPasskeyController(api.Group("/passkeys"))
 
 	// Subscription balancers — client-side balancers for the JSON sub output
 	NewSubBalancerController(api)

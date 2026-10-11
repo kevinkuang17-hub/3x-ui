@@ -140,7 +140,8 @@
         "emptyPassword": "Por favor ingresa la contraseña.",
         "wrongUsernameOrPassword": "Nombre de usuario, contraseña o código de dos factores incorrecto.",
         "successLogin": "Has iniciado sesión en tu cuenta correctamente."
-      }
+      },
+      "passkey": "Entrar con una llave de acceso"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "¿Eliminar el usuario {name}?",
         "saved": "Usuario guardado",
         "deleted": "Usuario eliminado"
+      },
+      "passkeys": {
+        "title": "Mis llaves de acceso",
+        "intro": "Entra con Face ID, Touch ID, Windows Hello o una llave de seguridad en lugar de la contraseña. Las llaves están ligadas al dominio de este panel.",
+        "unsupported": "Las llaves de acceso requieren abrir el panel por su dominio y con https.",
+        "namePlaceholder": "Nombre, p. ej. Mi iPhone",
+        "add": "Añadir llave",
+        "empty": "Aún no hay llaves",
+        "deleteConfirm": "¿Quitar la llave {name}?",
+        "meta": "Añadida {created} · último uso {used}",
+        "cancelled": "Se canceló la creación de la llave",
+        "failed": "Falló la operación con la llave",
+        "added": "Llave añadida",
+        "deleted": "Llave quitada"
       }
     },
     "xray": {

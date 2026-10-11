@@ -28,6 +28,7 @@ import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { setMessageInstance } from '@/utils/messageBus';
 import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
+import { getPasskey, passkeysSupported } from '@/utils/passkey';
 import { LoginFormSchema, TwoFactorCodeSchema, type LoginFormValues } from '@/schemas/login';
 import './LoginPage.css';
 
@@ -84,6 +85,33 @@ export default function LoginPage() {
       if (msg.success) window.location.href = basePath + 'panel/';
     } finally {
       setSubmitting(false);
+    }
+  }, []);
+
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+  const onPasskey = useCallback(async () => {
+    setPasskeyBusy(true);
+    try {
+      const begin = await HttpUtil.post<{ flow: string; options: Record<string, unknown> }>(
+        '/passkey/login/begin',
+        undefined,
+        { silentSuccess: true },
+      );
+      if (!begin?.success || !begin.obj) return;
+      let assertion: Record<string, unknown>;
+      try {
+        assertion = await getPasskey(begin.obj.options);
+      } catch {
+        return;
+      }
+      const msg = await HttpUtil.post(
+        `/passkey/login/finish?flow=${encodeURIComponent(begin.obj.flow)}`,
+        assertion,
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+      if (msg.success) window.location.href = basePath + 'panel/';
+    } finally {
+      setPasskeyBusy(false);
     }
   }, []);
 
@@ -246,6 +274,19 @@ export default function LoginPage() {
                         {t('login')}
                       </Button>
                     </Form.Item>
+                    {passkeysSupported() && (
+                      <Form.Item>
+                        <Button
+                          icon={<KeyOutlined />}
+                          size="large"
+                          block
+                          loading={passkeyBusy}
+                          onClick={onPasskey}
+                        >
+                          {t('pages.login.passkey')}
+                        </Button>
+                      </Form.Item>
+                    )}
                   </Form>
                 </FormProvider>
                 <SponsorSlot slot="login" variant="compact" className="login-sponsor" />

@@ -99,6 +99,7 @@ func allModels() []any {
 		&model.IspProbe{},
 		&model.IspProbeResult{},
 		&model.PanelRole{},
+		&model.PasskeyCredential{},
 	}
 }
 

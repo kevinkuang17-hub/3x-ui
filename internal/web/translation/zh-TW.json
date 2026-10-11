@@ -140,7 +140,8 @@
         "emptyPassword": "請輸入密碼",
         "wrongUsernameOrPassword": "用戶名、密碼或雙重驗證碼無效。",
         "successLogin": "您已成功登入您的帳戶。"
-      }
+      },
+      "passkey": "使用密碼金鑰登入"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "刪除帳號 {name}？",
         "saved": "帳號已儲存",
         "deleted": "帳號已刪除"
+      },
+      "passkeys": {
+        "title": "我的密碼金鑰",
+        "intro": "用 Face ID、Touch ID、Windows Hello 或安全金鑰登入，不用輸入密碼。密碼金鑰綁定在這個面板的網域上。",
+        "unsupported": "需要用網域並透過 https 開啟面板才能使用密碼金鑰。",
+        "namePlaceholder": "名稱，例如：我的 iPhone",
+        "add": "新增密碼金鑰",
+        "empty": "尚無密碼金鑰",
+        "deleteConfirm": "刪除密碼金鑰 {name}？",
+        "meta": "新增於 {created} · 最近使用 {used}",
+        "cancelled": "已取消建立密碼金鑰",
+        "failed": "密碼金鑰操作失敗",
+        "added": "密碼金鑰已新增",
+        "deleted": "密碼金鑰已刪除"
       }
     },
     "xray": {

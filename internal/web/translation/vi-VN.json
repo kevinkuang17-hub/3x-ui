@@ -140,7 +140,8 @@
         "emptyPassword": "Vui lòng nhập mật khẩu.",
         "wrongUsernameOrPassword": "Tên người dùng, mật khẩu hoặc mã xác thực hai yếu tố không hợp lệ.",
         "successLogin": "Bạn đã đăng nhập vào tài khoản thành công."
-      }
+      },
+      "passkey": "Đăng nhập bằng khóa truy cập"
     },
     "index": {
       "cpu": "CPU",
@@ -1858,6 +1859,20 @@
         "deleteConfirm": "Xóa tài khoản {name}?",
         "saved": "Đã lưu tài khoản",
         "deleted": "Đã xóa tài khoản"
+      },
+      "passkeys": {
+        "title": "Khóa truy cập của tôi",
+        "intro": "Đăng nhập bằng Face ID, Touch ID, Windows Hello hoặc khóa bảo mật thay cho mật khẩu. Khóa truy cập gắn với tên miền của bảng điều khiển này.",
+        "unsupported": "Khóa truy cập yêu cầu mở bảng điều khiển bằng tên miền qua https.",
+        "namePlaceholder": "Tên, vd. iPhone của tôi",
+        "add": "Thêm khóa truy cập",
+        "empty": "Chưa có khóa truy cập",
+        "deleteConfirm": "Xóa khóa truy cập {name}?",
+        "meta": "Thêm {created} · dùng lần cuối {used}",
+        "cancelled": "Đã hủy tạo khóa truy cập",
+        "failed": "Thao tác khóa truy cập thất bại",
+        "added": "Đã thêm khóa truy cập",
+        "deleted": "Đã xóa khóa truy cập"
       }
     },
     "xray": {

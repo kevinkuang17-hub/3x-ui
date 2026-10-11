@@ -4953,6 +4953,10 @@
       "description": "Extra panel logins with a role. operator sessions may manage clients, groups and plans and read status; everything else answers 403. Users without a role row (including every user that existed before roles) keep full access, and the first user is always admin. API tokens keep their own scopes."
     },
     {
+      "name": "Passkeys",
+      "description": "WebAuthn passkeys for password-less sign-in. The relying party is the host the panel is opened on, so passkeys need a domain name and https. Ceremonies run in two steps; the begin step returns a flow id that the finish step passes back as ?flow=."
+    },
+    {
       "name": "App traffic",
       "description": "Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named app-<key>, and a geosite rule after all existing rules, so routing is unchanged; outbound statistics are switched on."
     },
@@ -15614,6 +15618,197 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/passkeys/list": {
+      "get": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Passkeys of the signed-in user.",
+        "operationId": "get_panel_api_passkeys_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/passkeys/register/begin": {
+      "post": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Start registering a passkey; returns { flow, options } for navigator.credentials.create.",
+        "operationId": "post_panel_api_passkeys_register_begin",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/passkeys/register/finish": {
+      "post": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Finish registration with the browser credential as the JSON body; query: flow, name.",
+        "operationId": "post_panel_api_passkeys_register_finish",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/passkeys/del/{id}": {
+      "post": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Remove one of the signed-in user’s passkeys.",
+        "operationId": "post_panel_api_passkeys_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Passkey id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/passkey/login/begin": {
+      "post": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Public (CSRF token required): start a username-less sign-in; returns { flow, options }.",
+        "operationId": "post_passkey_login_begin",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/passkey/login/finish": {
+      "post": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Public (CSRF token required): verify the assertion (JSON body, ?flow=) and set the session cookie. Failed attempts count toward the login rate limit.",
+        "operationId": "post_passkey_login_finish",
         "responses": {
           "200": {
             "description": "Successful response",
