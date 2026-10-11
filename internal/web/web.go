@@ -301,7 +301,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 			return
 		}
 		if decoy.Enabled() && !strings.HasPrefix(c.Request.URL.Path, basePath) {
-			decoy.Serve(c)
+			decoy.Respond(c)
 			return
 		}
 		c.AbortWithStatus(http.StatusNotFound)
@@ -902,7 +902,7 @@ func (s *Server) RestartXray() error {
 // denyPanelAccess answers an address outside the panel allowlist like a plain web server would.
 func denyPanelAccess(c *gin.Context) {
 	if decoy.Enabled() {
-		decoy.Serve(c)
+		decoy.Respond(c)
 		return
 	}
 	c.AbortWithStatus(http.StatusNotFound)

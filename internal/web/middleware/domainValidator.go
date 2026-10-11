@@ -26,7 +26,7 @@ func DomainValidatorMiddleware(domain string) gin.HandlerFunc {
 		if host != domain {
 			// With the decoy on, a wrong host (a scan by IP) sees the decoy site instead of a telltale 403.
 			if decoy.Enabled() {
-				decoy.Serve(c)
+				decoy.Respond(c)
 				return
 			}
 			c.AbortWithStatus(http.StatusForbidden)
