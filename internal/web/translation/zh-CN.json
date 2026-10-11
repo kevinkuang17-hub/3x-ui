@@ -2608,7 +2608,7 @@
       "previewEmpty": "还没有选择任何规则。",
       "globalTab": "全局分流",
       "libraryTab": "规则库",
-      "globalDesc": "对所有没有单独设置分流的分组生效。用户下次刷新订阅即更新。",
+      "globalDesc": "对所有没有单独设置分流的分组生效，并下发到所有订阅格式：Clash/Mihomo 完整支持；sing-box、Surge、Loon、小火箭、Xray JSON（v2rayN、v2rayNG、Streisand）和 Happ/INCY 也会带上规则集、自定义规则和 DNS，模板分组统一按“走代理”处理。用户下次刷新订阅即更新。",
       "add": "新增规则集",
       "edit": "编辑规则集",
       "deleteConfirm": "删除规则集“{name}”？",

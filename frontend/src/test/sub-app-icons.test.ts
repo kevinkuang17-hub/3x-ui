@@ -9,6 +9,8 @@ describe('APP_ICONS', () => {
       subUrl: 'https://sub.example.com/sub/abc',
       sId: 'abc',
       subTitle: '',
+      singboxUrl: 'https://sub.example.com/singbox/abc',
+      shadowrocketUrl: 'https://sub.example.com/shadowrocket/abc',
     });
     const names = [...new Set(Object.values(apps).flatMap((list) => list.map((app) => app.name)))];
 
@@ -20,6 +22,8 @@ describe('APP_ICONS', () => {
       subUrl: 'https://sub.example.com/sub/abc',
       sId: 'abc',
       subTitle: '',
+      singboxUrl: 'https://sub.example.com/singbox/abc',
+      shadowrocketUrl: 'https://sub.example.com/shadowrocket/abc',
     });
     const offered = new Set(Object.values(apps).flatMap((list) => list.map((app) => app.name)));
 

@@ -125,6 +125,19 @@ describe('buildSubApps', () => {
     );
   });
 
+  it('imports the sing-box profile and offers the Shadowrocket rules when the panel serves them', () => {
+    const singboxUrl = 'https://sub.example.com/singbox/abc';
+    const shadowrocketUrl = 'https://sub.example.com/shadowrocket/abc';
+    const apps = buildSubApps({ ...sub, singboxUrl, shadowrocketUrl });
+    expect(apps.android[2].url).toBe(
+      `sing-box://import-remote-profile?url=${encodeURIComponent(singboxUrl)}#Nova%20Net`,
+    );
+    expect(apps.ios[1]).toEqual({
+      name: 'Shadowrocket Rules',
+      url: `shadowrocket://config/add/${shadowrocketUrl}`,
+    });
+  });
+
   it('appends flag=shadowrocket with & when the subscription URL already has a query', () => {
     const withQuery = { ...sub, subUrl: `${subUrl}?token=1` };
     const rocket = Buffer.from(`${subUrl}?token=1&flag=shadowrocket`).toString('base64');

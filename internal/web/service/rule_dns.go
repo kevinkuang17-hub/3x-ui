@@ -198,6 +198,12 @@ func toAny(list []string) []any {
 	return out
 }
 
+// Servers returns the domestic and foreign resolvers with the defaults filled in, so every client
+// format resolves the same way even when the admin left the lists empty.
+func (cfg DnsConfig) Servers() (domestic, foreign []string) {
+	return orDefault(cfg.Domestic, defaultDomesticDNS), orDefault(cfg.Foreign, defaultForeignDNS)
+}
+
 // BuildClashDNS turns the config into a Mihomo dns section plus DIRECT rules for company domains.
 // proxyGroup is the profile's main proxy group, used when foreign DNS should go through the proxy.
 func BuildClashDNS(cfg DnsConfig, proxyGroup string) (map[string]any, []string) {

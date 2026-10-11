@@ -939,6 +939,18 @@ func builtinProfileURL(c *gin.Context, scheme, hostWithPort string) string {
 	return fmt.Sprintf("%s://%s%s?html=1", scheme, hostWithPort, c.Request.URL.EscapedPath())
 }
 
+func (a *SUBController) libraryRoutingFor(c *gin.Context, profileRoutingRules string) bool {
+	if c.Request == nil || c.Param("subid") == "" {
+		return false
+	}
+	ua := c.GetHeader("User-Agent")
+	if !IsHappClient(ua) && !IsIncyClient(ua) {
+		return false
+	}
+	return strings.TrimSpace(profileRoutingRules) == "" && strings.TrimSpace(a.subJsonRoutingRules) == "" &&
+		(!a.subIncyEnableRouting || strings.TrimSpace(a.subIncyRoutingRules) == "")
+}
+
 // ApplyCommonHeaders sets common HTTP headers for subscription responses including user info, update interval, and profile title.
 func (a *SUBController) ApplyCommonHeaders(
 	c *gin.Context,
@@ -974,6 +986,16 @@ func (a *SUBController) ApplyCommonHeaders(
 		// Happ/INCY fetch the geo files the baked rules reference through this
 		// header; unlike the documents, it keeps the profile's own DNS servers.
 		rules, remote, routingErr = jsonRoutingHeaderSource(a.subJsonRoutingRules), false, nil
+	}
+	// Happ and INCY with no routing configured for them get the rule library as their profile; the
+	// header is built for those apps only, so other clients and proxies never see it.
+	if a.libraryRoutingFor(c, profileRoutingRules) {
+		if lib, dns := libraryRulesForSub(c.Param("subid")); len(lib) > 0 {
+			if link := happRoutingFromLibrary(lib, dns); link != "" {
+				rules, remote, routingErr = link, false, nil
+				profileEnableRouting = true
+			}
+		}
 	}
 	// The off values undo a previously pushed setting, so they ride the same
 	// opt-in as every other Happ header rather than reaching every Happ client.

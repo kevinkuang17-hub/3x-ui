@@ -16,5 +16,6 @@ export const APP_ICONS: Record<string, { src: string; tinted: boolean }> = {
   Happ: { src: happ, tinted: true },
   Incy: { src: incy, tinted: false },
   Shadowrocket: { src: shadowrocket, tinted: false },
+  'Shadowrocket Rules': { src: shadowrocket, tinted: false },
   Streisand: { src: streisand, tinted: false },
 };

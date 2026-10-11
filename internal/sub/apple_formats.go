@@ -20,16 +20,26 @@ const (
 	formatSurge = "surge"
 	formatLoon  = "loon"
 	formatQX    = "qx"
+	// Shadowrocket gets a rules-only config (nodes come from its subscription), sing-box a full profile.
+	formatShadowrocket = "shadowrocket"
+	formatSingbox      = "singbox"
 )
 
-var applePaths = map[string]string{formatSurge: "/surge/", formatLoon: "/loon/", formatQX: "/qx/"}
+var applePaths = map[string]string{
+	formatSurge: "/surge/", formatLoon: "/loon/", formatQX: "/qx/",
+	formatShadowrocket: "/shadowrocket/", formatSingbox: "/singbox/",
+}
+
+var appleURLKeys = map[string]string{
+	formatSurge: "Surge", formatLoon: "Loon", formatQX: "Qx", formatShadowrocket: "Shadowrocket", formatSingbox: "Singbox",
+}
 
 func (a *SUBController) initAppleFormats(g *gin.RouterGroup) {
 	// They serve the Clash proxy list, so they exist only while the Clash subscription is on.
 	if !a.clashEnabled {
 		return
 	}
-	for _, format := range []string{formatSurge, formatLoon, formatQX} {
+	for _, format := range []string{formatSurge, formatLoon, formatQX, formatShadowrocket, formatSingbox} {
 		path := applePaths[format]
 		if owner := a.configuredSubscriptionPathOwner(path); owner != "" {
 			continue
@@ -50,7 +60,7 @@ func (a *SUBController) appleURLs(subURL, subID string) map[string]string {
 	}
 	base := strings.TrimSuffix(subURL, suffix)
 	out := map[string]string{}
-	for format, key := range map[string]string{formatSurge: "Surge", formatLoon: "Loon", formatQX: "Qx"} {
+	for format, key := range appleURLKeys {
 		if a.configuredSubscriptionPathOwner(applePaths[format]) == "" {
 			out[key] = base + applePaths[format] + subID
 		}
@@ -85,9 +95,18 @@ func (a *SUBController) subApple(c *gin.Context, format string) {
 	rules, _ := (&service.RuleSetService{}).BuildRules(libraryChoiceForSub(subID))
 	dns := appleDNSFor(service.DnsForSub(subID))
 	rules = append(dns.direct, rules...)
-	body := renderAppleProfile(format, doc.Proxies, self, hours, appleRules(rules), dns)
+	contentType, body := "text/plain; charset=utf-8", ""
+	switch format {
+	case formatSingbox:
+		lib, dnsCfg := libraryRulesForSub(subID)
+		contentType, body = "application/json; charset=utf-8", renderSingbox(doc.Proxies, lib, dnsCfg)
+	case formatShadowrocket:
+		body = renderShadowrocket(self, rules, dns, service.DnsForSub(subID).IPv6)
+	default:
+		body = renderAppleProfile(format, doc.Proxies, self, hours, appleRules(rules), dns)
+	}
 	a.ApplyCommonHeaders(c, header, a.updateInterval, "", "", "", "", false, "", false)
-	c.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(body))
+	c.Data(http.StatusOK, contentType, []byte(body))
 	a.recordSubscriptionFetch(c)
 }
 
@@ -467,4 +486,42 @@ func appleDNSFor(cfg service.DnsConfig) appleDNS {
 		}
 	}
 	return d
+}
+
+// renderShadowrocket writes a Shadowrocket config: DNS, the library rules and mainland-direct, with
+// PROXY meaning the node chosen in the app.
+func renderShadowrocket(selfURL string, rules []string, dns appleDNS, ipv6 bool) string {
+	var b strings.Builder
+	b.WriteString("[General]\nbypass-system = true\n")
+	b.WriteString("skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local, captive.apple.com\n")
+	fmt.Fprintf(&b, "dns-server = %s\nipv6 = %t\n", dns.serverLine(), ipv6)
+	if selfURL != "" {
+		fmt.Fprintf(&b, "update-url = %s\n", selfURL)
+	}
+	b.WriteString("\n[Rule]\n")
+	for _, r := range rules {
+		parts := strings.Split(r, ",")
+		if len(parts) < 3 {
+			continue
+		}
+		switch parts[0] {
+		case "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "IP-CIDR", "IP-CIDR6", "GEOIP", "DST-PORT":
+		default:
+			continue
+		}
+		switch parts[2] {
+		case "DIRECT", "REJECT":
+		default:
+			parts[2] = "PROXY"
+		}
+		b.WriteString(strings.Join(parts, ",") + "\n")
+	}
+	b.WriteString("GEOIP,CN,DIRECT\nFINAL,PROXY\n")
+	if len(dns.hosts) > 0 {
+		b.WriteString("\n[Host]\n")
+		for _, h := range dns.hosts {
+			b.WriteString(h + "\n")
+		}
+	}
+	return b.String()
 }

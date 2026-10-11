@@ -8,7 +8,7 @@ interface SubLinksTabProps {
   subUrl: string;
   subJsonUrl: string;
   subClashUrl: string;
-  appleUrls?: { surge: string; loon: string; qx: string };
+  appleUrls?: { surge: string; loon: string; qx: string; shadowrocket: string; singbox: string };
   onCopy: (value: string) => void;
 }
 
@@ -46,6 +46,20 @@ export default function SubLinksTab({
       color: 'magenta',
       url: appleUrls?.qx ?? '',
       title: 'Quantumult X',
+      downloadable: false,
+    },
+    {
+      kind: 'SING-BOX',
+      color: 'geekblue',
+      url: appleUrls?.singbox ?? '',
+      title: 'sing-box / Hiddify / Karing',
+      downloadable: false,
+    },
+    {
+      kind: 'ROCKET',
+      color: 'volcano',
+      url: appleUrls?.shadowrocket ?? '',
+      title: 'Shadowrocket',
       downloadable: false,
     },
   ].filter((row) => row.url);
