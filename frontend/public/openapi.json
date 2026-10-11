@@ -4941,6 +4941,10 @@
       "description": "Xray configuration template, outbound management, Warp/Nord/PIA integration, and config testing. All endpoints under /panel/api/xray."
     },
     {
+      "name": "ISP probes",
+      "description": "Agents inside chosen networks (home routers on a given ISP, VPSs) that check every 5 minutes whether node lines are reachable from there. With subLineHealth on, a line that at least two fresh probes all fail to reach is hidden from subscriptions even when the master reaches it."
+    },
+    {
       "name": "Server costs",
       "description": "Monthly cost, currency and renewal date per node. An hourly job raises vps.renew (forwarded by the CRM webhook) once per renewal date, three days ahead."
     },
@@ -15027,6 +15031,261 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/probes/matrix": {
+      "get": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Probes, the lines they test, and each probe’s latest result per line.",
+        "operationId": "get_panel_api_probes_matrix",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/probes/add": {
+      "post": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Register a probe. Returns its path (shown once): install with curl -fsSL \"<origin><path>/agent.sh\" | sh -s -- install \"<origin><path>\".",
+        "operationId": "post_panel_api_probes_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Home router",
+                "isp": "telecom"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/probes/del/{id}": {
+      "post": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Remove a probe and its results.",
+        "operationId": "post_panel_api_probes_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Probe id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/probe/{token}": {
+      "get": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Public, used by the agent: plain-text targets, one \"inboundId host port\" per line.",
+        "operationId": "get_probe_token",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Probe token.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Public, used by the agent: report results.",
+        "operationId": "post_probe_token",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Probe token.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "results": [
+                  {
+                    "inboundId": 12,
+                    "ok": true,
+                    "latencyMs": 48
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/probe/{token}/agent.sh": {
+      "get": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Public: the POSIX-sh agent script (runs on OpenWrt).",
+        "operationId": "get_probe_token_agent_sh",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Probe token.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",

@@ -34,6 +34,7 @@ import NodeDnsModal from './NodeDnsModal';
 import NodeCostModal from './NodeCostModal';
 import type { NodeCost } from './NodeCostModal';
 import NodeCostSummary from './NodeCostSummary';
+import IspProbesCard from './IspProbesCard';
 import { useNodeMutations } from '@/api/queries/useNodeMutations';
 import AppSidebar from '@/layouts/AppSidebar';
 import NodeList from './NodeList';
@@ -388,6 +389,9 @@ export default function NodesPage() {
                       onUpdateNode={onUpdateNode}
                       onUpdateSelected={onUpdateSelected}
                     />
+                  </Col>
+                  <Col span={24}>
+                    <IspProbesCard />
                   </Col>
                 </Row>
               )}

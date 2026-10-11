@@ -1286,6 +1286,24 @@
         "total": "Monthly cost",
         "renewSoon": "Renewing within 7 days",
         "saved": "Server cost saved"
+      },
+      "probes": {
+        "title": "ISP probes",
+        "intro": "Install a probe on a router or server inside the network you care about (e.g. a home router on China Telecom). It checks every 5 minutes whether each node line can be reached from there. With auto-hide dead lines on, a line every probe fails to reach is left out of subscriptions.",
+        "add": "Add probe",
+        "line": "Line",
+        "name": "Probe name",
+        "namePlaceholder": "e.g. Shanghai Telecom home router",
+        "isp": "Network",
+        "isp_telecom": "China Telecom",
+        "isp_unicom": "China Unicom",
+        "isp_mobile": "China Mobile",
+        "isp_other": "Other",
+        "noData": "no data",
+        "blocked": "blocked",
+        "deleteConfirm": "Delete probe {name}?",
+        "deleted": "Probe deleted",
+        "installHint": "Run this once on the router or server (needs curl; OpenWrt works). It installs a 5-minute cron job:"
       }
     },
     "settings": {

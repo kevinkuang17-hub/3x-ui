@@ -1168,6 +1168,24 @@
         "total": "Custo mensal",
         "renewSoon": "Renovações em até 7 dias",
         "saved": "Custo do servidor salvo"
+      },
+      "probes": {
+        "title": "Sondas de operadora",
+        "intro": "Instale uma sonda num roteador ou servidor dentro da rede que importa (ex.: roteador de casa na China Telecom). A cada 5 minutos ela verifica de lá se cada linha é alcançável. Com a ocultação de linhas fora do ar ligada, uma linha que nenhuma sonda alcança sai das assinaturas.",
+        "add": "Adicionar sonda",
+        "line": "Linha",
+        "name": "Nome da sonda",
+        "namePlaceholder": "ex.: roteador de casa, Xangai Telecom",
+        "isp": "Rede",
+        "isp_telecom": "China Telecom",
+        "isp_unicom": "China Unicom",
+        "isp_mobile": "China Mobile",
+        "isp_other": "Outra",
+        "noData": "sem dados",
+        "blocked": "bloqueada",
+        "deleteConfirm": "Excluir a sonda {name}?",
+        "deleted": "Sonda excluída",
+        "installHint": "Execute isto uma vez no roteador ou servidor (precisa de curl; OpenWrt funciona). Instala uma verificação a cada 5 minutos:"
       }
     },
     "settings": {

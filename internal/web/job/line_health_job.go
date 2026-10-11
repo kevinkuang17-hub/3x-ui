@@ -2,10 +2,8 @@ package job
 
 import (
 	"context"
-	"encoding/json"
 	"net"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -41,6 +39,7 @@ type LineHealthJob struct {
 	running        sync.Mutex
 	fails          map[int]int
 	dial           func(ctx context.Context, address string) error
+	now            func() time.Time
 }
 
 func NewLineHealthJob() *LineHealthJob {
@@ -98,7 +97,7 @@ func (j *LineHealthJob) Run() {
 		}
 	}
 	verdicts := j.probeAll(probe, nodesByID)
-	j.apply(inbounds, verdicts)
+	j.apply(inbounds, verdicts, service.BlockedFromProbes(j.clock()))
 }
 
 func (j *LineHealthJob) probeAll(inbounds []*model.Inbound, nodesByID map[int]*model.Node) map[int]lineVerdict {
@@ -127,7 +126,7 @@ func (j *LineHealthJob) probeAll(inbounds []*model.Inbound, nodesByID map[int]*m
 }
 
 func (j *LineHealthJob) probeOne(ib *model.Inbound, node *model.Node) lineVerdict {
-	if lineIsUDP(ib) {
+	if linehealth.IsUDP(ib) {
 		// No handshake to test over UDP: trust the node's own report, and only while it answers.
 		if node.Status != "online" || node.XrayState == "" {
 			return lineUnknown
@@ -137,7 +136,7 @@ func (j *LineHealthJob) probeOne(ib *model.Inbound, node *model.Node) lineVerdic
 		}
 		return lineFail
 	}
-	host := lineProbeHost(ib, node)
+	host := linehealth.ProbeHost(ib, node)
 	if host == "" || ib.Port <= 0 {
 		return lineUnknown
 	}
@@ -149,81 +148,16 @@ func (j *LineHealthJob) probeOne(ib *model.Inbound, node *model.Node) lineVerdic
 	return lineOK
 }
 
-// lineProbeHost mirrors the subscription's own address choice (resolveInboundAddress) and returns ""
-// when clients reach the line some other way: fallback child, external proxy, or a private address.
-func lineProbeHost(ib *model.Inbound, node *model.Node) string {
-	listen := strings.TrimSpace(ib.Listen)
-	if strings.HasPrefix(listen, "@") || strings.HasPrefix(listen, "/") || lineHostIsInternal(listen) {
-		return ""
+func (j *LineHealthJob) clock() time.Time {
+	if j.now != nil {
+		return j.now()
 	}
-	var stream map[string]any
-	_ = json.Unmarshal([]byte(ib.StreamSettings), &stream)
-	if proxies, ok := stream["externalProxy"].([]any); ok && len(proxies) > 0 {
-		return ""
-	}
-	nodeAddr := strings.TrimSpace(node.Address)
-	listenAddr := ""
-	if listen != "" && !lineHostIsWildcard(listen) {
-		listenAddr = listen
-	}
-	candidates := []string{nodeAddr, listenAddr}
-	switch ib.ShareAddrStrategy {
-	case "listen":
-		candidates = []string{listenAddr, nodeAddr}
-	case "custom":
-		candidates = []string{strings.TrimSpace(ib.ShareAddr), nodeAddr, listenAddr}
-	}
-	for _, c := range candidates {
-		if c == "" {
-			continue
-		}
-		if lineHostIsInternal(c) || lineHostIsPrivate(c) {
-			return ""
-		}
-		return c
-	}
-	return ""
+	return time.Now()
 }
 
-func lineHostIsInternal(host string) bool {
-	if strings.EqualFold(host, "localhost") {
-		return true
-	}
-	ip := net.ParseIP(strings.Trim(host, "[]"))
-	return ip != nil && ip.IsLoopback()
-}
-
-func lineHostIsWildcard(host string) bool {
-	ip := net.ParseIP(strings.Trim(host, "[]"))
-	return ip != nil && ip.IsUnspecified()
-}
-
-// A private/CGNAT node address (e.g. a Tailscale IP) is how the master reaches the panel, not users.
-func lineHostIsPrivate(host string) bool {
-	ip := net.ParseIP(strings.Trim(host, "[]"))
-	if ip == nil {
-		return false
-	}
-	if ip.IsPrivate() || ip.IsLinkLocalUnicast() {
-		return true
-	}
-	cgnat := net.IPNet{IP: net.IPv4(100, 64, 0, 0), Mask: net.CIDRMask(10, 32)}
-	return cgnat.Contains(ip)
-}
-
-func lineIsUDP(ib *model.Inbound) bool {
-	switch ib.Protocol {
-	case model.Hysteria, model.TUIC, model.WireGuard, model.AmneziaWG:
-		return true
-	}
-	var stream struct {
-		Network string `json:"network"`
-	}
-	_ = json.Unmarshal([]byte(ib.StreamSettings), &stream)
-	return stream.Network == "kcp" || stream.Network == "quic"
-}
-
-func (j *LineHealthJob) apply(inbounds []*model.Inbound, verdicts map[int]lineVerdict) {
+// apply turns one round of verdicts into hide/restore decisions. blocked lists lines every ISP
+// probe failed to reach: those count as failures even when the master itself gets through.
+func (j *LineHealthJob) apply(inbounds []*model.Inbound, verdicts map[int]lineVerdict, blocked map[int]bool) {
 	probed, failed := 0, 0
 	for _, v := range verdicts {
 		if v != lineUnknown {
@@ -234,8 +168,17 @@ func (j *LineHealthJob) apply(inbounds []*model.Inbound, verdicts map[int]lineVe
 		}
 	}
 	if failed > 0 && (failed == probed || (failed >= lineHealthMassFailMin && failed*2 > probed)) {
-		logger.Warningf("line health: %d of %d lines failed at once; assuming a master-side network problem, leaving subscriptions unchanged", failed, probed)
-		return
+		logger.Warningf("line health: %d of %d lines failed at once; assuming a master-side network problem, ignoring this round's master checks", failed, probed)
+		for id, v := range verdicts {
+			if v == lineFail {
+				verdicts[id] = lineUnknown
+			}
+		}
+	}
+	for id := range blocked {
+		if _, probedHere := verdicts[id]; probedHere {
+			verdicts[id] = lineFail
+		}
 	}
 
 	byID := make(map[int]*model.Inbound, len(inbounds))

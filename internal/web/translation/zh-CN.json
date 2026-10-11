@@ -1168,6 +1168,24 @@
         "total": "每月成本合计",
         "renewSoon": "7 天内需要续费",
         "saved": "服务器费用已保存"
+      },
+      "probes": {
+        "title": "运营商探针",
+        "intro": "在你关心的网络里的路由器或服务器上装一个探针（比如电信宽带的家用路由器），它每 5 分钟从那里检测一次各节点线路通不通。打开“自动隐藏不通的线路”后，所有探针都连不上的线路会从订阅里拿掉。",
+        "add": "添加探针",
+        "line": "线路",
+        "name": "探针名称",
+        "namePlaceholder": "如：上海电信家里路由器",
+        "isp": "网络",
+        "isp_telecom": "中国电信",
+        "isp_unicom": "中国联通",
+        "isp_mobile": "中国移动",
+        "isp_other": "其他",
+        "noData": "无数据",
+        "blocked": "不通",
+        "deleteConfirm": "删除探针 {name}？",
+        "deleted": "探针已删除",
+        "installHint": "在路由器或服务器上运行一次这条命令（需要 curl，OpenWrt 也可以），会装好每 5 分钟一次的定时检测："
       }
     },
     "settings": {

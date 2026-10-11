@@ -201,6 +201,9 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	NewNodeJoinController(nodes.Group("/join"))
 	NewNodeCostController(nodes.Group("/cost"))
 
+	// ISP probes — reachability of node lines from inside chosen networks
+	NewIspProbeController(api.Group("/probes"))
+
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")
 	a.hostController = NewHostController(hosts)

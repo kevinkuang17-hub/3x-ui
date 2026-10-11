@@ -68,6 +68,8 @@ func migrationModels() []any {
 		&model.NodeJoinTicket{},
 		&model.ConfigSnapshot{},
 		&model.NodeCost{},
+		&model.IspProbe{},
+		&model.IspProbeResult{},
 	}
 }
 

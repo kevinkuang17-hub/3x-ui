@@ -2620,6 +2620,53 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'isp-probes',
+    title: 'ISP probes',
+    description:
+      'Agents inside chosen networks (home routers on a given ISP, VPSs) that check every 5 minutes whether node lines are reachable from there. With subLineHealth on, a line that at least two fresh probes all fail to reach is hidden from subscriptions even when the master reaches it.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/probes/matrix',
+        summary: 'Probes, the lines they test, and each probe’s latest result per line.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/probes/add',
+        summary:
+          'Register a probe. Returns its path (shown once): install with curl -fsSL "<origin><path>/agent.sh" | sh -s -- install "<origin><path>".',
+        body: '{\n  "name": "Home router",\n  "isp": "telecom"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/probes/del/:id',
+        summary: 'Remove a probe and its results.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Probe id.' }],
+      },
+      {
+        method: 'GET',
+        path: '/probe/:token',
+        summary:
+          'Public, used by the agent: plain-text targets, one "inboundId host port" per line.',
+        params: [{ name: 'token', in: 'path', type: 'string', desc: 'Probe token.' }],
+      },
+      {
+        method: 'POST',
+        path: '/probe/:token',
+        summary: 'Public, used by the agent: report results.',
+        params: [{ name: 'token', in: 'path', type: 'string', desc: 'Probe token.' }],
+        body: '{\n  "results": [{ "inboundId": 12, "ok": true, "latencyMs": 48 }]\n}',
+      },
+      {
+        method: 'GET',
+        path: '/probe/:token/agent.sh',
+        summary: 'Public: the POSIX-sh agent script (runs on OpenWrt).',
+        params: [{ name: 'token', in: 'path', type: 'string', desc: 'Probe token.' }],
+      },
+    ],
+  },
+
+  {
     id: 'node-cost',
     title: 'Server costs',
     description:

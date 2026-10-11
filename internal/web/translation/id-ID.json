@@ -1168,6 +1168,24 @@
         "total": "Biaya bulanan",
         "renewSoon": "Perpanjangan dalam 7 hari",
         "saved": "Biaya server disimpan"
+      },
+      "probes": {
+        "title": "Probe ISP",
+        "intro": "Pasang probe di router atau server dalam jaringan yang Anda pedulikan (mis. router rumah di China Telecom). Setiap 5 menit probe memeriksa dari sana apakah tiap jalur bisa dijangkau. Jika sembunyikan jalur mati aktif, jalur yang tak terjangkau semua probe dikeluarkan dari langganan.",
+        "add": "Tambah probe",
+        "line": "Jalur",
+        "name": "Nama probe",
+        "namePlaceholder": "mis. router rumah, Shanghai Telecom",
+        "isp": "Jaringan",
+        "isp_telecom": "China Telecom",
+        "isp_unicom": "China Unicom",
+        "isp_mobile": "China Mobile",
+        "isp_other": "Lainnya",
+        "noData": "tak ada data",
+        "blocked": "diblokir",
+        "deleteConfirm": "Hapus probe {name}?",
+        "deleted": "Probe dihapus",
+        "installHint": "Jalankan ini sekali di router atau server (butuh curl; OpenWrt bisa). Akan memasang pemeriksaan tiap 5 menit:"
       }
     },
     "settings": {

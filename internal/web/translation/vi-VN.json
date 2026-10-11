@@ -1168,6 +1168,24 @@
         "total": "Chi phí hằng tháng",
         "renewSoon": "Gia hạn trong 7 ngày",
         "saved": "Đã lưu chi phí máy chủ"
+      },
+      "probes": {
+        "title": "Đầu dò nhà mạng",
+        "intro": "Cài một đầu dò trên router hoặc máy chủ trong mạng bạn quan tâm (vd. router nhà dùng China Telecom). Cứ 5 phút nó kiểm tra từ đó xem từng tuyến có kết nối được không. Khi bật tự ẩn tuyến không hoạt động, tuyến mà mọi đầu dò đều không tới được sẽ bị bỏ khỏi gói đăng ký.",
+        "add": "Thêm đầu dò",
+        "line": "Tuyến",
+        "name": "Tên đầu dò",
+        "namePlaceholder": "vd. router nhà, Thượng Hải Telecom",
+        "isp": "Mạng",
+        "isp_telecom": "China Telecom",
+        "isp_unicom": "China Unicom",
+        "isp_mobile": "China Mobile",
+        "isp_other": "Khác",
+        "noData": "không có dữ liệu",
+        "blocked": "bị chặn",
+        "deleteConfirm": "Xóa đầu dò {name}?",
+        "deleted": "Đã xóa đầu dò",
+        "installHint": "Chạy lệnh này một lần trên router hoặc máy chủ (cần curl; OpenWrt dùng được). Sẽ cài kiểm tra mỗi 5 phút:"
       }
     },
     "settings": {

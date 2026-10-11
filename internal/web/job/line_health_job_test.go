@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/op/go-logging"
 
@@ -147,7 +148,7 @@ func TestLineHealthUDPFollowsNodeXrayState(t *testing.T) {
 			t.Fatalf("%s/%s: got %v want %v", c.status, c.xray, got, c.want)
 		}
 	}
-	if !lineIsUDP(&model.Inbound{Protocol: model.VLESS, StreamSettings: `{"network":"kcp"}`}) {
+	if !linehealth.IsUDP(&model.Inbound{Protocol: model.VLESS, StreamSettings: `{"network":"kcp"}`}) {
 		t.Fatal("kcp transport is UDP")
 	}
 }
@@ -170,7 +171,7 @@ func TestLineProbeHostFollowsAdvertisedAddress(t *testing.T) {
 		{"lan node address", model.Inbound{}, &model.Node{Address: "192.168.1.10"}, ""},
 	}
 	for _, c := range cases {
-		if got := lineProbeHost(&c.ib, c.node); got != c.want {
+		if got := linehealth.ProbeHost(&c.ib, c.node); got != c.want {
 			t.Errorf("%s: got %q want %q", c.name, got, c.want)
 		}
 	}
@@ -187,5 +188,19 @@ func TestLineHealthSkipsInboundsBehindManagedHosts(t *testing.T) {
 	}
 	if linehealth.IsDown(ids[10031]) {
 		t.Fatal("an inbound reached through managed hosts must not be judged by the node port")
+	}
+}
+
+func TestLineHealthHidesLinesProbesCannotReach(t *testing.T) {
+	j, _, ids := seedLineHealth(t, 10041, 10042, 10043)
+	now := time.Now().Unix()
+	for probeID := 1; probeID <= 2; probeID++ {
+		database.GetDB().Create(&model.IspProbeResult{ProbeId: probeID, InboundId: ids[10041], Ok: false, CheckedAt: now})
+	}
+	for range lineHealthFailThreshold {
+		j.Run()
+	}
+	if !linehealth.IsDown(ids[10041]) || linehealth.IsDown(ids[10042]) {
+		t.Fatalf("a line every ISP probe fails must be hidden even when the master reaches it: %v", linehealth.Down())
 	}
 }

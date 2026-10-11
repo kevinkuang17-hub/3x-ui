@@ -1168,6 +1168,24 @@
         "total": "Aylık maliyet",
         "renewSoon": "7 gün içinde yenilenecek",
         "saved": "Sunucu maliyeti kaydedildi"
+      },
+      "probes": {
+        "title": "Operatör yoklayıcıları",
+        "intro": "Önem verdiğiniz ağdaki bir yönlendirici veya sunucuya (ör. China Telecom'daki ev yönlendiricisi) bir yoklayıcı kurun. Her 5 dakikada oradan her hatta erişilip erişilemediğini kontrol eder. Çalışmayan hatları gizleme açıksa, hiçbir yoklayıcının ulaşamadığı hat aboneliklerden çıkarılır.",
+        "add": "Yoklayıcı ekle",
+        "line": "Hat",
+        "name": "Yoklayıcı adı",
+        "namePlaceholder": "ör. ev yönlendiricisi, Şanghay Telecom",
+        "isp": "Ağ",
+        "isp_telecom": "China Telecom",
+        "isp_unicom": "China Unicom",
+        "isp_mobile": "China Mobile",
+        "isp_other": "Diğer",
+        "noData": "veri yok",
+        "blocked": "engelli",
+        "deleteConfirm": "{name} yoklayıcısı silinsin mi?",
+        "deleted": "Yoklayıcı silindi",
+        "installHint": "Bunu yönlendiricide veya sunucuda bir kez çalıştırın (curl gerekir; OpenWrt olur). 5 dakikada bir kontrol kurulur:"
       }
     },
     "settings": {

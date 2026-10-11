@@ -1168,6 +1168,24 @@
         "total": "每月成本合計",
         "renewSoon": "7 天內需要續費",
         "saved": "伺服器費用已儲存"
+      },
+      "probes": {
+        "title": "電信商探針",
+        "intro": "在你在意的網路裡的路由器或伺服器上裝一個探針（例如中華電信寬頻的家用路由器），它每 5 分鐘從那裡檢測一次各節點線路通不通。開啟「自動隱藏不通的線路」後，所有探針都連不上的線路會從訂閱移除。",
+        "add": "新增探針",
+        "line": "線路",
+        "name": "探針名稱",
+        "namePlaceholder": "例如：上海電信家裡路由器",
+        "isp": "網路",
+        "isp_telecom": "中國電信",
+        "isp_unicom": "中國聯通",
+        "isp_mobile": "中國移動",
+        "isp_other": "其他",
+        "noData": "無資料",
+        "blocked": "不通",
+        "deleteConfirm": "刪除探針 {name}？",
+        "deleted": "探針已刪除",
+        "installHint": "在路由器或伺服器上執行一次這條指令（需要 curl，OpenWrt 也可以），會裝好每 5 分鐘一次的定時檢測："
       }
     },
     "settings": {
