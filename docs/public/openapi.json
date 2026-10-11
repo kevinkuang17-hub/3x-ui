@@ -4949,6 +4949,10 @@
       "description": "Monthly cost, currency and renewal date per node. An hourly job raises vps.renew (forwarded by the CRM webhook) once per renewal date, three days ahead."
     },
     {
+      "name": "Panel users",
+      "description": "Extra panel logins with a role. operator sessions may manage clients, groups and plans and read status; everything else answers 403. Users without a role row (including every user that existed before roles) keep full access, and the first user is always admin. API tokens keep their own scopes."
+    },
+    {
       "name": "App traffic",
       "description": "Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named app-<key>, and a geosite rule after all existing rules, so routing is unchanged; outbound statistics are switched on."
     },
@@ -15404,6 +15408,207 @@
             "in": "path",
             "required": true,
             "description": "Node id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/users/me": {
+      "get": {
+        "tags": [
+          "Panel users"
+        ],
+        "summary": "The signed-in user and role.",
+        "operationId": "get_panel_api_users_me",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/users/list": {
+      "get": {
+        "tags": [
+          "Panel users"
+        ],
+        "summary": "All panel users with roles (admin only).",
+        "operationId": "get_panel_api_users_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/users/add": {
+      "post": {
+        "tags": [
+          "Panel users"
+        ],
+        "summary": "Create a user (password at least 8 characters; role admin or operator).",
+        "operationId": "post_panel_api_users_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "username": "support1",
+                "password": "…",
+                "role": "operator"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/users/update/{id}": {
+      "post": {
+        "tags": [
+          "Panel users"
+        ],
+        "summary": "Change role and/or password (empty keeps it); signs the user out everywhere.",
+        "operationId": "post_panel_api_users_update_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "password": "",
+                "role": "admin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/users/del/{id}": {
+      "post": {
+        "tags": [
+          "Panel users"
+        ],
+        "summary": "Delete a user. The primary admin and the signed-in user cannot be deleted.",
+        "operationId": "post_panel_api_users_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User id.",
             "schema": {
               "type": "integer"
             }

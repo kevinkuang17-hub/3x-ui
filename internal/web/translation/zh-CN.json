@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "节点上报的公网 IP 变了，就马上更新它的 DNS 记录。",
       "secretConfigured": "已配置——输入新值以替换",
       "xrayAutoRollback": "保守模式（自动回滚）",
-      "xrayAutoRollbackDesc": "Xray 配置改动后如果 Xray 持续约 1 分钟起不来，就自动恢复到上一个能正常运行的版本并重启，避免用户断网。"
+      "xrayAutoRollbackDesc": "Xray 配置改动后如果 Xray 持续约 1 分钟起不来，就自动恢复到上一个能正常运行的版本并重启，避免用户断网。",
+      "users": {
+        "title": "面板账号",
+        "intro": "给员工开的额外登录账号。操作员可以管理用户、分组和套餐、查看状态，但不能改设置、Xray、节点和其他账号。主管理员在“安全设置”里管理。如果开启了两步验证，所有账号登录都需要验证码。",
+        "add": "添加账号",
+        "username": "用户名",
+        "password": "密码",
+        "passwordKeep": "留空表示不修改密码",
+        "role": "角色",
+        "role_admin": "管理员",
+        "role_operator": "操作员",
+        "roleDesc_admin": "完全权限，和主管理员一样。",
+        "roleDesc_operator": "只能管理用户、分组和套餐；设置、Xray、节点为只读或隐藏。",
+        "primary": "主管理员",
+        "deleteConfirm": "删除账号 {name}？",
+        "saved": "账号已保存",
+        "deleted": "账号已删除"
+      }
     },
     "xray": {
       "importRules": "导入规则",

@@ -502,6 +502,13 @@ export default function CommandPalette() {
         icon: <GlobalOutlined />,
       },
       {
+        path: '/settings#users',
+        title: `${t('menu.settings')} · ${t('pages.settings.users.title')}`,
+        subtitle: t('pages.settings.users.title'),
+        keywords: ['users', 'admins', 'operators', 'roles', 'accounts'],
+        icon: <TeamOutlined />,
+      },
+      {
         path: '/settings#subscription',
         title: `${t('menu.settings')} · ${t('pages.settings.subSettings')}`,
         subtitle: t('pages.settings.subSettings'),

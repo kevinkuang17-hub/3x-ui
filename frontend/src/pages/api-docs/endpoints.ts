@@ -2690,6 +2690,40 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'panel-users',
+    title: 'Panel users',
+    description:
+      'Extra panel logins with a role. operator sessions may manage clients, groups and plans and read status; everything else answers 403. Users without a role row (including every user that existed before roles) keep full access, and the first user is always admin. API tokens keep their own scopes.',
+    endpoints: [
+      { method: 'GET', path: '/panel/api/users/me', summary: 'The signed-in user and role.' },
+      {
+        method: 'GET',
+        path: '/panel/api/users/list',
+        summary: 'All panel users with roles (admin only).',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/users/add',
+        summary: 'Create a user (password at least 8 characters; role admin or operator).',
+        body: '{\n  "username": "support1",\n  "password": "…",\n  "role": "operator"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/users/update/:id',
+        summary: 'Change role and/or password (empty keeps it); signs the user out everywhere.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'User id.' }],
+        body: '{\n  "password": "",\n  "role": "admin"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/users/del/:id',
+        summary: 'Delete a user. The primary admin and the signed-in user cannot be deleted.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'User id.' }],
+      },
+    ],
+  },
+
+  {
     id: 'app-traffic',
     title: 'App traffic',
     description:

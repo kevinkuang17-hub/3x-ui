@@ -44,6 +44,7 @@ import { HttpUtil } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useAllSettings } from '@/api/queries/useAllSettings';
+import { useQuery } from '@tanstack/react-query';
 import { useCommandPalette } from '@/components/command-palette/useCommandPalette';
 import SponsorSlot from '@/components/sponsor/SponsorSlot';
 import './AppSidebar.css';
@@ -60,6 +61,9 @@ const SIDER_WIDTH = 220;
 const SIDEBAR_PINNED_KEY = 'sidebar-pinned';
 
 let hoveredAcrossRemounts = false;
+
+// Admin-only areas an operator account cannot use; the API refuses them anyway.
+const OPERATOR_HIDDEN = ['/settings', '/xray', '/outbound', '/routing', '/hosts', '/api-docs'];
 
 type IconName =
   | 'dashboard'
@@ -246,7 +250,24 @@ export default function AppSidebar() {
     [t],
   );
 
-  const navItems = useMemo(() => tabs.filter((tab) => tab.icon !== 'logout'), [tabs]);
+  const { data: me } = useQuery({
+    queryKey: ['users', 'me'],
+    queryFn: async () => {
+      const msg = await HttpUtil.get<{ role: string }>('/panel/api/users/me', undefined, {
+        silent: true,
+      });
+      return msg?.success ? (msg.obj ?? null) : null;
+    },
+    staleTime: 300_000,
+  });
+  const isOperator = me?.role === 'operator';
+  const navItems = useMemo(
+    () =>
+      tabs.filter(
+        (tab) => tab.icon !== 'logout' && !(isOperator && OPERATOR_HIDDEN.includes(tab.key)),
+      ),
+    [tabs, isOperator],
+  );
   const utilItems = useMemo(() => tabs.filter((tab) => tab.icon === 'logout'), [tabs]);
 
   const settingsChildren = useMemo<NonNullable<MenuProps['items']>>(() => {
@@ -281,6 +302,11 @@ export default function AppSidebar() {
         key: '/settings#cloudflare',
         icon: <GlobalOutlined />,
         label: t('pages.settings.cfSettings'),
+      },
+      {
+        key: '/settings#users',
+        icon: <TeamOutlined />,
+        label: t('pages.settings.users.title'),
       },
       {
         key: '/settings#subscription',

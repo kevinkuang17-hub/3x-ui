@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "Cuando un nodo informe una nueva IP pública, actualizar su registro DNS de inmediato.",
       "secretConfigured": "Configurado: escribe un valor nuevo para reemplazarlo",
       "xrayAutoRollback": "Modo conservador (reversión automática)",
-      "xrayAutoRollbackDesc": "Si tras un cambio en la configuración de Xray este no arranca durante cerca de un minuto, se restaura la última versión con la que funcionó y se reinicia, para no dejar a los usuarios sin servicio."
+      "xrayAutoRollbackDesc": "Si tras un cambio en la configuración de Xray este no arranca durante cerca de un minuto, se restaura la última versión con la que funcionó y se reinicia, para no dejar a los usuarios sin servicio.",
+      "users": {
+        "title": "Usuarios del panel",
+        "intro": "Accesos adicionales para el personal. Los operadores gestionan clientes, grupos y planes y ven el estado, pero no pueden cambiar ajustes, Xray, nodos ni otros usuarios. El administrador principal se gestiona en Seguridad. La verificación en dos pasos, si está activa, se aplica a todos los accesos.",
+        "add": "Añadir usuario",
+        "username": "Usuario",
+        "password": "Contraseña",
+        "passwordKeep": "Déjala vacía para mantener la contraseña actual",
+        "role": "Rol",
+        "role_admin": "Administrador",
+        "role_operator": "Operador",
+        "roleDesc_admin": "Acceso completo, como el administrador principal.",
+        "roleDesc_operator": "Solo clientes, grupos y planes; ajustes, Xray y nodos son de solo lectura u ocultos.",
+        "primary": "Principal",
+        "deleteConfirm": "¿Eliminar el usuario {name}?",
+        "saved": "Usuario guardado",
+        "deleted": "Usuario eliminado"
+      }
     },
     "xray": {
       "save": "Guardar configuración",

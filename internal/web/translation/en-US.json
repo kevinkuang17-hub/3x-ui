@@ -1959,7 +1959,24 @@
       "cfAutoDnsDesc": "When a node reports a new public IP, update its DNS record right away.",
       "secretConfigured": "Configured - enter a new value to replace",
       "xrayAutoRollback": "Conservative mode (auto-rollback)",
-      "xrayAutoRollbackDesc": "If Xray keeps failing for about a minute after an Xray config change, restore the last version it ran with and restart it, so users are not left without service."
+      "xrayAutoRollbackDesc": "If Xray keeps failing for about a minute after an Xray config change, restore the last version it ran with and restart it, so users are not left without service.",
+      "users": {
+        "title": "Panel users",
+        "intro": "Extra logins for staff. Operators can manage clients, groups and plans and view status, but cannot change settings, Xray, nodes or other users. The primary admin is managed under Security. Two-factor authentication, when enabled, applies to every login.",
+        "add": "Add user",
+        "username": "Username",
+        "password": "Password",
+        "passwordKeep": "Leave empty to keep the current password",
+        "role": "Role",
+        "role_admin": "Admin",
+        "role_operator": "Operator",
+        "roleDesc_admin": "Full access, like the primary admin.",
+        "roleDesc_operator": "Clients, groups and plans only; settings, Xray and nodes are read-only or hidden.",
+        "primary": "Primary",
+        "deleteConfirm": "Delete user {name}?",
+        "saved": "User saved",
+        "deleted": "User deleted"
+      }
     },
     "xray": {
       "save": "Save",

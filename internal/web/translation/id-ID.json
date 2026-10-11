@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "Saat node melaporkan IP publik baru, segera perbarui record DNS-nya.",
       "secretConfigured": "Sudah diatur — masukkan nilai baru untuk mengganti",
       "xrayAutoRollback": "Mode konservatif (rollback otomatis)",
-      "xrayAutoRollbackDesc": "Jika Xray terus gagal sekitar satu menit setelah konfigurasinya diubah, pulihkan versi terakhir yang berjalan lalu mulai ulang, agar pengguna tidak terputus."
+      "xrayAutoRollbackDesc": "Jika Xray terus gagal sekitar satu menit setelah konfigurasinya diubah, pulihkan versi terakhir yang berjalan lalu mulai ulang, agar pengguna tidak terputus.",
+      "users": {
+        "title": "Pengguna panel",
+        "intro": "Login tambahan untuk staf. Operator dapat mengelola klien, grup dan paket serta melihat status, tetapi tidak dapat mengubah pengaturan, Xray, node, atau pengguna lain. Admin utama dikelola di Keamanan. Autentikasi dua faktor, bila aktif, berlaku untuk semua login.",
+        "add": "Tambah pengguna",
+        "username": "Nama pengguna",
+        "password": "Kata sandi",
+        "passwordKeep": "Kosongkan untuk mempertahankan kata sandi saat ini",
+        "role": "Peran",
+        "role_admin": "Admin",
+        "role_operator": "Operator",
+        "roleDesc_admin": "Akses penuh, seperti admin utama.",
+        "roleDesc_operator": "Hanya klien, grup dan paket; pengaturan, Xray dan node hanya-baca atau disembunyikan.",
+        "primary": "Utama",
+        "deleteConfirm": "Hapus pengguna {name}?",
+        "saved": "Pengguna disimpan",
+        "deleted": "Pengguna dihapus"
+      }
     },
     "xray": {
       "save": "Simpan",

@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "Khi node báo cáo IP công khai mới, cập nhật bản ghi DNS của nó ngay lập tức.",
       "secretConfigured": "Đã thiết lập — nhập giá trị mới để thay thế",
       "xrayAutoRollback": "Chế độ thận trọng (tự hoàn tác)",
-      "xrayAutoRollbackDesc": "Nếu sau khi đổi cấu hình Xray mà Xray không chạy được khoảng một phút, tự khôi phục phiên bản chạy được gần nhất và khởi động lại để người dùng không bị mất kết nối."
+      "xrayAutoRollbackDesc": "Nếu sau khi đổi cấu hình Xray mà Xray không chạy được khoảng một phút, tự khôi phục phiên bản chạy được gần nhất và khởi động lại để người dùng không bị mất kết nối.",
+      "users": {
+        "title": "Tài khoản bảng điều khiển",
+        "intro": "Đăng nhập bổ sung cho nhân viên. Người vận hành quản lý khách, nhóm và gói, xem trạng thái nhưng không thể đổi cài đặt, Xray, nút hay tài khoản khác. Quản trị viên chính được quản lý trong mục Bảo mật. Xác thực hai bước, nếu bật, áp dụng cho mọi lần đăng nhập.",
+        "add": "Thêm tài khoản",
+        "username": "Tên đăng nhập",
+        "password": "Mật khẩu",
+        "passwordKeep": "Để trống để giữ mật khẩu hiện tại",
+        "role": "Vai trò",
+        "role_admin": "Quản trị viên",
+        "role_operator": "Người vận hành",
+        "roleDesc_admin": "Toàn quyền, như quản trị viên chính.",
+        "roleDesc_operator": "Chỉ khách, nhóm và gói; cài đặt, Xray và nút chỉ đọc hoặc bị ẩn.",
+        "primary": "Chính",
+        "deleteConfirm": "Xóa tài khoản {name}?",
+        "saved": "Đã lưu tài khoản",
+        "deleted": "Đã xóa tài khoản"
+      }
     },
     "xray": {
       "importRules": "Nhập quy tắc",

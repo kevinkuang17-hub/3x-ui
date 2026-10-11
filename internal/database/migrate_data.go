@@ -70,6 +70,7 @@ func migrationModels() []any {
 		&model.NodeCost{},
 		&model.IspProbe{},
 		&model.IspProbeResult{},
+		&model.PanelRole{},
 	}
 }
 

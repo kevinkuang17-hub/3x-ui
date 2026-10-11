@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "Bir düğüm yeni bir genel IP bildirdiğinde DNS kaydını hemen güncelle.",
       "secretConfigured": "Ayarlandı — değiştirmek için yeni değer girin",
       "xrayAutoRollback": "Temkinli mod (otomatik geri alma)",
-      "xrayAutoRollbackDesc": "Xray yapılandırması değiştikten sonra Xray yaklaşık bir dakika çalışmazsa, çalıştığı son sürüm geri yüklenir ve yeniden başlatılır; kullanıcılar bağlantısız kalmaz."
+      "xrayAutoRollbackDesc": "Xray yapılandırması değiştikten sonra Xray yaklaşık bir dakika çalışmazsa, çalıştığı son sürüm geri yüklenir ve yeniden başlatılır; kullanıcılar bağlantısız kalmaz.",
+      "users": {
+        "title": "Panel kullanıcıları",
+        "intro": "Çalışanlar için ek girişler. Operatörler istemcileri, grupları ve paketleri yönetip durumu görebilir; ancak ayarları, Xray'i, düğümleri veya diğer kullanıcıları değiştiremez. Ana yönetici Güvenlik bölümünden yönetilir. İki adımlı doğrulama açıksa tüm girişlere uygulanır.",
+        "add": "Kullanıcı ekle",
+        "username": "Kullanıcı adı",
+        "password": "Parola",
+        "passwordKeep": "Mevcut parolayı korumak için boş bırakın",
+        "role": "Rol",
+        "role_admin": "Yönetici",
+        "role_operator": "Operatör",
+        "roleDesc_admin": "Ana yönetici gibi tam erişim.",
+        "roleDesc_operator": "Yalnızca istemciler, gruplar ve paketler; ayarlar, Xray ve düğümler salt okunur veya gizli.",
+        "primary": "Ana",
+        "deleteConfirm": "{name} kullanıcısı silinsin mi?",
+        "saved": "Kullanıcı kaydedildi",
+        "deleted": "Kullanıcı silindi"
+      }
     },
     "xray": {
       "save": "Kaydet",

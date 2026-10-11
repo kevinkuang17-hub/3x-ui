@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "Quando um nó informar um novo IP público, atualizar seu registro DNS imediatamente.",
       "secretConfigured": "Configurado — digite um novo valor para substituir",
       "xrayAutoRollback": "Modo conservador (reversão automática)",
-      "xrayAutoRollbackDesc": "Se o Xray continuar falhando por cerca de um minuto após uma mudança na configuração, restaura a última versão com que ele funcionou e o reinicia, para os usuários não ficarem sem serviço."
+      "xrayAutoRollbackDesc": "Se o Xray continuar falhando por cerca de um minuto após uma mudança na configuração, restaura a última versão com que ele funcionou e o reinicia, para os usuários não ficarem sem serviço.",
+      "users": {
+        "title": "Usuários do painel",
+        "intro": "Acessos extras para a equipe. Operadores gerenciam clientes, grupos e planos e veem o status, mas não alteram configurações, Xray, nós ou outros usuários. O administrador principal é gerenciado em Segurança. A verificação em duas etapas, se ativa, vale para todos os acessos.",
+        "add": "Adicionar usuário",
+        "username": "Usuário",
+        "password": "Senha",
+        "passwordKeep": "Deixe vazio para manter a senha atual",
+        "role": "Papel",
+        "role_admin": "Administrador",
+        "role_operator": "Operador",
+        "roleDesc_admin": "Acesso total, como o administrador principal.",
+        "roleDesc_operator": "Somente clientes, grupos e planos; configurações, Xray e nós ficam só leitura ou ocultos.",
+        "primary": "Principal",
+        "deleteConfirm": "Excluir o usuário {name}?",
+        "saved": "Usuário salvo",
+        "deleted": "Usuário excluído"
+      }
     },
     "xray": {
       "importRules": "Importar regras",

@@ -1841,7 +1841,24 @@
       "cfAutoDnsDesc": "節點回報的公網 IP 變了，就馬上更新它的 DNS 記錄。",
       "secretConfigured": "已設定——輸入新值以取代",
       "xrayAutoRollback": "保守模式（自動回滾）",
-      "xrayAutoRollbackDesc": "Xray 設定變更後若 Xray 持續約 1 分鐘無法啟動，就自動恢復到上一個能正常執行的版本並重啟，避免用戶斷線。"
+      "xrayAutoRollbackDesc": "Xray 設定變更後若 Xray 持續約 1 分鐘無法啟動，就自動恢復到上一個能正常執行的版本並重啟，避免用戶斷線。",
+      "users": {
+        "title": "面板帳號",
+        "intro": "給員工開的額外登入帳號。操作員可以管理用戶、分組和方案、查看狀態，但不能改設定、Xray、節點和其他帳號。主管理員在「安全設定」中管理。若開啟兩步驗證，所有帳號登入都需要驗證碼。",
+        "add": "新增帳號",
+        "username": "使用者名稱",
+        "password": "密碼",
+        "passwordKeep": "留空表示不修改密碼",
+        "role": "角色",
+        "role_admin": "管理員",
+        "role_operator": "操作員",
+        "roleDesc_admin": "完整權限，和主管理員一樣。",
+        "roleDesc_operator": "只能管理用戶、分組和方案；設定、Xray、節點為唯讀或隱藏。",
+        "primary": "主管理員",
+        "deleteConfirm": "刪除帳號 {name}？",
+        "saved": "帳號已儲存",
+        "deleted": "帳號已刪除"
+      }
     },
     "xray": {
       "save": "儲存",

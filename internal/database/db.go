@@ -98,6 +98,7 @@ func allModels() []any {
 		&model.NodeCost{},
 		&model.IspProbe{},
 		&model.IspProbeResult{},
+		&model.PanelRole{},
 	}
 }
 

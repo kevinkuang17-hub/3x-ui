@@ -175,6 +175,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	api := g.Group("/panel/api")
 	api.Use(a.checkAPIAuth)
 	api.Use(a.enforceTokenScope)
+	api.Use(enforcePanelRole)
 	// Decode + verify the node config envelope (zstd + X-Config-Sha256) and
 	// advertise support, before CSRF/handlers read the body.
 	api.Use(middleware.ConfigEnvelopeMiddleware())
@@ -215,6 +216,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	a.xraySettingController = NewXraySettingController(api)
 	NewConfigHistoryController(api.Group("/xray/history"))
 	NewAppTrafficController(api.Group("/apps"))
+	NewPanelUserController(api.Group("/users"))
 
 	// Subscription balancers — client-side balancers for the JSON sub output
 	NewSubBalancerController(api)
