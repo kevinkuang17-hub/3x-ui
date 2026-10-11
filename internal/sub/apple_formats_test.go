@@ -7,11 +7,15 @@ import (
 
 func appleSampleProxies() []map[string]any {
 	return []map[string]any{
-		{"name": "HK A", "type": "vmess", "server": "hk.example.com", "port": 443, "uuid": "u-1", "tls": true, "servername": "hk.example.com",
-			"network": "ws", "ws-opts": map[string]any{"path": "/ws", "headers": map[string]any{"Host": "cdn.example.com"}}},
+		{
+			"name": "HK A", "type": "vmess", "server": "hk.example.com", "port": 443, "uuid": "u-1", "tls": true, "servername": "hk.example.com",
+			"network": "ws", "ws-opts": map[string]any{"path": "/ws", "headers": map[string]any{"Host": "cdn.example.com"}},
+		},
 		{"name": "US A", "type": "trojan", "server": "us.example.com", "port": 443, "password": "pw", "sni": "us.example.com"},
-		{"name": "JP A", "type": "vless", "server": "jp.example.com", "port": 443, "uuid": "u-2", "tls": true, "flow": "xtls-rprx-vision",
-			"servername": "www.apple.com", "reality-opts": map[string]any{"public-key": "PBK", "short-id": "ab12"}},
+		{
+			"name": "JP A", "type": "vless", "server": "jp.example.com", "port": 443, "uuid": "u-2", "tls": true, "flow": "xtls-rprx-vision",
+			"servername": "www.apple.com", "reality-opts": map[string]any{"public-key": "PBK", "short-id": "ab12"},
+		},
 		{"name": "SG A", "type": "ss", "server": "sg.example.com", "port": 8388, "cipher": "aes-128-gcm", "password": "sspw"},
 		{"name": "gRPC", "type": "vless", "server": "x.example.com", "port": 443, "uuid": "u-3", "network": "grpc"},
 		{"name": "WG", "type": "wireguard", "server": "w.example.com", "port": 51820},

@@ -135,7 +135,7 @@ func surgeLine(p map[string]any) string {
 	if !transportOK(p) || len(appleSub(p, "reality-opts")) > 0 {
 		return ""
 	}
-	parts := []string{}
+	var parts []string
 	switch appleStr(p, "type") {
 	case "ss":
 		if appleStr(p, "plugin") != "" {
