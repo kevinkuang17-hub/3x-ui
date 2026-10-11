@@ -136,12 +136,12 @@ func TestShadowrocketConfig(t *testing.T) {
 func TestRenderSingbox(t *testing.T) {
 	proxies := []map[string]any{
 		{
-			"name": "HK A", "type": "vless", "server": "hk.example.com", "port": uint64(443), "uuid": "u1", "flow": "xtls-rprx-vision",
+			"name": "HK A", "type": "vless", "server": "hk.example.com", "port": uint64(443), "uuid": "11111111-2222-4333-8444-000000000001", "flow": "xtls-rprx-vision",
 			"network": "tcp", "tls": true, "servername": "www.apple.com", "client-fingerprint": "chrome",
 			"reality-opts": map[string]any{"public-key": "Z84J2IelR9ch3k8VtlVhhs5ycBUlXA7wHBWcBrjqnAw", "short-id": "ab"},
 		},
 		{
-			"name": "US A", "type": "vmess", "server": "us.example.com", "port": 8443, "uuid": "u2", "cipher": "auto",
+			"name": "US A", "type": "vmess", "server": "us.example.com", "port": 8443, "uuid": "11111111-2222-4333-8444-000000000002", "cipher": "auto",
 			"network": "ws", "tls": true, "servername": "us.example.com", "ws-opts": map[string]any{"path": "/ws", "headers": map[string]any{"Host": "cdn.example.com"}},
 		},
 		{
@@ -154,10 +154,10 @@ func TestRenderSingbox(t *testing.T) {
 			"obfs": "salamander", "obfs-password": "ob", "ports": "20000-30000",
 		},
 		{
-			"name": "TW A", "type": "tuic", "server": "tw.example.com", "port": 443, "uuid": "u3", "password": "pw",
+			"name": "TW A", "type": "tuic", "server": "tw.example.com", "port": 443, "uuid": "11111111-2222-4333-8444-000000000003", "password": "pw",
 			"congestion-controller": "bbr", "alpn": []any{"h3"},
 		},
-		{"name": "XH", "type": "vless", "server": "x.example.com", "port": 443, "uuid": "u4", "network": "xhttp", "tls": true},
+		{"name": "XH", "type": "vless", "server": "x.example.com", "port": 443, "uuid": "11111111-2222-4333-8444-000000000004", "network": "xhttp", "tls": true},
 		{"name": "WG", "type": "wireguard", "server": "w.example.com", "port": 51820},
 		{"name": "auto", "type": "trojan", "server": "a.example.com", "port": 443, "password": "pw", "tls": true},
 	}
