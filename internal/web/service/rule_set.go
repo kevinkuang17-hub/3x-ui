@@ -384,6 +384,11 @@ func (s *RuleSetService) SaveTemplate(template string) error {
 	if remote {
 		template = canonical
 	}
+	current, _ := s.settingService.GetSubClashRules()
+	on, _ := s.settingService.GetSubClashEnableRouting()
+	if on && template == strings.TrimSpace(current) {
+		return nil
+	}
 	// Choosing no template only switches template routing off; the stored source is kept.
 	if template == "" {
 		return s.settingService.setString("subClashEnableRouting", "false")

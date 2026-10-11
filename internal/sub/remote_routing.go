@@ -649,28 +649,42 @@ func (r *remoteRoutingResolver) persistEntry(kind remoteRoutingKind, entry remot
 	}
 }
 
+// templatePreviewResolver fetches templates the admin is only looking at; it never persists, so
+// browsing cannot replace the saved copy of the template subscriptions use.
+var templatePreviewResolver = newRemoteRoutingResolver(newRemoteRoutingHTTPClient(), false)
+
+func cachedClashDocument(r *remoteRoutingResolver, source string) map[string]any {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if e, ok := r.entries[remoteRoutingKey{kind: remoteRoutingClash, source: source}]; ok {
+		return e.Clash
+	}
+	return nil
+}
+
 // ClashTemplateGroups lists the policy groups a Clash/Mihomo routing source defines, so the rule
-// library can offer them as destinations. A remote source is fetched once if it is not cached yet.
+// library can offer them as destinations. A remote source not cached yet is fetched once.
 func ClashTemplateGroups(raw string) ([]string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
 		return nil, nil
 	}
-	_, remote, err := common.ParseRemoteRoutingURL(raw)
+	source, remote, err := common.ParseRemoteRoutingURL(raw)
 	if err != nil {
 		return nil, err
 	}
 	var doc map[string]any
 	if remote {
-		refreshErr := routingSourceResolver.refreshSource(remoteRoutingClash, raw)
-		_, cached, _, resolveErr := resolveClashRoutingSource(raw)
-		if cached == nil {
-			if refreshErr != nil {
+		doc = cachedClashDocument(routingSourceResolver, source)
+		if doc == nil {
+			refreshErr := templatePreviewResolver.refreshSource(remoteRoutingClash, raw)
+			if doc = cachedClashDocument(templatePreviewResolver, source); doc == nil {
+				if refreshErr == nil {
+					refreshErr = errRemoteRoutingUnavailable
+				}
 				return nil, refreshErr
 			}
-			return nil, resolveErr
 		}
-		doc = cached
 	} else if yaml.Unmarshal([]byte(raw), &doc) != nil {
 		return nil, nil
 	}

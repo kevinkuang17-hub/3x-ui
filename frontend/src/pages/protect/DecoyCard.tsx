@@ -42,6 +42,7 @@ export default function DecoyCard() {
   const { t } = useTranslation();
   const query = useQuery({
     queryKey: decoyKey(),
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const msg = await HttpUtil.get<DecoySettings>(`${API}/decoy`, undefined, { silent: true });
       if (!msg?.success || !msg.obj) throw new Error(msg?.msg || 'request failed');
@@ -66,6 +67,13 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
     email: initial.email,
   });
   const [preview, setPreview] = useState<string | null>(null);
+  // Turning off or switching to the uploaded site keeps the deployed details, not half-typed ones.
+  const saved: SiteDraft = {
+    mode: initial.mode,
+    title: initial.title,
+    tagline: initial.tagline,
+    email: initial.email,
+  };
   const [uploading, setUploading] = useState(false);
   const refresh = () => queryClient.invalidateQueries({ queryKey: decoyKey() });
 
@@ -138,7 +146,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
                 danger
                 icon={<PoweroffOutlined />}
                 loading={deploy.isPending && deploy.variables?.mode === 'off'}
-                onClick={() => deploy.mutate({ ...draft, mode: 'off' })}
+                onClick={() => deploy.mutate({ ...saved, mode: 'off' })}
               >
                 {t('pages.protect.decoyTurnOff')}
               </Button>
@@ -261,7 +269,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
             disabled={!initial.customSite}
             icon={<RocketOutlined />}
             loading={deploy.isPending && deploy.variables?.mode === 'custom'}
-            onClick={() => deploy.mutate({ ...draft, mode: 'custom' })}
+            onClick={() => deploy.mutate({ ...saved, mode: 'custom' })}
           >
             {t('pages.protect.decoyDeployCustom')}
           </Button>

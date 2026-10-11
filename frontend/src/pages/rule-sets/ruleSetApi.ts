@@ -59,12 +59,10 @@ export async function fetchGlobalRouting(): Promise<GlobalRouting> {
 // Policy groups a template defines; the first one is the template's main node choice.
 export async function fetchTemplateGroups(template: string): Promise<string[]> {
   if (!template.trim()) return [];
-  const msg = await HttpUtil.get<string[]>(
+  const msg = await HttpUtil.post<string[]>(
     '/panel/api/ruleSets/groups',
     { template },
-    {
-      silent: true,
-    },
+    { ...JSON_HEADERS, silent: true },
   );
   if (!msg?.success) throw new Error(msg?.msg || 'Failed to read the template');
   return msg.obj ?? [];

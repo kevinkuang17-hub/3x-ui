@@ -135,6 +135,7 @@ export default function RuleSetsPage() {
   const routingQuery = useQuery({
     queryKey: keys.ruleSets.routing(),
     queryFn: fetchGlobalRouting,
+    refetchOnWindowFocus: false,
   });
   const sets = setsQuery.data ?? [];
   const [editing, setEditing] = useState<RuleSet | null>(null);

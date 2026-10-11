@@ -250,17 +250,18 @@ func prependLibraryRules(config map[string]any, choice service.RoutingChoice) {
 	added := make([]any, 0, len(rules))
 	skipped := 0
 	for _, r := range rules {
-		if clashRuleTarget(r) == "PROXY" && primary != "PROXY" {
+		target := clashRuleTarget(r)
+		if target == "PROXY" && primary != "PROXY" {
 			r = retargetClashRule(r, primary)
-		}
-		if _, ok := known[clashRuleTarget(r)]; !ok {
+		} else if _, ok := known[target]; !ok {
+			// A group the current template lacks (template switched or removed): still proxy it.
+			r = retargetClashRule(r, primary)
 			skipped++
-			continue
 		}
 		added = append(added, r)
 	}
 	if skipped > 0 {
-		logger.Warningf("clash routing: skipped %d custom rule(s) naming a policy group the profile does not define", skipped)
+		logger.Warningf("clash routing: %d rule(s) named a policy group the profile does not define; sent to %s", skipped, primary)
 	}
 	existing, _ := asAnySlice(config["rules"])
 	config["rules"] = append(added, existing...)

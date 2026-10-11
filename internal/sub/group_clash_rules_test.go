@@ -113,8 +113,8 @@ func TestGetClash_RuleLibraryGoesAheadOfTemplate(t *testing.T) {
 	if bank < 0 || ship < bank || tmpl < ship {
 		t.Fatalf("want custom rules, then picked sets, then template rules:\n%s", out)
 	}
-	if strings.Contains(out, "lost.example") {
-		t.Fatalf("a rule naming an undefined policy group would break the profile and must be dropped:\n%s", out)
+	if !strings.Contains(out, "DOMAIN-SUFFIX,lost.example,PROXY") || strings.Contains(out, "Missing Group") {
+		t.Fatalf("a rule naming an undefined policy group must fall back to the proxy group, not break the profile:\n%s", out)
 	}
 
 	own, _, err := clash.GetClash("sub-own", "sub.example.com")
@@ -145,8 +145,8 @@ func TestGetClash_LibraryProxyFollowsTemplateMainGroup(t *testing.T) {
 	if !strings.Contains(out, "DOMAIN-SUFFIX,ships.example,🚀 手动选择") {
 		t.Fatalf("\"proxy\" must mean the template's main group, or the rule bypasses the user's node choice:\n%s", out)
 	}
-	if !strings.Contains(out, "DOMAIN-SUFFIX,bank.example,🎯 全球直连") || strings.Contains(out, "lost.example") {
-		t.Fatalf("template groups are valid destinations; groups it lacks are dropped:\n%s", out)
+	if !strings.Contains(out, "DOMAIN-SUFFIX,bank.example,🎯 全球直连") || !strings.Contains(out, "DOMAIN-SUFFIX,lost.example,🚀 手动选择") {
+		t.Fatalf("template groups are valid destinations; groups it lacks fall back to its main group:\n%s", out)
 	}
 	groups, err := ClashTemplateGroups(template)
 	if err != nil || strings.Join(groups, "|") != "🚀 手动选择|🎯 全球直连" {
