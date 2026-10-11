@@ -1810,7 +1810,9 @@
       "cfZoneDesc": "Cloudflare で管理しているドメイン（例：example.com）。ノードのレコードは hk-a.example.com のようになります。",
       "cfAutoDns": "IP の変化に自動追従",
       "cfAutoDnsDesc": "ノードが新しいパブリック IP を報告したら、すぐに DNS レコードを更新します。",
-      "secretConfigured": "設定済み — 置き換えるには新しい値を入力"
+      "secretConfigured": "設定済み — 置き換えるには新しい値を入力",
+      "xrayAutoRollback": "保守モード（自動ロールバック）",
+      "xrayAutoRollbackDesc": "Xray 設定の変更後に Xray が約 1 分間起動しない場合、最後に正常動作したバージョンに戻して再起動し、利用者が切断されないようにします。"
     },
     "xray": {
       "importRules": "ルールをインポート",
@@ -2317,7 +2319,20 @@
         "poolSize": "プールサイズ"
       },
       "defaultOutbound": "デフォルトアウトバウンド",
-      "defaultOutboundDesc": "ルーティング規則に一致しないトラフィックはこのアウトバウンドを使います（一覧の先頭）。"
+      "defaultOutboundDesc": "ルーティング規則に一致しないトラフィックはこのアウトバウンドを使います（一覧の先頭）。",
+      "history": {
+        "title": "バージョン履歴",
+        "intro": "Xray 設定の変更はすべて保存されます（直近 50 件）。「動作済み」は Xray がそのバージョンで動いたことを示します。復元すると適用して Xray を再起動します。",
+        "time": "保存日時",
+        "size": "サイズ",
+        "good": "動作済み",
+        "view": "表示",
+        "restore": "復元",
+        "restoreConfirm": "このバージョンに戻して Xray を再起動しますか？",
+        "versionTitle": "バージョン {id}",
+        "restored": "バージョンを復元しました",
+        "restoreFailed": "復元に失敗しました"
+      }
     },
     "hosts": {
       "addHost": "ホストを追加",

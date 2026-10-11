@@ -2620,6 +2620,33 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'xray-history',
+    title: 'Xray config history',
+    description:
+      'The last 50 versions of the Xray template config, captured automatically whatever saved them. good marks versions Xray ran with for 90 s. With xrayAutoRollback on (conservative mode), a change that keeps Xray down for about a minute is rolled back to the last good version.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/xray/history/list',
+        summary: 'Versions, newest first, without their content.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/xray/history/get/:id',
+        summary: 'One version including its full template JSON.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Version id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/xray/history/restore/:id',
+        summary:
+          'Save that version as the current template (validated like a normal save) and restart Xray when it is running.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Version id.' }],
+      },
+    ],
+  },
+
+  {
     id: 'node-dns',
     title: 'Node domains & one-click join',
     description:

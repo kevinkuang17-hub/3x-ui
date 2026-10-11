@@ -185,7 +185,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "webDomain": "",
     "webKeyFile": "",
     "webListen": "",
-    "webPort": 1
+    "webPort": 1,
+    "xrayAutoRollback": false
   },
   "AllSettingView": {
     "cfApiToken": "",
@@ -382,7 +383,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "webDomain": "",
     "webKeyFile": "",
     "webListen": "",
-    "webPort": 1
+    "webPort": 1,
+    "xrayAutoRollback": false
   },
   "AmneziaWGLogs": {
     "events": [

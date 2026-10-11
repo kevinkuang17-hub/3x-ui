@@ -88,6 +88,7 @@ export const AllSettingSchema = z
     cfApiToken: z.string().max(256).optional(),
     cfZone: z.string().max(253).optional(),
     cfAutoDns: z.boolean().optional(),
+    xrayAutoRollback: z.boolean().optional(),
     subJsonMux: z.string().optional(),
     subJsonRules: z.string().optional(),
     subJsonRoutingRules: z.string().optional(),

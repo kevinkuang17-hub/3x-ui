@@ -82,6 +82,7 @@ export class AllSetting {
   cfApiToken = '';
   cfZone = '';
   cfAutoDns = false;
+  xrayAutoRollback = false;
   subJsonMux = '';
   subJsonRules = '';
   subJsonRoutingRules = '';

@@ -314,6 +314,7 @@ const (
 	cadenceRemoteRouting = "@every 5m"
 	cadenceLineHealth    = "@every 1m"
 	cadenceCrm           = "@every 30s"
+	cadenceConfigHistory = "@every 20s"
 	cadenceXrayLogPrune  = "@every 10m"
 	cadenceCheckHash     = "@every 2m"
 	// cpu.Percent samples over a full minute (blocking), so a finer cadence just
@@ -375,6 +376,9 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 
 	// CRM lifecycle events + webhook outbox; idle unless the CRM webhook is enabled.
 	_, _ = s.cron.AddJob(cadenceCrm, job.NewCrmJob(crm.NewService()))
+
+	// Xray template version history; conservative mode rolls back a breaking edit.
+	_, _ = s.cron.AddJob(cadenceConfigHistory, job.NewConfigHistoryJob())
 
 	// Warm permanent routing URLs immediately and refresh them outside the
 	// latency-sensitive subscription request path.

@@ -12,6 +12,8 @@ const (
 
 	// Xray core (local)
 	EventXrayCrash EventType = "xray.crash"
+	// Conservative mode restored the last good template after a breaking edit
+	EventXrayRollback EventType = "xray.rollback"
 
 	// Node health (heartbeat-driven)
 	EventNodeDown EventType = "node.down"

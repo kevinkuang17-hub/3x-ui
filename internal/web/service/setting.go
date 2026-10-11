@@ -194,6 +194,7 @@ var defaultValueMap = map[string]string{
 	"cfApiToken":                  "",
 	"cfZone":                      "",
 	"cfAutoDns":                   "false",
+	"xrayAutoRollback":            "false",
 	"subJsonMux":                  "",
 	"subJsonRules":                "",
 	"subJsonRoutingRules":         "",
@@ -1251,6 +1252,10 @@ func (s *SettingService) GetSubClashEnableRouting() (bool, error) {
 
 func (s *SettingService) GetSubLineHealth() (bool, error) {
 	return s.getBool("subLineHealth")
+}
+
+func (s *SettingService) GetXrayAutoRollback() (bool, error) {
+	return s.getBool("xrayAutoRollback")
 }
 
 func (s *SettingService) GetCfApiToken() (string, error) {

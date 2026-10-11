@@ -1810,7 +1810,9 @@
       "cfZoneDesc": "Cloudflare'de yönetilen alan adı, örn. example.com. Düğüm kayıtları hk-a.example.com olur.",
       "cfAutoDns": "IP değişikliklerini otomatik takip et",
       "cfAutoDnsDesc": "Bir düğüm yeni bir genel IP bildirdiğinde DNS kaydını hemen güncelle.",
-      "secretConfigured": "Ayarlandı — değiştirmek için yeni değer girin"
+      "secretConfigured": "Ayarlandı — değiştirmek için yeni değer girin",
+      "xrayAutoRollback": "Temkinli mod (otomatik geri alma)",
+      "xrayAutoRollbackDesc": "Xray yapılandırması değiştikten sonra Xray yaklaşık bir dakika çalışmazsa, çalıştığı son sürüm geri yüklenir ve yeniden başlatılır; kullanıcılar bağlantısız kalmaz."
     },
     "xray": {
       "save": "Kaydet",
@@ -2317,7 +2319,20 @@
         "poolSize": "Havuz Boyutu"
       },
       "defaultOutbound": "Varsayılan giden",
-      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden)."
+      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden).",
+      "history": {
+        "title": "Sürüm geçmişi",
+        "intro": "Xray yapılandırmasındaki her değişiklik saklanır (son 50). \"Çalıştı\" Xray'in o sürümle çalıştığını gösterir; geri yükleme sürümü uygular ve Xray'i yeniden başlatır.",
+        "time": "Kaydedilme",
+        "size": "Boyut",
+        "good": "Çalıştı",
+        "view": "Görüntüle",
+        "restore": "Geri yükle",
+        "restoreConfirm": "Bu sürüm geri yüklensin ve Xray yeniden başlatılsın mı?",
+        "versionTitle": "Sürüm {id}",
+        "restored": "Sürüm geri yüklendi",
+        "restoreFailed": "Geri yükleme başarısız"
+      }
     },
     "hosts": {
       "addHost": "Host Ekle",

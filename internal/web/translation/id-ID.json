@@ -1810,7 +1810,9 @@
       "cfZoneDesc": "Domain yang dikelola di Cloudflare, mis. example.com. Record node menjadi hk-a.example.com.",
       "cfAutoDns": "Ikuti perubahan IP secara otomatis",
       "cfAutoDnsDesc": "Saat node melaporkan IP publik baru, segera perbarui record DNS-nya.",
-      "secretConfigured": "Sudah diatur — masukkan nilai baru untuk mengganti"
+      "secretConfigured": "Sudah diatur — masukkan nilai baru untuk mengganti",
+      "xrayAutoRollback": "Mode konservatif (rollback otomatis)",
+      "xrayAutoRollbackDesc": "Jika Xray terus gagal sekitar satu menit setelah konfigurasinya diubah, pulihkan versi terakhir yang berjalan lalu mulai ulang, agar pengguna tidak terputus."
     },
     "xray": {
       "save": "Simpan",
@@ -2317,7 +2319,20 @@
         "poolSize": "Ukuran Kolam"
       },
       "defaultOutbound": "Outbound default",
-      "defaultOutboundDesc": "Lalu lintas tanpa aturan routing memakai outbound ini (yang pertama dalam daftar)."
+      "defaultOutboundDesc": "Lalu lintas tanpa aturan routing memakai outbound ini (yang pertama dalam daftar).",
+      "history": {
+        "title": "Riwayat versi",
+        "intro": "Setiap perubahan konfigurasi Xray disimpan (50 terakhir). \"Berjalan\" menandai versi yang pernah dipakai Xray; memulihkan akan menerapkannya dan memulai ulang Xray.",
+        "time": "Disimpan",
+        "size": "Ukuran",
+        "good": "Berjalan",
+        "view": "Lihat",
+        "restore": "Pulihkan",
+        "restoreConfirm": "Pulihkan versi ini dan mulai ulang Xray?",
+        "versionTitle": "Versi {id}",
+        "restored": "Versi dipulihkan",
+        "restoreFailed": "Gagal memulihkan"
+      }
     },
     "hosts": {
       "addHost": "Tambah Host",

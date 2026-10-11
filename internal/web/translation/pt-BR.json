@@ -1810,7 +1810,9 @@
       "cfZoneDesc": "O domínio gerenciado no Cloudflare, ex.: example.com. Os registros dos nós ficam como hk-a.example.com.",
       "cfAutoDns": "Acompanhar mudanças de IP automaticamente",
       "cfAutoDnsDesc": "Quando um nó informar um novo IP público, atualizar seu registro DNS imediatamente.",
-      "secretConfigured": "Configurado — digite um novo valor para substituir"
+      "secretConfigured": "Configurado — digite um novo valor para substituir",
+      "xrayAutoRollback": "Modo conservador (reversão automática)",
+      "xrayAutoRollbackDesc": "Se o Xray continuar falhando por cerca de um minuto após uma mudança na configuração, restaura a última versão com que ele funcionou e o reinicia, para os usuários não ficarem sem serviço."
     },
     "xray": {
       "importRules": "Importar regras",
@@ -2317,7 +2319,20 @@
         "poolSize": "Tamanho do Pool"
       },
       "defaultOutbound": "Saída padrão",
-      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista)."
+      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista).",
+      "history": {
+        "title": "Histórico de versões",
+        "intro": "Toda mudança na configuração do Xray é guardada (últimas 50). \"Funcionou\" marca versões com que o Xray rodou; restaurar aplica a versão e reinicia o Xray.",
+        "time": "Salva em",
+        "size": "Tamanho",
+        "good": "Funcionou",
+        "view": "Ver",
+        "restore": "Restaurar",
+        "restoreConfirm": "Restaurar esta versão e reiniciar o Xray?",
+        "versionTitle": "Versão {id}",
+        "restored": "Versão restaurada",
+        "restoreFailed": "Falha ao restaurar"
+      }
     },
     "hosts": {
       "addHost": "Adicionar Host",

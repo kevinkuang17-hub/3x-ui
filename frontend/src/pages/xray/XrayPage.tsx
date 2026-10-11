@@ -37,6 +37,7 @@ import {
 } from './balancers/balancer-loopback';
 import { DnsTab } from './dns';
 import { WarpModal, NordModal, PiaModal } from './overrides';
+import ConfigHistoryModal from './ConfigHistoryModal';
 import './XrayPage.css';
 
 const SECTION_SLUGS = ['basic', 'routing', 'outbound', 'balancer', 'dns', 'advanced'];
@@ -83,6 +84,7 @@ export default function XrayPage() {
   const [warpOpen, setWarpOpen] = useState(false);
   const [nordOpen, setNordOpen] = useState(false);
   const [piaOpen, setPiaOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [advSettings, setAdvSettings] = useState<AdvKey>('xraySetting');
   const location = useLocation();
   const navigate = useNavigate();
@@ -347,6 +349,9 @@ export default function XrayPage() {
                             <Button type="primary" disabled={saveDisabled} onClick={onSaveAll}>
                               {t('pages.xray.save')}
                             </Button>
+                            <Button onClick={() => setHistoryOpen(true)}>
+                              {t('pages.xray.history.title')}
+                            </Button>
                           </Space>
                         </Col>
                         <Col xs={24} sm={10} className="header-info">
@@ -366,6 +371,13 @@ export default function XrayPage() {
           </Layout.Content>
         </Layout>
 
+        {historyOpen && (
+          <ConfigHistoryModal
+            open={historyOpen}
+            onClose={() => setHistoryOpen(false)}
+            onRestored={() => fetchAll()}
+          />
+        )}
         <WarpModal
           open={warpOpen}
           templateSettings={templateSettings}

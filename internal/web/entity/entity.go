@@ -129,6 +129,7 @@ type AllSetting struct {
 	CfApiToken                  string `json:"cfApiToken" form:"cfApiToken"`
 	CfZone                      string `json:"cfZone" form:"cfZone"`
 	CfAutoDns                   bool   `json:"cfAutoDns" form:"cfAutoDns"`
+	XrayAutoRollback            bool   `json:"xrayAutoRollback" form:"xrayAutoRollback"`
 	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`
 	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
 	SubJsonRoutingRules         string `json:"subJsonRoutingRules" form:"subJsonRoutingRules"`

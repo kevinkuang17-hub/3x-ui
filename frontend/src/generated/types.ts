@@ -194,6 +194,7 @@ export interface AllSetting {
   webKeyFile: string;
   webListen: string;
   webPort: number;
+  xrayAutoRollback: boolean;
 }
 
 export interface AllSettingView {
@@ -392,6 +393,7 @@ export interface AllSettingView {
   webKeyFile: string;
   webListen: string;
   webPort: number;
+  xrayAutoRollback: boolean;
 }
 
 export interface AmneziaWGLogs {

@@ -1928,7 +1928,9 @@
       "cfZoneDesc": "The domain managed in Cloudflare, e.g. example.com. Node records become hk-a.example.com.",
       "cfAutoDns": "Follow IP changes automatically",
       "cfAutoDnsDesc": "When a node reports a new public IP, update its DNS record right away.",
-      "secretConfigured": "Configured - enter a new value to replace"
+      "secretConfigured": "Configured - enter a new value to replace",
+      "xrayAutoRollback": "Conservative mode (auto-rollback)",
+      "xrayAutoRollbackDesc": "If Xray keeps failing for about a minute after an Xray config change, restore the last version it ran with and restart it, so users are not left without service."
     },
     "xray": {
       "save": "Save",
@@ -2435,7 +2437,20 @@
         "poolSize": "Pool Size"
       },
       "defaultOutbound": "Default Outbound",
-      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list)."
+      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list).",
+      "history": {
+        "title": "Version history",
+        "intro": "Every change to the Xray config is kept (last 50). \"Worked\" marks versions Xray ran with; restoring one applies it and restarts Xray.",
+        "time": "Saved at",
+        "size": "Size",
+        "good": "Worked",
+        "view": "View",
+        "restore": "Restore",
+        "restoreConfirm": "Restore this version and restart Xray?",
+        "versionTitle": "Version {id}",
+        "restored": "Version restored",
+        "restoreFailed": "Restore failed"
+      }
     },
     "sponsors": {
       "title": "Sponsors",

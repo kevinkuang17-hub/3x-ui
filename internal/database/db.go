@@ -94,6 +94,7 @@ func allModels() []any {
 		&model.Plan{},
 		&model.NodeDns{},
 		&model.NodeJoinTicket{},
+		&model.ConfigSnapshot{},
 	}
 }
 

@@ -336,6 +336,17 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
                 />
               </SettingListItem>
 
+              <SettingListItem
+                paddings="small"
+                title={t('pages.settings.xrayAutoRollback')}
+                description={t('pages.settings.xrayAutoRollbackDesc')}
+              >
+                <Switch
+                  checked={allSetting.xrayAutoRollback}
+                  onChange={(v) => updateSetting({ xrayAutoRollback: v })}
+                />
+              </SettingListItem>
+
               <SettingListItem paddings="small" title={t('pages.settings.language')}>
                 <Select
                   value={lang}

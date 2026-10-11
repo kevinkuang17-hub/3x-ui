@@ -619,6 +619,9 @@
             "maximum": 65535,
             "minimum": 1,
             "type": "integer"
+          },
+          "xrayAutoRollback": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -806,7 +809,8 @@
           "webDomain",
           "webKeyFile",
           "webListen",
-          "webPort"
+          "webPort",
+          "xrayAutoRollback"
         ],
         "type": "object"
       },
@@ -1433,6 +1437,9 @@
             "maximum": 65535,
             "minimum": 1,
             "type": "integer"
+          },
+          "xrayAutoRollback": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -1630,7 +1637,8 @@
           "webDomain",
           "webKeyFile",
           "webListen",
-          "webPort"
+          "webPort",
+          "xrayAutoRollback"
         ],
         "type": "object"
       },
@@ -4931,6 +4939,10 @@
     {
       "name": "Xray Settings",
       "description": "Xray configuration template, outbound management, Warp/Nord/PIA integration, and config testing. All endpoints under /panel/api/xray."
+    },
+    {
+      "name": "Xray config history",
+      "description": "The last 50 versions of the Xray template config, captured automatically whatever saved them. good marks versions Xray ran with for 90 s. With xrayAutoRollback on (conservative mode), a change that keeps Xray down for about a minute is rolled back to the last good version."
     },
     {
       "name": "Node domains & one-click join",
@@ -15011,6 +15023,118 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/history/list": {
+      "get": {
+        "tags": [
+          "Xray config history"
+        ],
+        "summary": "Versions, newest first, without their content.",
+        "operationId": "get_panel_api_xray_history_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/history/get/{id}": {
+      "get": {
+        "tags": [
+          "Xray config history"
+        ],
+        "summary": "One version including its full template JSON.",
+        "operationId": "get_panel_api_xray_history_get_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Version id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/xray/history/restore/{id}": {
+      "post": {
+        "tags": [
+          "Xray config history"
+        ],
+        "summary": "Save that version as the current template (validated like a normal save) and restart Xray when it is running.",
+        "operationId": "post_panel_api_xray_history_restore_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Version id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",

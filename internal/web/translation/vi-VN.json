@@ -1810,7 +1810,9 @@
       "cfZoneDesc": "Tên miền được quản lý trên Cloudflare, ví dụ example.com. Bản ghi của node sẽ là hk-a.example.com.",
       "cfAutoDns": "Tự động theo dõi thay đổi IP",
       "cfAutoDnsDesc": "Khi node báo cáo IP công khai mới, cập nhật bản ghi DNS của nó ngay lập tức.",
-      "secretConfigured": "Đã thiết lập — nhập giá trị mới để thay thế"
+      "secretConfigured": "Đã thiết lập — nhập giá trị mới để thay thế",
+      "xrayAutoRollback": "Chế độ thận trọng (tự hoàn tác)",
+      "xrayAutoRollbackDesc": "Nếu sau khi đổi cấu hình Xray mà Xray không chạy được khoảng một phút, tự khôi phục phiên bản chạy được gần nhất và khởi động lại để người dùng không bị mất kết nối."
     },
     "xray": {
       "importRules": "Nhập quy tắc",
@@ -2317,7 +2319,20 @@
         "poolSize": "Kích thước bể bơi"
       },
       "defaultOutbound": "Outbound mặc định",
-      "defaultOutboundDesc": "Lưu lượng không khớp quy tắc định tuyến dùng outbound này (mục đầu danh sách)."
+      "defaultOutboundDesc": "Lưu lượng không khớp quy tắc định tuyến dùng outbound này (mục đầu danh sách).",
+      "history": {
+        "title": "Lịch sử phiên bản",
+        "intro": "Mọi thay đổi cấu hình Xray đều được lưu (50 bản gần nhất). \"Đã chạy\" là phiên bản Xray từng chạy được; khôi phục sẽ áp dụng và khởi động lại Xray.",
+        "time": "Thời gian lưu",
+        "size": "Kích thước",
+        "good": "Đã chạy",
+        "view": "Xem",
+        "restore": "Khôi phục",
+        "restoreConfirm": "Khôi phục phiên bản này và khởi động lại Xray?",
+        "versionTitle": "Phiên bản {id}",
+        "restored": "Đã khôi phục phiên bản",
+        "restoreFailed": "Khôi phục thất bại"
+      }
     },
     "hosts": {
       "addHost": "Thêm Host",

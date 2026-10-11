@@ -1810,7 +1810,9 @@
       "cfZoneDesc": "Cloudflare 託管的網域，如 example.com，節點記錄會是 hk-a.example.com。",
       "cfAutoDns": "自動跟隨 IP 變化",
       "cfAutoDnsDesc": "節點回報的公網 IP 變了，就馬上更新它的 DNS 記錄。",
-      "secretConfigured": "已設定——輸入新值以取代"
+      "secretConfigured": "已設定——輸入新值以取代",
+      "xrayAutoRollback": "保守模式（自動回滾）",
+      "xrayAutoRollbackDesc": "Xray 設定變更後若 Xray 持續約 1 分鐘無法啟動，就自動恢復到上一個能正常執行的版本並重啟，避免用戶斷線。"
     },
     "xray": {
       "save": "儲存",
@@ -2317,7 +2319,20 @@
         "poolSize": "池大小"
       },
       "defaultOutbound": "預設出站",
-      "defaultOutboundDesc": "未符合任何路由規則的流量走此出站（清單中的第一個出站）。"
+      "defaultOutboundDesc": "未符合任何路由規則的流量走此出站（清單中的第一個出站）。",
+      "history": {
+        "title": "歷史版本",
+        "intro": "每次修改 Xray 設定都會保留一份（最近 50 個）。「可用」表示 Xray 用這個版本正常執行過；恢復後會立即生效並重啟 Xray。",
+        "time": "儲存時間",
+        "size": "大小",
+        "good": "可用",
+        "view": "檢視",
+        "restore": "恢復",
+        "restoreConfirm": "恢復到這個版本並重啟 Xray？",
+        "versionTitle": "版本 {id}",
+        "restored": "已恢復到該版本",
+        "restoreFailed": "恢復失敗"
+      }
     },
     "hosts": {
       "addHost": "新增 Host",
