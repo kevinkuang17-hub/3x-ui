@@ -370,7 +370,7 @@ export default function SubscriptionGeneralTab({
                   <>
                     {t('pages.settings.subThemeDirDesc')}{' '}
                     <a
-                      href="https://github.com/MHSanaei/3x-ui/blob/main/docs/custom-subscription-templates.md"
+                      href="https://github.com/kevinkuang17-hub/3x-ui/blob/main/docs/custom-subscription-templates.md"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

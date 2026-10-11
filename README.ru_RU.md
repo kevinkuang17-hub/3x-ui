@@ -74,19 +74,19 @@
 ## Быстрый старт
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main/install.sh)
 ```
 
-Чтобы установить конкретную версию, добавьте её тег (например, `v3.7.0`):
+Чтобы установить конкретную версию, добавьте её тег (например, `v3.9.0-k3`):
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.7.0
+bash <(curl -Ls https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main/install.sh) v3.9.0-k3
 ```
 
 Чтобы установить скользящую **dev**-сборку (новейший предварительный релиз по каждому коммиту из ветки `main`, а не стабильный релиз), передайте `dev-latest`:
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
+bash <(curl -Ls https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main/install.sh) dev-latest
 ```
 
 Во время установки генерируются случайные имя пользователя, пароль и путь доступа. После установки выполните `x-ui`, чтобы открыть меню управления, где можно запускать/останавливать сервис, просматривать или сбрасывать учётные данные для входа, управлять SSL-сертификатами и многое другое.
