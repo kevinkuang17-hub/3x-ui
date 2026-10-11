@@ -10,7 +10,6 @@ import {
   Input,
   Layout,
   Modal,
-  Select,
   Space,
   Switch,
   Table,
@@ -26,7 +25,6 @@ import {
   SaveOutlined,
   ThunderboltOutlined,
   UnlockOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -36,6 +34,7 @@ import { HttpUtil } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import AppSidebar from '@/layouts/AppSidebar';
 import { keys } from '@/api/queryKeys';
+import DecoyCard from './DecoyCard';
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
 const API = '/panel/api/protect';
@@ -49,14 +48,6 @@ interface SpeedupStatus {
   rmemMax: string;
   applied: boolean;
   bbrOn: boolean;
-}
-
-interface DecoySettings {
-  mode: string;
-  title: string;
-  modes: string[];
-  customSite: boolean;
-  secretPath: boolean;
 }
 
 interface CfInfo {
@@ -96,124 +87,6 @@ async function getObj<T>(path: string): Promise<T> {
 
 function isIP(host: string): boolean {
   return /^[\d.]+$/.test(host) || host.includes(':');
-}
-
-function DecoyCard() {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const query = useQuery({
-    queryKey: [...keys.protect.root(), 'decoy'],
-    queryFn: () => getObj<DecoySettings>('/decoy'),
-  });
-  return (
-    <Card size="small" title={t('pages.protect.decoyTitle')}>
-      {query.data && (
-        <DecoyForm
-          key={query.dataUpdatedAt}
-          initial={query.data}
-          onChanged={() => queryClient.invalidateQueries({ queryKey: keys.protect.root() })}
-        />
-      )}
-    </Card>
-  );
-}
-
-function DecoyForm({ initial, onChanged }: { initial: DecoySettings; onChanged: () => void }) {
-  const { t } = useTranslation();
-  const [mode, setMode] = useState(initial.mode);
-  const [title, setTitle] = useState(initial.title);
-  const [uploading, setUploading] = useState(false);
-  const save = useMutation({
-    mutationFn: () => HttpUtil.post(`${API}/decoy`, { mode, title }, JSON_HEADERS),
-    onSuccess: (msg) => {
-      if (msg?.success) onChanged();
-    },
-  });
-
-  function upload() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.zip';
-    input.addEventListener('change', async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      const form = new FormData();
-      form.append('file', file);
-      setUploading(true);
-      try {
-        const msg = await HttpUtil.post(`${API}/decoy/upload`, form, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        if (msg?.success) onChanged();
-      } finally {
-        setUploading(false);
-      }
-    });
-    input.click();
-  }
-
-  const titled = mode === 'company' || mode === 'blog' || mode === 'maintenance';
-  return (
-    <Form layout="vertical">
-      <Typography.Paragraph type="secondary">{t('pages.protect.decoyDesc')}</Typography.Paragraph>
-      {!initial.secretPath && (
-        <Alert
-          type="warning"
-          showIcon
-          style={{ marginBottom: 12 }}
-          title={t('pages.protect.decoyNeedsPath')}
-        />
-      )}
-      <Space wrap align="end">
-        <Form.Item label={t('pages.protect.decoyMode')}>
-          <Select
-            style={{ width: 220 }}
-            value={mode}
-            onChange={setMode}
-            options={initial.modes.map((m) => ({
-              value: m,
-              label: t(`pages.protect.decoyMode_${m}`),
-              disabled: m === 'custom' && !initial.customSite,
-            }))}
-          />
-        </Form.Item>
-        {titled && (
-          <Form.Item label={t('pages.protect.decoySiteTitle')}>
-            <Input
-              style={{ width: 240 }}
-              value={title}
-              maxLength={80}
-              placeholder={t('pages.protect.decoySiteTitlePlaceholder')}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </Form.Item>
-        )}
-        <Form.Item>
-          <Space wrap>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={save.isPending}
-              onClick={() => save.mutate()}
-            >
-              {t('save')}
-            </Button>
-            <Button icon={<UploadOutlined />} loading={uploading} onClick={upload}>
-              {t('pages.protect.decoyUpload')}
-            </Button>
-            <Button href="/" target="_blank" rel="noreferrer">
-              {t('pages.protect.decoyPreview')}
-            </Button>
-          </Space>
-        </Form.Item>
-      </Space>
-      <Typography.Text type="secondary">
-        {initial.customSite
-          ? t('pages.protect.decoyCustomReady')
-          : t('pages.protect.decoyUploadDesc')}
-      </Typography.Text>
-    </Form>
-  );
 }
 
 function AccessCard() {

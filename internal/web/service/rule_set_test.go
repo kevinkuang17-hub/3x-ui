@@ -22,6 +22,7 @@ func TestExtraRuleForms(t *testing.T) {
 		{"203.0.113.7,reject", "IP-CIDR,203.0.113.7/32,REJECT,no-resolve"},
 		{"domain-keyword,teams,🚀 节点选择", "DOMAIN-KEYWORD,teams,🚀 节点选择"},
 		{"IP-CIDR,192.0.2.0/24,PROXY,no-resolve", "IP-CIDR,192.0.2.0/24,PROXY,no-resolve"},
+		{"maersk.com,🇭🇰 香港节点", "DOMAIN-SUFFIX,maersk.com,🇭🇰 香港节点"},
 	}
 	for _, c := range cases {
 		got, err := extraRule(c.in)
@@ -152,7 +153,29 @@ func TestGroupRoutingFollowsGlobalUntilSet(t *testing.T) {
 	if g := GroupRoutingBySubID("sub-alice"); !g.Override || g.Choice.ExtraRules != "x.example" {
 		t.Fatalf("saving only the template must keep the group's picks, got %+v", g)
 	}
-	if err := svc.SetGroupRouting("vip", "", &RoutingChoice{RuleSets: []RuleSetPick{{Id: 1, Policy: "PROXY-ALL"}}}); err == nil {
-		t.Fatal("an unknown policy must be rejected")
+	if err := svc.SetGroupRouting("vip", "", &RoutingChoice{RuleSets: []RuleSetPick{{Id: 1, Policy: "HK,US"}}}); err == nil {
+		t.Fatal("a destination that is not a single group name must be rejected")
+	}
+}
+
+func TestSaveTemplateDrivesTemplateRouting(t *testing.T) {
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
+	svc := &RuleSetService{}
+	const url = "https://rules.example/standard.yaml"
+	if err := svc.SaveTemplate(url); err != nil {
+		t.Fatal(err)
+	}
+	v, err := svc.GlobalRoutingView()
+	if err != nil || v.Template != url || !v.TemplateOn || !v.ClashEnabled {
+		t.Fatalf("after choosing a template: %+v, %v", v, err)
+	}
+	if err := svc.SaveTemplate(""); err != nil {
+		t.Fatal(err)
+	}
+	if v, _ := svc.GlobalRoutingView(); v.TemplateOn || v.Template != url {
+		t.Fatalf("choosing no template must switch routing off but keep the stored source: %+v", v)
+	}
+	if err := svc.SaveTemplate("https://user:pw@rules.example/x.yaml"); err == nil {
+		t.Fatal("a template URL with credentials must be rejected")
 	}
 }

@@ -115,6 +115,7 @@ type subControllerConfig struct {
 	subJsonObservatory    string
 	subClashEnableRouting bool
 	subClashRules         string
+	subClashLive          bool
 
 	subTitle         string
 	subSupportURL    string
@@ -215,6 +216,11 @@ func WithSUBClashEnableRouting(value bool) SUBControllerOption {
 
 func WithSUBClashRules(value string) SUBControllerOption {
 	return func(config *subControllerConfig) { config.subClashRules = value }
+}
+
+// WithSUBClashLive makes the Clash template follow the settings without a restart.
+func WithSUBClashLive(value bool) SUBControllerOption {
+	return func(config *subControllerConfig) { config.subClashLive = value }
 }
 
 func WithSUBTitle(value string) SUBControllerOption {
@@ -323,6 +329,7 @@ func NewSUBController(g *gin.RouterGroup, options ...SUBControllerOption) *SUBCo
 
 		subTemplateCache: map[string]*cachedSubTemplate{},
 	}
+	a.subClashService.live = config.subClashLive
 	a.initRouter(g)
 	return a
 }

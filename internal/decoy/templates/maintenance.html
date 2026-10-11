@@ -16,7 +16,7 @@ p { margin: 0; color: #6b7280; line-height: 1.6; }
 <body>
 <div class="box">
 <h1>{{.Title}}</h1>
-<p>We are performing scheduled maintenance to improve our service. Please check back soon. Thank you for your patience.</p>
+<p>{{.Tagline}}{{if .Email}} For urgent matters: <a href="mailto:{{.Email}}">{{.Email}}</a>{{end}}</p>
 </div>
 </body>
 </html>

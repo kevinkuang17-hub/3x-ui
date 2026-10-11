@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{.Title}}</title>
-<meta name="description" content="{{.Title}} — sourcing, quality control and shipping for growing brands.">
+<meta name="description" content="{{.Tagline}}">
 <style>
 :root { --ink: #1d2433; --muted: #5b6475; --line: #e4e7ee; --accent: #1f6feb; --bg: #ffffff; --soft: #f5f7fb; }
 * { box-sizing: border-box; }
@@ -29,9 +29,9 @@ footer { border-top: 1px solid var(--line); padding: 26px 0; color: var(--muted)
 <body>
 <header><div class="wrap"><nav><span class="logo">{{.Title}}</span><span><a href="#services">Services</a><a href="#about">About</a><a href="#contact">Contact</a></span></nav></div></header>
 <section class="hero"><div class="wrap">
-<h1>Reliable sourcing and logistics, from factory floor to your warehouse.</h1>
+<h1>{{.Tagline}}</h1>
 <p>We help brands find vetted manufacturers, inspect every order and ship on schedule — with one team handling the details.</p>
-<a class="btn" href="#contact">Request a quote</a>
+<a class="btn" href="{{.ContactHref}}">Request a quote</a>
 </div></section>
 <section id="services" class="wrap grid">
 <div class="card"><h3>Supplier sourcing</h3><p>Shortlists of audited factories matched to your volume, materials and budget.</p></div>
@@ -43,6 +43,6 @@ footer { border-top: 1px solid var(--line); padding: 26px 0; color: var(--muted)
 <h2>About us</h2>
 <p>Founded by a small team of supply-chain specialists, {{.Title}} works with importers of every size. We keep our process transparent: clear quotes, scheduled updates and a single point of contact for each project.</p>
 </section>
-<footer id="contact"><div class="wrap">&copy; {{.Year}} {{.Title}}. All rights reserved. · Contact us through your account manager for quotes and schedules.</div></footer>
+<footer id="contact"><div class="wrap">&copy; {{.Year}} {{.Title}}. All rights reserved. · {{if .Email}}Email: <a href="mailto:{{.Email}}">{{.Email}}</a>{{else}}Contact us through your account manager for quotes and schedules.{{end}}</div></footer>
 </body>
 </html>

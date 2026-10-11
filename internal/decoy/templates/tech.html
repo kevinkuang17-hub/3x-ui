@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<meta name="description" content="{{.Tagline}}">
+<style>
+:root { color-scheme: light dark; --ink: #16181d; --muted: #61666f; --line: #e6e7ea; --accent: #5b4cdb; --bg: #fbfbfc; }
+@media (prefers-color-scheme: dark) { :root { --ink: #ececf0; --muted: #a2a5ad; --line: #2a2c33; --bg: #111216; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; }
+.wrap { max-width: 1000px; margin: 0 auto; padding: 0 22px; }
+nav { display: flex; justify-content: space-between; align-items: center; height: 66px; }
+nav b { font-size: 18px; }
+nav a { color: var(--muted); text-decoration: none; margin-left: 22px; font-size: 15px; }
+.hero { padding: 96px 0 72px; }
+.hero h1 { font-size: clamp(32px, 5.4vw, 54px); line-height: 1.08; margin: 0 0 18px; letter-spacing: -.5px; max-width: 14em; }
+.hero p { color: var(--muted); font-size: 19px; max-width: 30em; margin: 0 0 30px; }
+.btn { display: inline-block; padding: 12px 22px; border-radius: 8px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 72px; }
+.grid div { background: var(--bg); padding: 26px; }
+.grid h3 { margin: 0 0 8px; font-size: 18px; }
+.grid p { margin: 0; color: var(--muted); font-size: 15px; }
+footer { border-top: 1px solid var(--line); padding: 26px 0; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><b>{{.Title}}</b><span><a href="#work">Work</a><a href="#contact">Contact</a></span></nav>
+<section class="hero"><h1>{{.Tagline}}</h1><p>Web platforms, internal tools and integrations — planned carefully, shipped in small steps and maintained for the long run.</p>
+<a class="btn" href="{{.ContactHref}}">Start a project</a></section>
+<section id="work" class="grid">
+<div><h3>Product engineering</h3><p>From first prototype to a stable product, with tests and documentation that outlast the launch.</p></div>
+<div><h3>Systems integration</h3><p>Connecting ERP, CRM and payment systems so data moves without manual copying.</p></div>
+<div><h3>Cloud operations</h3><p>Deployments, monitoring and cost reviews for teams without a dedicated ops engineer.</p></div>
+<div><h3>Technical audits</h3><p>An outside look at architecture, security and performance, with a prioritised plan.</p></div>
+</section>
+</div>
+<footer id="contact"><div class="wrap">&copy; {{.Year}} {{.Title}}{{if .Email}} · <a href="mailto:{{.Email}}">{{.Email}}</a>{{end}}</div></footer>
+</body>
+</html>

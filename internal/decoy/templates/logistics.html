@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<meta name="description" content="{{.Tagline}}">
+<style>
+:root { --ink: #10233f; --muted: #5a6880; --line: #dfe6ef; --accent: #0b6e99; --soft: #f1f6fa; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--ink); line-height: 1.6; background: #fff; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+header { background: var(--ink); color: #fff; }
+nav { display: flex; justify-content: space-between; align-items: center; height: 62px; }
+nav b { letter-spacing: .4px; }
+nav a { color: #c9d6e6; margin-left: 20px; text-decoration: none; font-size: 15px; }
+.hero { background: linear-gradient(135deg, #10233f, #0b6e99); color: #fff; padding: 84px 0 76px; }
+.hero h1 { font-size: clamp(28px, 4.6vw, 44px); line-height: 1.15; margin: 0 0 14px; max-width: 17em; }
+.hero p { color: #d5e4f2; font-size: 18px; max-width: 32em; margin: 0; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 18px; margin-top: -34px; }
+.stat { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; box-shadow: 0 8px 22px rgba(16, 35, 63, .08); }
+.stat strong { display: block; font-size: 24px; color: var(--accent); }
+.stat span { color: var(--muted); font-size: 14px; }
+.svc { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; padding: 64px 0 40px; }
+.svc div { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; }
+.svc h3 { margin: 0 0 6px; font-size: 18px; }
+.svc p { margin: 0; color: var(--muted); font-size: 15px; }
+.track { background: var(--soft); padding: 40px 0; margin: 24px 0 0; }
+.track form { display: flex; gap: 10px; flex-wrap: wrap; }
+.track input { flex: 1 1 260px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 6px; font-size: 15px; }
+.track button { padding: 11px 22px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font-weight: 600; }
+footer { padding: 26px 0; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header><div class="wrap"><nav><b>{{.Title}}</b><span><a href="#services">Services</a><a href="#tracking">Tracking</a><a href="#contact">Contact</a></span></nav></div></header>
+<section class="hero"><div class="wrap"><h1>{{.Tagline}}</h1><p>Full-container and less-than-container loads, air cargo, customs brokerage and last-mile delivery across Asia, Europe and North America.</p></div></section>
+<div class="wrap stats">
+<div class="stat"><strong>FCL / LCL</strong><span>Weekly sailings on major lanes</span></div>
+<div class="stat"><strong>Air cargo</strong><span>Express and consolidated</span></div>
+<div class="stat"><strong>Customs</strong><span>Import and export clearance</span></div>
+<div class="stat"><strong>Door to door</strong><span>Pickup to final delivery</span></div>
+</div>
+<section id="services" class="wrap svc">
+<div><h3>Ocean freight</h3><p>Container bookings with leading carriers, flexible schedules and clear all-in quotes.</p></div>
+<div><h3>Air freight</h3><p>Time-critical shipments with daily departures and real-time status updates.</p></div>
+<div><h3>Warehousing</h3><p>Consolidation, palletising, labelling and short-term storage near the port.</p></div>
+</section>
+<section id="tracking" class="track"><div class="wrap">
+<h2 style="margin-top:0">Track a shipment</h2>
+<form onsubmit="return false"><input placeholder="Bill of lading or container number" aria-label="Tracking number"><button type="submit">Track</button></form>
+</div></section>
+<footer id="contact"><div class="wrap">&copy; {{.Year}} {{.Title}}. {{if .Email}}Quotes and bookings: <a href="mailto:{{.Email}}">{{.Email}}</a>{{else}}Contact your account manager for quotes and bookings.{{end}}</div></footer>
+</body>
+</html>

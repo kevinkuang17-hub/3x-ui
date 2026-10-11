@@ -27,7 +27,6 @@ import {
   SaveOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
 
 import { useTheme } from '@/hooks/useTheme';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -36,9 +35,11 @@ import { setMessageInstance } from '@/utils/messageBus';
 import AppSidebar from '@/layouts/AppSidebar';
 import { keys } from '@/api/queryKeys';
 import RoutingChoiceEditor from './RoutingChoiceEditor';
+import TemplatePicker, { useTemplateGroups } from './TemplatePicker';
 import {
   JSON_HEADERS,
   ROUTING_POLICIES,
+  type GlobalRouting,
   type RoutingChoice,
   type RuleSet,
   fetchGlobalRouting,
@@ -57,18 +58,22 @@ const EMPTY_SET: RuleSet = {
   sortOrder: 0,
 };
 
-function GlobalRoutingTab({ sets, initial }: { sets: RuleSet[]; initial: RoutingChoice }) {
+function GlobalRoutingTab({ sets, initial }: { sets: RuleSet[]; initial: GlobalRouting }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [choice, setChoice] = useState(initial);
+  const [choice, setChoice] = useState<RoutingChoice>({
+    ruleSets: initial.ruleSets,
+    extraRules: initial.extraRules,
+  });
+  const [template, setTemplate] = useState(initial.templateOn ? initial.template : '');
+  const groupsQuery = useTemplateGroups(template);
   const saveMut = useMutation({
-    mutationFn: (body: RoutingChoice) =>
+    mutationFn: (body: RoutingChoice & { template: string }) =>
       HttpUtil.post('/panel/api/ruleSets/routing', body, JSON_HEADERS),
     onSuccess: (msg) => {
       if (msg?.success) queryClient.invalidateQueries({ queryKey: keys.ruleSets.routing() });
     },
   });
-  const navigate = useNavigate();
   return (
     <>
       <Alert
@@ -76,19 +81,37 @@ function GlobalRoutingTab({ sets, initial }: { sets: RuleSet[]; initial: Routing
         showIcon
         style={{ marginBottom: 16 }}
         title={t('pages.ruleSets.globalDesc')}
-        action={
-          <Button size="small" onClick={() => navigate('/settings')}>
-            {t('pages.ruleSets.templateLink')}
-          </Button>
+      />
+      {!initial.clashEnabled && (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          title={t('pages.ruleSets.clashOffNote')}
+        />
+      )}
+      <TemplatePicker
+        value={template}
+        onChange={setTemplate}
+        groups={groupsQuery.data ?? []}
+        groupsError={
+          groupsQuery.error
+            ? t('pages.ruleSets.templateGroupsFailed', { msg: groupsQuery.error.message })
+            : undefined
         }
       />
-      <RoutingChoiceEditor sets={sets} value={choice} onChange={setChoice} />
+      <RoutingChoiceEditor
+        sets={sets}
+        value={choice}
+        onChange={setChoice}
+        groups={groupsQuery.data ?? []}
+      />
       <div style={{ marginTop: 16 }}>
         <Button
           type="primary"
           icon={<SaveOutlined />}
           loading={saveMut.isPending}
-          onClick={() => saveMut.mutate(choice)}
+          onClick={() => saveMut.mutate({ ...choice, template })}
         >
           {t('save')}
         </Button>

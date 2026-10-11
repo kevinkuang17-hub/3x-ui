@@ -28,7 +28,7 @@ func protectRouter(t *testing.T, settings map[string]string) *gin.Engine {
 		}
 	}
 	t.Cleanup(func() {
-		decoy.Configure(decoy.ModeOff, "", "")
+		decoy.Configure(decoy.ModeOff, decoy.Site{}, "")
 		_ = panelaccess.Configure("")
 	})
 	previous := global.GetWebServer()

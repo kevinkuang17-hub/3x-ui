@@ -648,3 +648,38 @@ func (r *remoteRoutingResolver) persistEntry(kind remoteRoutingKind, entry remot
 		logger.Warningf("Could not persist the last valid %s remote routing value", kind)
 	}
 }
+
+// ClashTemplateGroups lists the policy groups a Clash/Mihomo routing source defines, so the rule
+// library can offer them as destinations. A remote source is fetched once if it is not cached yet.
+func ClashTemplateGroups(raw string) ([]string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+	_, remote, err := common.ParseRemoteRoutingURL(raw)
+	if err != nil {
+		return nil, err
+	}
+	var doc map[string]any
+	if remote {
+		refreshErr := routingSourceResolver.refreshSource(remoteRoutingClash, raw)
+		_, cached, _, resolveErr := resolveClashRoutingSource(raw)
+		if cached == nil {
+			if refreshErr != nil {
+				return nil, refreshErr
+			}
+			return nil, resolveErr
+		}
+		doc = cached
+	} else if yaml.Unmarshal([]byte(raw), &doc) != nil {
+		return nil, nil
+	}
+	groups, _ := asAnySlice(doc["proxy-groups"])
+	names := make([]string, 0, len(groups))
+	for _, g := range groups {
+		if name := clashProxyGroupName(g); name != "" {
+			names = append(names, name)
+		}
+	}
+	return names, nil
+}

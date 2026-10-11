@@ -125,3 +125,31 @@ func TestGetClash_RuleLibraryGoesAheadOfTemplate(t *testing.T) {
 		t.Fatalf("a group with its own routing gets only its own rules:\n%s", own)
 	}
 }
+
+func TestGetClash_LibraryProxyFollowsTemplateMainGroup(t *testing.T) {
+	seedSubDB(t)
+	seedSubInbound(t, "sub-tpl", "tpl-in", 20007, 0, groupClashTCP)
+	template := "proxy-groups:\n" +
+		"  - {name: \"🚀 手动选择\", type: select, proxies: [DIRECT]}\n" +
+		"  - {name: \"🎯 全球直连\", type: select, proxies: [DIRECT]}\n" +
+		"rules:\n  - MATCH,🚀 手动选择\n"
+	if err := (&service.RuleSetService{}).SaveGlobalRouting(service.RoutingChoice{
+		ExtraRules: "ships.example\nbank.example,🎯 全球直连\nlost.example,🇭🇰 香港节点",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	out, _, err := NewSubClashService(true, template, NewSubService("")).GetClash("sub-tpl", "sub.example.com")
+	if err != nil {
+		t.Fatalf("GetClash: %v", err)
+	}
+	if !strings.Contains(out, "DOMAIN-SUFFIX,ships.example,🚀 手动选择") {
+		t.Fatalf("\"proxy\" must mean the template's main group, or the rule bypasses the user's node choice:\n%s", out)
+	}
+	if !strings.Contains(out, "DOMAIN-SUFFIX,bank.example,🎯 全球直连") || strings.Contains(out, "lost.example") {
+		t.Fatalf("template groups are valid destinations; groups it lacks are dropped:\n%s", out)
+	}
+	groups, err := ClashTemplateGroups(template)
+	if err != nil || strings.Join(groups, "|") != "🚀 手动选择|🎯 全球直连" {
+		t.Fatalf("ClashTemplateGroups = %v, %v", groups, err)
+	}
+}

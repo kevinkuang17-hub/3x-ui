@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 	"github.com/mhsanaei/3x-ui/v3/internal/panelaccess"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -37,6 +38,7 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.GET("/decoy", a.decoy)
 	g.POST("/decoy", a.saveDecoy)
 	g.POST("/decoy/upload", a.uploadDecoy)
+	g.POST("/decoy/preview", a.previewDecoy)
 	g.GET("/cf", a.cfInfo)
 	g.POST("/cf/status", a.cfStatus)
 	g.POST("/cf/proxied", a.cfProxied)
@@ -94,16 +96,29 @@ func (a *ProtectController) decoy(c *gin.Context) {
 	jsonObj(c, st, err)
 }
 
+type decoyBody struct {
+	Mode string `json:"mode"`
+	decoy.Site
+}
+
 func (a *ProtectController) saveDecoy(c *gin.Context) {
-	var body struct {
-		Mode  string `json:"mode"`
-		Title string `json:"title"`
-	}
+	var body decoyBody
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	jsonMsg(c, I18nWeb(c, "pages.protect.saved"), a.protect.SaveDecoy(body.Mode, body.Title))
+	jsonMsg(c, I18nWeb(c, "pages.protect.decoyDeployed"), a.protect.SaveDecoy(body.Mode, body.Site))
+}
+
+// previewDecoy returns the rendered template so the panel can show it before deploying.
+func (a *ProtectController) previewDecoy(c *gin.Context) {
+	var body decoyBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	page, err := a.protect.PreviewDecoy(body.Mode, body.Site)
+	jsonObj(c, string(page), err)
 }
 
 func (a *ProtectController) uploadDecoy(c *gin.Context) {

@@ -21,14 +21,14 @@ footer { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px;
 <body>
 <main>
 <h1 class="site">{{.Title}}</h1>
-<p class="tag">Notes on photography, slow travel and small software projects.</p>
+<p class="tag">{{.Tagline}}</p>
 <article><h2>Shooting film again after ten years</h2><time>Spring, {{.Year}}</time>
 <p>I dug an old rangefinder out of a drawer and spent a month with two rolls of black-and-white. A few thoughts on patience, metering by eye and why I stopped checking the back of the camera.</p></article>
 <article><h2>A week of trains through the countryside</h2><time>Winter, {{.Year}}</time>
 <p>No flights, no rental car — just regional lines, a paperback and whatever the station café had left. What worked, what didn't, and the timetable trick that saved two connections.</p></article>
 <article><h2>Keeping a personal wiki in plain text</h2><time>Autumn, {{.Year}}</time>
 <p>After trying every notes app I went back to a folder of text files and a tiny search script. Here is the layout I settled on and the few conventions that make it stick.</p></article>
-<footer>&copy; {{.Year}} {{.Title}}</footer>
+<footer>&copy; {{.Year}} {{.Title}}{{if .Email}} · <a href="mailto:{{.Email}}">{{.Email}}</a>{{end}}</footer>
 </main>
 </body>
 </html>

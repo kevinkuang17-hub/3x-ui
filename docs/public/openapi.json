@@ -16186,7 +16186,7 @@
         "tags": [
           "Routing rule library"
         ],
-        "summary": "Save the global picks (in match order) and custom rules.",
+        "summary": "Save the global picks (in match order) and custom rules. Optional template sets the one-click routing template (empty turns template routing off); it applies to subscriptions without a restart.",
         "operationId": "post_panel_api_ruleSets_routing",
         "requestBody": {
           "required": true,
@@ -16196,6 +16196,7 @@
                 "type": "object"
               },
               "example": {
+                "template": "https://raw.githubusercontent.com/kevinkuang17-hub/pxc/main/rules/3x-ui/standard.yaml",
                 "ruleSets": [
                   {
                     "id": 1,
@@ -16203,7 +16204,7 @@
                   },
                   {
                     "id": 5,
-                    "policy": "PROXY"
+                    "policy": "🇭🇰 香港节点"
                   }
                 ],
                 "extraRules": "example.com\nbank.example,DIRECT"
@@ -16211,6 +16212,47 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/groups": {
+      "get": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Policy groups a routing template defines (fetched if remote); picks may send traffic to them, and PROXY means the first one.",
+        "operationId": "get_panel_api_ruleSets_groups",
+        "parameters": [
+          {
+            "name": "template",
+            "in": "query",
+            "required": true,
+            "description": "Template URL or inline YAML.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -16507,7 +16549,7 @@
         "tags": [
           "Protect & speed"
         ],
-        "summary": "Set the decoy: off, nginx, company, blog, maintenance or custom.",
+        "summary": "Deploy the decoy at once: mode off, nginx, company, logistics, tech, blog, photo, maintenance or custom, with the site name, optional slogan and contact email.",
         "operationId": "post_panel_api_protect_decoy",
         "requestBody": {
           "required": true,
@@ -16518,7 +16560,53 @@
               },
               "example": {
                 "mode": "company",
-                "title": "Horizon Supply Co."
+                "title": "Evergreen Trading Ltd.",
+                "tagline": "",
+                "email": "info@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/decoy/preview": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Render a template with unsaved details; returns the HTML as obj.",
+        "operationId": "post_panel_api_protect_decoy_preview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "mode": "logistics",
+                "title": "Bluewater Freight"
               }
             }
           }

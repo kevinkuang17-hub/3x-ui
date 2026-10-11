@@ -2838,8 +2838,18 @@ export const sections: readonly Section[] = [
       {
         method: 'POST',
         path: '/panel/api/ruleSets/routing',
-        summary: 'Save the global picks (in match order) and custom rules.',
-        body: '{\n  "ruleSets": [{ "id": 1, "policy": "DIRECT" }, { "id": 5, "policy": "PROXY" }],\n  "extraRules": "example.com\\nbank.example,DIRECT"\n}',
+        summary:
+          'Save the global picks (in match order) and custom rules. Optional template sets the one-click routing template (empty turns template routing off); it applies to subscriptions without a restart.',
+        body: '{\n  "template": "https://raw.githubusercontent.com/kevinkuang17-hub/pxc/main/rules/3x-ui/standard.yaml",\n  "ruleSets": [{ "id": 1, "policy": "DIRECT" }, { "id": 5, "policy": "🇭🇰 香港节点" }],\n  "extraRules": "example.com\\nbank.example,DIRECT"\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/ruleSets/groups',
+        summary:
+          'Policy groups a routing template defines (fetched if remote); picks may send traffic to them, and PROXY means the first one.',
+        params: [
+          { name: 'template', in: 'query', type: 'string', desc: 'Template URL or inline YAML.' },
+        ],
       },
       {
         method: 'POST',
@@ -2897,8 +2907,15 @@ export const sections: readonly Section[] = [
       {
         method: 'POST',
         path: '/panel/api/protect/decoy',
-        summary: 'Set the decoy: off, nginx, company, blog, maintenance or custom.',
-        body: '{\n  "mode": "company",\n  "title": "Horizon Supply Co."\n}',
+        summary:
+          'Deploy the decoy at once: mode off, nginx, company, logistics, tech, blog, photo, maintenance or custom, with the site name, optional slogan and contact email.',
+        body: '{\n  "mode": "company",\n  "title": "Evergreen Trading Ltd.",\n  "tagline": "",\n  "email": "info@example.com"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/decoy/preview',
+        summary: 'Render a template with unsaved details; returns the HTML as obj.',
+        body: '{\n  "mode": "logistics",\n  "title": "Bluewater Freight"\n}',
       },
       {
         method: 'POST',
