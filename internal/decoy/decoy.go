@@ -75,8 +75,8 @@ func Enabled() bool {
 	return s != nil && s.mode != ModeOff
 }
 
-// Serve answers the request with the decoy site and stops the handler chain.
-func Serve(c *gin.Context) {
+// Respond answers the request with the decoy site and stops the handler chain.
+func Respond(c *gin.Context) {
 	s := current.Load()
 	if s == nil || s.mode == ModeOff {
 		c.AbortWithStatus(http.StatusNotFound)

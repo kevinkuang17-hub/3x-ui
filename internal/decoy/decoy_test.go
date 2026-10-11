@@ -18,7 +18,7 @@ func serve(t *testing.T, method, path string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(method, path, nil)
-	Serve(c)
+	Respond(c)
 	return w
 }
 

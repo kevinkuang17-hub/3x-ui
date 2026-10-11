@@ -59,7 +59,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	// Unknown paths get the decoy site when it is on, else gin's usual 404.
 	engine.NoRoute(func(c *gin.Context) {
 		if decoy.Enabled() {
-			decoy.Serve(c)
+			decoy.Respond(c)
 		}
 	})
 
