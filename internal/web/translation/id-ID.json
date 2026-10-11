@@ -1157,6 +1157,17 @@
         "intro": "Jalankan perintah ini sebagai root di server baru. Perintah ini memasang panel, menamai node berdasarkan wilayah (mis. HK A), membuat domainnya jika Cloudflare sudah diatur, dan mendaftarkannya ke sini secara otomatis.",
         "expires": "Sekali pakai, berlaku hingga {time}",
         "notes": "Server baru perlu membuka port 80 (sertifikat) dan port panel untuk master ini. Setelah selesai, muat ulang halaman ini."
+      },
+      "cost": {
+        "title": "Biaya server",
+        "modalTitle": "Biaya server {name}",
+        "provider": "Penyedia",
+        "monthly": "Biaya bulanan",
+        "currency": "Mata uang",
+        "renewAt": "Diperpanjang pada",
+        "total": "Biaya bulanan",
+        "renewSoon": "Perpanjangan dalam 7 hari",
+        "saved": "Biaya server disimpan"
       }
     },
     "settings": {

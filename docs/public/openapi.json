@@ -4941,6 +4941,10 @@
       "description": "Xray configuration template, outbound management, Warp/Nord/PIA integration, and config testing. All endpoints under /panel/api/xray."
     },
     {
+      "name": "Server costs",
+      "description": "Monthly cost, currency and renewal date per node. An hourly job raises vps.renew (forwarded by the CRM webhook) once per renewal date, three days ahead."
+    },
+    {
       "name": "Xray config history",
       "description": "The last 50 versions of the Xray template config, captured automatically whatever saved them. good marks versions Xray ran with for 90 s. With xrayAutoRollback on (conservative mode), a change that keeps Xray down for about a minute is rolled back to the last good version."
     },
@@ -4954,7 +4958,7 @@
     },
     {
       "name": "CRM integration",
-      "description": "Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = \"sha256=\" + hex(HMAC-SHA256(secret, timestamp + \".\" + body)). Undelivered events are retried with backoff for about three days, so order events by the payload time field. These endpoints require an admin-scope API token."
+      "description": "Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up, vps.renew, xray.rollback) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = \"sha256=\" + hex(HMAC-SHA256(secret, timestamp + \".\" + body)). Undelivered events are retried with backoff for about three days, so order events by the payload time field. These endpoints require an admin-scope API token."
     },
     {
       "name": "Subscription Balancers",
@@ -15023,6 +15027,125 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/cost/list": {
+      "get": {
+        "tags": [
+          "Server costs"
+        ],
+        "summary": "All cost entries.",
+        "operationId": "get_panel_api_nodes_cost_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/cost/set": {
+      "post": {
+        "tags": [
+          "Server costs"
+        ],
+        "summary": "Create or replace the cost entry of a node. renewAt is unix seconds (0 = not tracked).",
+        "operationId": "post_panel_api_nodes_cost_set",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "nodeId": 3,
+                "provider": "Vultr",
+                "monthly": 6,
+                "currency": "USD",
+                "renewAt": 1767225599,
+                "note": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/cost/del/{id}": {
+      "post": {
+        "tags": [
+          "Server costs"
+        ],
+        "summary": "Remove the cost entry of a node.",
+        "operationId": "post_panel_api_nodes_cost_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Node id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",

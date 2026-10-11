@@ -1157,6 +1157,17 @@
         "intro": "在新服务器上用 root 运行这条命令：自动安装面板、按地区命名（如 HK A）、配置好 Cloudflare 时自动创建域名，并自动接入到这里。",
         "expires": "只能用一次，有效期到 {time}",
         "notes": "新服务器需要放行 80 端口（申请证书）和面板端口（让主控能连上）。运行完成后刷新本页即可。"
+      },
+      "cost": {
+        "title": "服务器费用",
+        "modalTitle": "{name} 的服务器费用",
+        "provider": "服务商",
+        "monthly": "每月费用",
+        "currency": "币种",
+        "renewAt": "到期续费日",
+        "total": "每月成本合计",
+        "renewSoon": "7 天内需要续费",
+        "saved": "服务器费用已保存"
       }
     },
     "settings": {

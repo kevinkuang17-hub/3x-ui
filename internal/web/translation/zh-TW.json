@@ -1157,6 +1157,17 @@
         "intro": "在新伺服器上用 root 執行這條指令：自動安裝面板、依地區命名（如 HK A）、設定好 Cloudflare 時自動建立網域，並自動接入到這裡。",
         "expires": "只能用一次，有效期到 {time}",
         "notes": "新伺服器需要開放 80 埠（申請憑證）和面板埠（讓主控能連上）。執行完成後重新整理本頁即可。"
+      },
+      "cost": {
+        "title": "伺服器費用",
+        "modalTitle": "{name} 的伺服器費用",
+        "provider": "服務商",
+        "monthly": "每月費用",
+        "currency": "幣別",
+        "renewAt": "到期續費日",
+        "total": "每月成本合計",
+        "renewSoon": "7 天內需要續費",
+        "saved": "伺服器費用已儲存"
       }
     },
     "settings": {

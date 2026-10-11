@@ -199,6 +199,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	a.nodeController = NewNodeController(nodes)
 	NewNodeDnsController(nodes.Group("/dns"))
 	NewNodeJoinController(nodes.Group("/join"))
+	NewNodeCostController(nodes.Group("/cost"))
 
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")

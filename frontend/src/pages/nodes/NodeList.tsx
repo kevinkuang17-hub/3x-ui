@@ -8,6 +8,7 @@ import {
   ClusterOutlined,
   CloudDownloadOutlined,
   DeleteOutlined,
+  DollarOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   EyeInvisibleOutlined,
@@ -40,6 +41,7 @@ interface NodeListProps {
   onMtls: () => void;
   onJoin: () => void;
   onDns: (node: NodeRecord) => void;
+  onCost: (node: NodeRecord) => void;
   onEdit: (node: NodeRecord) => void;
   onDelete: (node: NodeRecord) => void;
   onProbe: (node: NodeRecord) => void;
@@ -178,6 +180,7 @@ export default function NodeList({
   onMtls,
   onJoin,
   onDns,
+  onCost,
   onEdit,
   onDelete,
   onProbe,
@@ -286,6 +289,16 @@ export default function NodeList({
                   />
                 </Tooltip>
               )}
+              <Tooltip title={t('pages.nodes.cost.title')}>
+                <Button
+                  type="text"
+                  size="small"
+                  style={{ fontSize: 16 }}
+                  icon={<DollarOutlined />}
+                  aria-label={t('pages.nodes.cost.title')}
+                  onClick={() => onCost(record)}
+                />
+              </Tooltip>
               <Tooltip title={t('pages.nodes.dns.title')}>
                 <Button
                   type="text"
@@ -546,6 +559,7 @@ export default function NodeList({
       onProbe,
       onEdit,
       onDns,
+      onCost,
       onDelete,
       onUpdateNode,
       nameByGuid,
@@ -702,6 +716,15 @@ export default function NodeList({
                                     },
                                   ]
                                 : []),
+                              {
+                                key: 'cost',
+                                label: (
+                                  <>
+                                    <DollarOutlined /> {t('pages.nodes.cost.title')}
+                                  </>
+                                ),
+                                onClick: () => onCost(record),
+                              },
                               {
                                 key: 'dns',
                                 label: (

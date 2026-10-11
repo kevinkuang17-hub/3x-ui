@@ -2620,6 +2620,29 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'node-cost',
+    title: 'Server costs',
+    description:
+      'Monthly cost, currency and renewal date per node. An hourly job raises vps.renew (forwarded by the CRM webhook) once per renewal date, three days ahead.',
+    endpoints: [
+      { method: 'GET', path: '/panel/api/nodes/cost/list', summary: 'All cost entries.' },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/cost/set',
+        summary:
+          'Create or replace the cost entry of a node. renewAt is unix seconds (0 = not tracked).',
+        body: '{\n  "nodeId": 3,\n  "provider": "Vultr",\n  "monthly": 6,\n  "currency": "USD",\n  "renewAt": 1767225599,\n  "note": ""\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/cost/del/:id',
+        summary: 'Remove the cost entry of a node.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node id.' }],
+      },
+    ],
+  },
+
+  {
     id: 'xray-history',
     title: 'Xray config history',
     description:
@@ -2764,7 +2787,7 @@ export const sections: readonly Section[] = [
     id: 'crm',
     title: 'CRM integration',
     description:
-      'Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = "sha256=" + hex(HMAC-SHA256(secret, timestamp + "." + body)). Undelivered events are retried with backoff for about three days, so order events by the payload time field. These endpoints require an admin-scope API token.',
+      'Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up, vps.renew, xray.rollback) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = "sha256=" + hex(HMAC-SHA256(secret, timestamp + "." + body)). Undelivered events are retried with backoff for about three days, so order events by the payload time field. These endpoints require an admin-scope API token.',
     endpoints: [
       {
         method: 'POST',

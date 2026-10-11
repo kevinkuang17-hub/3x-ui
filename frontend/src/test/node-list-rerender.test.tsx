@@ -52,6 +52,7 @@ describe('NodeList re-render', () => {
       onMtls: noop,
       onJoin: noop,
       onDns: noop,
+      onCost: noop,
       onEdit: noop,
       onDelete: noop,
       onProbe: noop,

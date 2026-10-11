@@ -31,6 +31,9 @@ import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import NodeJoinModal from './NodeJoinModal';
 import NodeDnsModal from './NodeDnsModal';
+import NodeCostModal from './NodeCostModal';
+import type { NodeCost } from './NodeCostModal';
+import NodeCostSummary from './NodeCostSummary';
 import { useNodeMutations } from '@/api/queries/useNodeMutations';
 import AppSidebar from '@/layouts/AppSidebar';
 import NodeList from './NodeList';
@@ -82,6 +85,17 @@ export default function NodesPage() {
   const { nodes, loading, fetched, fetchError, refetch, totals } = useNodesQuery();
   const [joinOpen, setJoinOpen] = useState(false);
   const [dnsNode, setDnsNode] = useState<NodeRecord | null>(null);
+  const [costNode, setCostNode] = useState<NodeRecord | null>(null);
+  const costsQuery = useQuery({
+    queryKey: ['nodes', 'costs'],
+    queryFn: async () => {
+      const msg = await HttpUtil.get<NodeCost[]>('/panel/api/nodes/cost/list', undefined, {
+        silent: true,
+      });
+      return msg?.success ? (msg.obj ?? []) : [];
+    },
+  });
+  const costs = costsQuery.data ?? [];
   const {
     create,
     update,
@@ -349,6 +363,11 @@ export default function NodesPage() {
                     </Card>
                   </Col>
 
+                  {costs.length > 0 && (
+                    <Col span={24}>
+                      <NodeCostSummary costs={costs} nodes={nodes} />
+                    </Col>
+                  )}
                   <Col span={24}>
                     <NodeList
                       nodes={nodes}
@@ -361,6 +380,7 @@ export default function NodesPage() {
                       onMtls={() => setMtlsOpen(true)}
                       onJoin={() => setJoinOpen(true)}
                       onDns={setDnsNode}
+                      onCost={setCostNode}
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onProbe={onProbe}
@@ -383,6 +403,14 @@ export default function NodesPage() {
               refetch();
             }}
             onCopied={() => messageApi.success(t('copied'))}
+          />
+        )}
+        {costNode && (
+          <NodeCostModal
+            node={costNode}
+            cost={costs.find((c) => c.nodeId === costNode.id)}
+            onClose={() => setCostNode(null)}
+            onSaved={() => costsQuery.refetch()}
           />
         )}
         {dnsNode && (

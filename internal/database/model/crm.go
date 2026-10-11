@@ -59,3 +59,17 @@ type NodeJoinTicket struct {
 }
 
 func (NodeJoinTicket) TableName() string { return "node_join_tickets" }
+
+// NodeCost tracks what a node's server costs and when it must be renewed.
+type NodeCost struct {
+	NodeId   int     `json:"nodeId" gorm:"primaryKey;autoIncrement:false"`
+	Provider string  `json:"provider"`
+	Monthly  float64 `json:"monthly"`
+	Currency string  `json:"currency"`
+	RenewAt  int64   `json:"renewAt"` // unix seconds, 0 = not tracked
+	Note     string  `json:"note"`
+	// RemindedFor is the RenewAt the last reminder was sent for, so each renewal is announced once.
+	RemindedFor int64 `json:"-"`
+}
+
+func (NodeCost) TableName() string { return "node_costs" }

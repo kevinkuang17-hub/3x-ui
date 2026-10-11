@@ -1157,6 +1157,17 @@
         "intro": "Execute este comando como root no novo servidor. Ele instala o painel, nomeia o nó pela região (ex.: HK A), cria o domínio se o Cloudflare estiver configurado e o registra aqui automaticamente.",
         "expires": "Uso único, válido até {time}",
         "notes": "O novo servidor precisa da porta 80 aberta (certificado) e da porta do painel aberta para este mestre. Ao terminar, atualize esta página."
+      },
+      "cost": {
+        "title": "Custo do servidor",
+        "modalTitle": "Custo do servidor de {name}",
+        "provider": "Provedor",
+        "monthly": "Custo mensal",
+        "currency": "Moeda",
+        "renewAt": "Renova em",
+        "total": "Custo mensal",
+        "renewSoon": "Renovações em até 7 dias",
+        "saved": "Custo do servidor salvo"
       }
     },
     "settings": {

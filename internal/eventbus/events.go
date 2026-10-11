@@ -23,6 +23,9 @@ const (
 	EventLineDown EventType = "line.down"
 	EventLineUp   EventType = "line.up"
 
+	// A node's server is due for renewal soon (VPS cost tracking)
+	EventVpsRenew EventType = "vps.renew"
+
 	// Client lifecycle (CRM webhook)
 	EventClientTraffic80 EventType = "client.traffic80"
 	EventClientDepleted  EventType = "client.depleted"
@@ -93,4 +96,13 @@ type ClientLifecycleData struct {
 	Down       int64  `json:"down"`
 	Total      int64  `json:"total"`
 	ExpiryTime int64  `json:"expiryTime"`
+}
+
+// VpsRenewData describes the server behind a vps.renew event.
+type VpsRenewData struct {
+	NodeId   int     `json:"nodeId"`
+	Provider string  `json:"provider"`
+	Monthly  float64 `json:"monthly"`
+	Currency string  `json:"currency"`
+	RenewAt  int64   `json:"renewAt"`
 }

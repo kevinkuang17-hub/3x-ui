@@ -1157,6 +1157,17 @@
         "intro": "Ejecuta este comando como root en el nuevo servidor. Instala el panel, nombra el nodo por región (p. ej. HK A), crea su dominio si Cloudflare está configurado y lo registra aquí automáticamente.",
         "expires": "Un solo uso, válido hasta {time}",
         "notes": "El nuevo servidor necesita el puerto 80 abierto (certificado) y el puerto del panel abierto para este maestro. Al terminar, recarga esta página."
+      },
+      "cost": {
+        "title": "Coste del servidor",
+        "modalTitle": "Coste del servidor de {name}",
+        "provider": "Proveedor",
+        "monthly": "Coste mensual",
+        "currency": "Moneda",
+        "renewAt": "Se renueva el",
+        "total": "Coste mensual",
+        "renewSoon": "Renovaciones en 7 días",
+        "saved": "Coste del servidor guardado"
       }
     },
     "settings": {

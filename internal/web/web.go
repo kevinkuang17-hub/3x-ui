@@ -379,6 +379,7 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 
 	// Xray template version history; conservative mode rolls back a breaking edit.
 	_, _ = s.cron.AddJob(cadenceConfigHistory, job.NewConfigHistoryJob())
+	_, _ = s.cron.AddJob("@hourly", job.NewVpsRenewJob())
 
 	// Warm permanent routing URLs immediately and refresh them outside the
 	// latency-sensitive subscription request path.

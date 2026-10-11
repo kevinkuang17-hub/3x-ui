@@ -1157,6 +1157,17 @@
         "intro": "Chạy lệnh này với quyền root trên máy chủ mới. Lệnh sẽ cài đặt panel, đặt tên node theo khu vực (ví dụ HK A), tạo tên miền nếu đã thiết lập Cloudflare và tự động đăng ký node tại đây.",
         "expires": "Dùng một lần, hiệu lực đến {time}",
         "notes": "Máy chủ mới cần mở cổng 80 (chứng chỉ) và mở cổng panel cho máy chủ chính này. Khi hoàn tất, hãy tải lại trang này."
+      },
+      "cost": {
+        "title": "Chi phí máy chủ",
+        "modalTitle": "Chi phí máy chủ {name}",
+        "provider": "Nhà cung cấp",
+        "monthly": "Chi phí hằng tháng",
+        "currency": "Tiền tệ",
+        "renewAt": "Ngày gia hạn",
+        "total": "Chi phí hằng tháng",
+        "renewSoon": "Gia hạn trong 7 ngày",
+        "saved": "Đã lưu chi phí máy chủ"
       }
     },
     "settings": {

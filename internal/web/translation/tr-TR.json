@@ -1157,6 +1157,17 @@
         "intro": "Bu komutu yeni sunucuda root olarak çalıştırın. Paneli kurar, düğümü bölgeye göre adlandırır (örn. HK A), Cloudflare ayarlıysa alan adını oluşturur ve buraya otomatik olarak kaydeder.",
         "expires": "Tek kullanımlık, {time} tarihine kadar geçerli",
         "notes": "Yeni sunucuda 80 numaralı port (sertifika) ve bu ana sunucuya açık panel portu gerekir. İşlem bitince bu sayfayı yenileyin."
+      },
+      "cost": {
+        "title": "Sunucu maliyeti",
+        "modalTitle": "{name} sunucu maliyeti",
+        "provider": "Sağlayıcı",
+        "monthly": "Aylık maliyet",
+        "currency": "Para birimi",
+        "renewAt": "Yenileme tarihi",
+        "total": "Aylık maliyet",
+        "renewSoon": "7 gün içinde yenilenecek",
+        "saved": "Sunucu maliyeti kaydedildi"
       }
     },
     "settings": {

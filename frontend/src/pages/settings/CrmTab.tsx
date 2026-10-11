@@ -21,6 +21,8 @@ const CRM_EVENTS = [
   'line.up',
   'node.down',
   'node.up',
+  'vps.renew',
+  'xray.rollback',
 ];
 
 function splitEvents(raw: string): string[] {

@@ -31,6 +31,7 @@ describe('NodeList desktop table row keys', () => {
         onMtls={noop}
         onJoin={noop}
         onDns={noop}
+        onCost={noop}
         onEdit={noop}
         onDelete={noop}
         onProbe={noop}

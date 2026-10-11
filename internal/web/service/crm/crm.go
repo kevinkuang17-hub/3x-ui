@@ -46,6 +46,7 @@ var Forwarded = []eventbus.EventType{
 	eventbus.EventClientExpiring, eventbus.EventClientExpired,
 	eventbus.EventLineDown, eventbus.EventLineUp,
 	eventbus.EventNodeDown, eventbus.EventNodeUp,
+	eventbus.EventVpsRenew, eventbus.EventXrayRollback,
 }
 
 type Service struct {

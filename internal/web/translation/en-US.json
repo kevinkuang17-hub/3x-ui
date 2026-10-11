@@ -1275,6 +1275,17 @@
         "intro": "Run this command as root on the new server. It installs the panel, names the node by region (e.g. HK A), creates its domain when Cloudflare is set up, and registers it here automatically.",
         "expires": "Valid once, until {time}",
         "notes": "The new server needs port 80 open (certificate) and the panel port open to this master. When it finishes, refresh this page."
+      },
+      "cost": {
+        "title": "Server cost",
+        "modalTitle": "Server cost for {name}",
+        "provider": "Provider",
+        "monthly": "Monthly cost",
+        "currency": "Currency",
+        "renewAt": "Renews on",
+        "total": "Monthly cost",
+        "renewSoon": "Renewing within 7 days",
+        "saved": "Server cost saved"
       }
     },
     "settings": {
