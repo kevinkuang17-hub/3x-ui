@@ -135,18 +135,28 @@ func TestShadowrocketConfig(t *testing.T) {
 
 func TestRenderSingbox(t *testing.T) {
 	proxies := []map[string]any{
-		{"name": "HK A", "type": "vless", "server": "hk.example.com", "port": uint64(443), "uuid": "u1", "flow": "xtls-rprx-vision",
+		{
+			"name": "HK A", "type": "vless", "server": "hk.example.com", "port": uint64(443), "uuid": "u1", "flow": "xtls-rprx-vision",
 			"network": "tcp", "tls": true, "servername": "www.apple.com", "client-fingerprint": "chrome",
-			"reality-opts": map[string]any{"public-key": "Z84J2IelR9ch3k8VtlVhhs5ycBUlXA7wHBWcBrjqnAw", "short-id": "ab"}},
-		{"name": "US A", "type": "vmess", "server": "us.example.com", "port": 8443, "uuid": "u2", "cipher": "auto",
-			"network": "ws", "tls": true, "servername": "us.example.com", "ws-opts": map[string]any{"path": "/ws", "headers": map[string]any{"Host": "cdn.example.com"}}},
-		{"name": "JP A", "type": "trojan", "server": "jp.example.com", "port": 443, "password": "pw", "network": "grpc", "tls": true,
-			"sni": "jp.example.com", "grpc-opts": map[string]any{"grpc-service-name": "svc"}},
-		{"name": "SG A", "type": "ss", "server": "sg.example.com", "port": 8388, "cipher": "2022-blake3-aes-128-gcm", "password": "a:b"},
-		{"name": "KR A", "type": "hysteria2", "server": "kr.example.com", "port": 443, "password": "pw", "sni": "kr.example.com",
-			"obfs": "salamander", "obfs-password": "ob", "ports": "20000-30000"},
-		{"name": "TW A", "type": "tuic", "server": "tw.example.com", "port": 443, "uuid": "u3", "password": "pw",
-			"congestion-controller": "bbr", "alpn": []any{"h3"}},
+			"reality-opts": map[string]any{"public-key": "Z84J2IelR9ch3k8VtlVhhs5ycBUlXA7wHBWcBrjqnAw", "short-id": "ab"},
+		},
+		{
+			"name": "US A", "type": "vmess", "server": "us.example.com", "port": 8443, "uuid": "u2", "cipher": "auto",
+			"network": "ws", "tls": true, "servername": "us.example.com", "ws-opts": map[string]any{"path": "/ws", "headers": map[string]any{"Host": "cdn.example.com"}},
+		},
+		{
+			"name": "JP A", "type": "trojan", "server": "jp.example.com", "port": 443, "password": "pw", "network": "grpc", "tls": true,
+			"sni": "jp.example.com", "grpc-opts": map[string]any{"grpc-service-name": "svc"},
+		},
+		{"name": "SG A", "type": "ss", "server": "sg.example.com", "port": 8388, "cipher": "2022-blake3-aes-128-gcm", "password": "YWJjZGVmZ2hpamtsbW5vcA==:cXJzdHV2d3h5ejAxMjM0NQ=="},
+		{
+			"name": "KR A", "type": "hysteria2", "server": "kr.example.com", "port": 443, "password": "pw", "sni": "kr.example.com",
+			"obfs": "salamander", "obfs-password": "ob", "ports": "20000-30000",
+		},
+		{
+			"name": "TW A", "type": "tuic", "server": "tw.example.com", "port": 443, "uuid": "u3", "password": "pw",
+			"congestion-controller": "bbr", "alpn": []any{"h3"},
+		},
 		{"name": "XH", "type": "vless", "server": "x.example.com", "port": 443, "uuid": "u4", "network": "xhttp", "tls": true},
 		{"name": "WG", "type": "wireguard", "server": "w.example.com", "port": 51820},
 		{"name": "auto", "type": "trojan", "server": "a.example.com", "port": 443, "password": "pw", "tls": true},

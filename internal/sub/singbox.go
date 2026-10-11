@@ -384,7 +384,7 @@ func renderSingbox(proxies []map[string]any, rules []libraryRule, cfg service.Dn
 		used[tag], ob["tag"] = true, tag
 		nodes = append(nodes, ob)
 		names = append(names, tag)
-		if !(ob["type"] == "socks" && ob["server"] == "127.0.0.1") {
+		if ob["type"] != "socks" || ob["server"] != "127.0.0.1" {
 			hasNodes = true
 		}
 	}

@@ -28,6 +28,6 @@ jobs:
           gh release download -R XTLS/Xray-core -p 'Xray-linux-64.zip' -D xr
           (cd xr && unzip -q Xray-linux-64.zip)
           { echo "== go test"; tail -20 test.txt; echo "== sing-box $($SB version | head -1)"; $SB check -c samples/singbox.json 2>&1; echo "exit $?";
-            echo "== xray"; jq '(.outbounds[] | select(.protocol=="vless") | .settings.vnext[]?.users[]?) += {"encryption":"none"} | (.outbounds[] | select(.protocol=="vless") | .settings) |= (if has("encryption") then . else . + {"encryption":"none"} end)' samples/xray.json > samples/x2.json && mv samples/x2.json samples/xray.json; XRAY_LOCATION_ASSET=$PWD/xr xr/xray run -test -c samples/xray.json 2>&1 | tail -15; echo "exit ${PIPESTATUS[0]}"; } > result.txt
+            echo "== xray"; jq '(.outbounds[] | select(.protocol=="vless") | .settings.encryption) = "none"' samples/xray.json > samples/x2.json && mv samples/x2.json samples/xray.json; XRAY_LOCATION_ASSET=$PWD/xr xr/xray run -test -c samples/xray.json 2>&1 | tail -15; echo "exit ${PIPESTATUS[0]}"; } > result.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' result.txt)
           echo "::error title=formats::${msg}"
