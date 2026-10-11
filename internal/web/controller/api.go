@@ -214,6 +214,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	a.settingController = NewSettingController(api)
 	a.xraySettingController = NewXraySettingController(api)
 	NewConfigHistoryController(api.Group("/xray/history"))
+	NewAppTrafficController(api.Group("/apps"))
 
 	// Subscription balancers — client-side balancers for the JSON sub output
 	NewSubBalancerController(api)

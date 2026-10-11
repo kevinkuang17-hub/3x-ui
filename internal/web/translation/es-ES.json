@@ -2361,6 +2361,15 @@
         "versionTitle": "Versión {id}",
         "restored": "Versión restaurada",
         "restoreFailed": "No se pudo restaurar"
+      },
+      "apps": {
+        "title": "Tráfico por app",
+        "intro": "Cuenta el tráfico por app (Netflix, YouTube, …) de todos los usuarios sin cambiar su ruta: cada app seguida recibe una copia de la salida por defecto y una regla tras todas tus reglas. Activarlo habilita las estadísticas de salidas en la configuración de Xray.",
+        "track": "Apps a seguir",
+        "empty": "Aún no hay tráfico registrado",
+        "app": "App",
+        "usage": "Uso desde el último reinicio",
+        "saved": "Seguimiento de apps actualizado"
       }
     },
     "hosts": {

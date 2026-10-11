@@ -2479,6 +2479,15 @@
         "versionTitle": "Version {id}",
         "restored": "Version restored",
         "restoreFailed": "Restore failed"
+      },
+      "apps": {
+        "title": "App traffic",
+        "intro": "Counts traffic per app (Netflix, YouTube, …) across all users without changing where it goes: each tracked app gets a copy of the default outbound and a rule placed after all your rules. Turning it on enables outbound statistics in the Xray config.",
+        "track": "Apps to track",
+        "empty": "No traffic recorded yet",
+        "app": "App",
+        "usage": "Usage since last reset",
+        "saved": "App tracking updated"
       }
     },
     "sponsors": {

@@ -2690,6 +2690,26 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'app-traffic',
+    title: 'App traffic',
+    description:
+      'Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named app-<key>, and a geosite rule after all existing rules, so routing is unchanged; outbound statistics are switched on.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/apps/status',
+        summary: 'Trackable apps, the ones tracked now, and their up/down bytes.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/apps/set',
+        summary: 'Track exactly these apps (an empty list removes the feature) and restart Xray.',
+        body: '{\n  "apps": ["netflix", "youtube"]\n}',
+      },
+    ],
+  },
+
+  {
     id: 'xray-history',
     title: 'Xray config history',
     description:

@@ -2361,6 +2361,15 @@
         "versionTitle": "Versi {id}",
         "restored": "Versi dipulihkan",
         "restoreFailed": "Gagal memulihkan"
+      },
+      "apps": {
+        "title": "Trafik per aplikasi",
+        "intro": "Menghitung trafik per aplikasi (Netflix, YouTube, …) untuk semua pengguna tanpa mengubah rutenya: tiap aplikasi yang dilacak mendapat salinan outbound bawaan dan satu aturan setelah semua aturan Anda. Mengaktifkannya menyalakan statistik outbound di konfigurasi Xray.",
+        "track": "Aplikasi yang dilacak",
+        "empty": "Belum ada trafik tercatat",
+        "app": "Aplikasi",
+        "usage": "Pemakaian sejak reset terakhir",
+        "saved": "Pelacakan aplikasi diperbarui"
       }
     },
     "hosts": {

@@ -4949,6 +4949,10 @@
       "description": "Monthly cost, currency and renewal date per node. An hourly job raises vps.renew (forwarded by the CRM webhook) once per renewal date, three days ahead."
     },
     {
+      "name": "App traffic",
+      "description": "Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named app-<key>, and a geosite rule after all existing rules, so routing is unchanged; outbound statistics are switched on."
+    },
+    {
       "name": "Xray config history",
       "description": "The last 50 versions of the Xray template config, captured automatically whatever saved them. good marks versions Xray ran with for 90 s. With xrayAutoRollback on (conservative mode), a change that keeps Xray down for about a minute is rolled back to the last good version."
     },
@@ -15405,6 +15409,82 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/apps/status": {
+      "get": {
+        "tags": [
+          "App traffic"
+        ],
+        "summary": "Trackable apps, the ones tracked now, and their up/down bytes.",
+        "operationId": "get_panel_api_apps_status",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/apps/set": {
+      "post": {
+        "tags": [
+          "App traffic"
+        ],
+        "summary": "Track exactly these apps (an empty list removes the feature) and restart Xray.",
+        "operationId": "post_panel_api_apps_set",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "apps": [
+                  "netflix",
+                  "youtube"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful response",

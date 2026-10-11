@@ -2361,6 +2361,15 @@
         "versionTitle": "Sürüm {id}",
         "restored": "Sürüm geri yüklendi",
         "restoreFailed": "Geri yükleme başarısız"
+      },
+      "apps": {
+        "title": "Uygulama trafiği",
+        "intro": "Tüm kullanıcıların trafiğini uygulamaya göre (Netflix, YouTube, …) sayar, yönünü değiştirmeden: izlenen her uygulama varsayılan çıkışın bir kopyasını ve tüm kurallarınızdan sonra bir kural alır. Açmak Xray yapılandırmasında çıkış istatistiklerini etkinleştirir.",
+        "track": "İzlenecek uygulamalar",
+        "empty": "Henüz trafik kaydedilmedi",
+        "app": "Uygulama",
+        "usage": "Son sıfırlamadan beri kullanım",
+        "saved": "Uygulama izleme güncellendi"
       }
     },
     "hosts": {

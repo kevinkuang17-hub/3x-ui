@@ -2361,6 +2361,15 @@
         "versionTitle": "Phiên bản {id}",
         "restored": "Đã khôi phục phiên bản",
         "restoreFailed": "Khôi phục thất bại"
+      },
+      "apps": {
+        "title": "Lưu lượng theo ứng dụng",
+        "intro": "Đếm lưu lượng theo ứng dụng (Netflix, YouTube, …) của mọi người dùng mà không đổi hướng đi: mỗi ứng dụng được theo dõi có một bản sao của outbound mặc định và một quy tắc đặt sau mọi quy tắc của bạn. Bật lên sẽ mở thống kê outbound trong cấu hình Xray.",
+        "track": "Ứng dụng theo dõi",
+        "empty": "Chưa ghi nhận lưu lượng",
+        "app": "Ứng dụng",
+        "usage": "Dung lượng từ lần đặt lại gần nhất",
+        "saved": "Đã cập nhật theo dõi ứng dụng"
       }
     },
     "hosts": {
