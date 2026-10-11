@@ -168,13 +168,13 @@ config_after_update() {
     local panel_needs_restart=0
 
     echo -e "${yellow}x-ui settings:${plain}"
-    ${xui_folder}/x-ui setting -show true
+    ${xui_folder}/x-ui setting -show
     ${xui_folder}/x-ui migrate
 
     # Properly detect empty cert by checking if cert: line exists and has content after it
-    local existing_cert=$(${xui_folder}/x-ui setting -getCert true 2> /dev/null | grep 'cert:' | awk -F': ' '{print $2}' | tr -d '[:space:]')
-    local existing_port=$(${xui_folder}/x-ui setting -show true | grep -Eo 'port: .+' | awk '{print $2}')
-    local existing_webBasePath=$(${xui_folder}/x-ui setting -show true | grep -Eo 'webBasePath: .+' | awk '{print $2}' | sed 's#^/##')
+    local existing_cert=$(${xui_folder}/x-ui setting -getCert 2> /dev/null | grep 'cert:' | awk -F': ' '{print $2}' | tr -d '[:space:]')
+    local existing_port=$(${xui_folder}/x-ui setting -show | grep -Eo 'port: .+' | awk '{print $2}')
+    local existing_webBasePath=$(${xui_folder}/x-ui setting -show | grep -Eo 'webBasePath: .+' | awk '{print $2}' | sed 's#^/##')
 
     # Get server IP
     local URL_lists=(

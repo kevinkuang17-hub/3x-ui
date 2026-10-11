@@ -3,15 +3,11 @@
 // clean three-part numeric tag, fall back to a normalized string inequality —
 // the same heuristic the Go side uses so the node "update available" badge
 // agrees with what the server would decide.
-function parseVersionParts(version: string): [number, number, number] | null {
-  const parts = version.trim().replace(/^v/, '').split('.');
-  if (parts.length !== 3) return null;
-  const out: number[] = [];
-  for (const part of parts) {
-    if (!/^\d+$/.test(part)) return null;
-    out.push(Number(part));
-  }
-  return [out[0], out[1], out[2]];
+function parseVersionParts(version: string): [number, number, number, number] | null {
+  // The fork's "3.9.0-k8" follows upstream 3.9.0; no -kN counts as revision 0.
+  const m = /^(\d+)\.(\d+)\.(\d+)(?:-k(\d+))?$/.exec(version.trim().replace(/^v/, ''));
+  if (!m) return null;
+  return [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4] ?? 0)];
 }
 
 // Format a panel version for display. Dev builds report a "dev+<commit>"
@@ -36,7 +32,7 @@ export function isPanelUpdateAvailable(latest: string, current: string): boolean
   if (!a || !b) {
     return latest.trim().replace(/^v/, '') !== current.trim().replace(/^v/, '');
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     if (a[i] > b[i]) return true;
     if (a[i] < b[i]) return false;
   }

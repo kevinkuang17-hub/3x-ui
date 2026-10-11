@@ -16,6 +16,14 @@ describe('isPanelUpdateAvailable', () => {
     expect(isPanelUpdateAvailable('2.6.4', '2.6.5')).toBe(false);
   });
 
+  it('orders fork -kN releases after their upstream base', () => {
+    expect(isPanelUpdateAvailable('v3.9.0-k8', '3.9.0')).toBe(true);
+    expect(isPanelUpdateAvailable('v3.9.0-k8', '3.9.0-k8')).toBe(false);
+    expect(isPanelUpdateAvailable('v3.9.0-k8', '3.9.0-k9')).toBe(false);
+    expect(isPanelUpdateAvailable('v3.9.0-k10', '3.9.0-k9')).toBe(true);
+    expect(isPanelUpdateAvailable('v3.9.1', '3.9.0-k12')).toBe(true);
+  });
+
   it('ignores a leading v on either side', () => {
     expect(isPanelUpdateAvailable('v2.6.5', '2.6.4')).toBe(true);
     expect(isPanelUpdateAvailable('2.6.5', 'v2.6.4')).toBe(true);
