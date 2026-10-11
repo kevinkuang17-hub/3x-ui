@@ -403,12 +403,11 @@ func appleRules(rules []string) []string {
 		if len(parts) < 3 {
 			continue
 		}
+		// Surge and Loon profiles have one proxy group, so template groups map to it as well.
 		switch parts[2] {
-		case "PROXY":
-			parts[2] = "Proxy"
 		case "DIRECT", "REJECT":
 		default:
-			continue
+			parts[2] = "Proxy"
 		}
 		out = append(out, strings.Join(parts, ","))
 	}

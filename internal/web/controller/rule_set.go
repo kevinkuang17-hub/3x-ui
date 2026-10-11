@@ -24,7 +24,7 @@ func NewRuleSetController(g *gin.RouterGroup) *RuleSetController {
 	g.GET("/routing", a.routing)
 	g.POST("/routing", a.saveRouting)
 	g.POST("/preview", a.preview)
-	g.GET("/groups", a.groups)
+	g.POST("/groups", a.groups)
 	return a
 }
 
@@ -84,7 +84,8 @@ func (a *RuleSetController) saveRouting(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if err := a.ruleSets.SaveGlobalRouting(body.RoutingChoice); err != nil {
+	// Check both parts before writing either, so a bad template does not leave the picks half saved.
+	if _, _, err := service.NormalizeChoice(body.RoutingChoice); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
@@ -94,12 +95,19 @@ func (a *RuleSetController) saveRouting(c *gin.Context) {
 			return
 		}
 	}
-	jsonMsg(c, I18nWeb(c, "pages.ruleSets.saved"), nil)
+	jsonMsg(c, I18nWeb(c, "pages.ruleSets.saved"), a.ruleSets.SaveGlobalRouting(body.RoutingChoice))
 }
 
 // groups lists the policy groups of a template so picks can send traffic to them.
 func (a *RuleSetController) groups(c *gin.Context) {
-	names, err := sub.ClashTemplateGroups(c.Query("template"))
+	var body struct {
+		Template string `json:"template"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	names, err := sub.ClashTemplateGroups(body.Template)
 	if names == nil {
 		names = []string{}
 	}

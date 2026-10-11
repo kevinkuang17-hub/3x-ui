@@ -2843,13 +2843,11 @@ export const sections: readonly Section[] = [
         body: '{\n  "template": "https://raw.githubusercontent.com/kevinkuang17-hub/pxc/main/rules/3x-ui/standard.yaml",\n  "ruleSets": [{ "id": 1, "policy": "DIRECT" }, { "id": 5, "policy": "🇭🇰 香港节点" }],\n  "extraRules": "example.com\\nbank.example,DIRECT"\n}',
       },
       {
-        method: 'GET',
+        method: 'POST',
         path: '/panel/api/ruleSets/groups',
         summary:
-          'Policy groups a routing template defines (fetched if remote); picks may send traffic to them, and PROXY means the first one.',
-        params: [
-          { name: 'template', in: 'query', type: 'string', desc: 'Template URL or inline YAML.' },
-        ],
+          'Policy groups a routing template (URL or inline YAML) defines, fetched if remote; picks may send traffic to them, and PROXY means the first one.',
+        body: '{\n  "template": "https://raw.githubusercontent.com/kevinkuang17-hub/pxc/main/rules/3x-ui/standard.yaml"\n}',
       },
       {
         method: 'POST',

@@ -16236,23 +16236,25 @@
       }
     },
     "/panel/api/ruleSets/groups": {
-      "get": {
+      "post": {
         "tags": [
           "Routing rule library"
         ],
-        "summary": "Policy groups a routing template defines (fetched if remote); picks may send traffic to them, and PROXY means the first one.",
-        "operationId": "get_panel_api_ruleSets_groups",
-        "parameters": [
-          {
-            "name": "template",
-            "in": "query",
-            "required": true,
-            "description": "Template URL or inline YAML.",
-            "schema": {
-              "type": "string"
+        "summary": "Policy groups a routing template (URL or inline YAML) defines, fetched if remote; picks may send traffic to them, and PROXY means the first one.",
+        "operationId": "post_panel_api_ruleSets_groups",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "template": "https://raw.githubusercontent.com/kevinkuang17-hub/pxc/main/rules/3x-ui/standard.yaml"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Successful response",
