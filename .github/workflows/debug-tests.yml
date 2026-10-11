@@ -4,7 +4,7 @@ on:
   push:
     branches: ["dev/**"]
 env:
-  PKGS: "./internal/web/service/ ./internal/web/ ./internal/sub/ ./internal/decoy/ ./internal/panelaccess/ ./internal/web/controller/"
+  PKGS: "./..."
   RUN: "."
 jobs:
   test:
@@ -22,7 +22,7 @@ jobs:
           set +e
           go test -count=1 -run "$RUN" $PKGS > out.txt 2>&1
           code=$?
-          grep -E -- "--- FAIL|FAIL|panic|_test.go:[0-9]+|Error|\.go:[0-9]+:" out.txt | head -120 > fail.txt
+          grep -E -- "--- FAIL|^FAIL|panic:|_test.go:[0-9]+" out.txt | head -120 > fail.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' fail.txt)
           echo "::error title=go test::${msg}"
           exit $code
