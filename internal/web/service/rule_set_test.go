@@ -21,6 +21,7 @@ func TestExtraRuleForms(t *testing.T) {
 		{"10.0.0.0/8,DIRECT", "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve"},
 		{"203.0.113.7,reject", "IP-CIDR,203.0.113.7/32,REJECT,no-resolve"},
 		{"domain-keyword,teams,🚀 节点选择", "DOMAIN-KEYWORD,teams,🚀 节点选择"},
+		{"IP-CIDR,192.0.2.0/24,PROXY,no-resolve", "IP-CIDR,192.0.2.0/24,PROXY,no-resolve"},
 	}
 	for _, c := range cases {
 		got, err := extraRule(c.in)
@@ -28,7 +29,7 @@ func TestExtraRuleForms(t *testing.T) {
 			t.Errorf("extraRule(%q) = %q, %v; want %q", c.in, got, err, c.want)
 		}
 	}
-	for _, bad := range []string{"MATCH,DIRECT", "not a domain", "DOMAIN-SUFFIX,x.com", "RULE-SET,ads,REJECT"} {
+	for _, bad := range []string{"MATCH,DIRECT", "not a domain", "DOMAIN-SUFFIX,x.com", "RULE-SET,ads,REJECT", "IP-CIDR,192.0.2.0/24,no-resolve"} {
 		if _, err := extraRule(bad); err == nil {
 			t.Errorf("extraRule(%q) must be rejected", bad)
 		}

@@ -20,8 +20,8 @@ type GroupSummary struct {
 	Down        int64  `json:"down"`
 	ClashRules  string `json:"clashRules"`
 	// ClashRuleSets and ClashExtraRules are the group's own rule-library picks and hand-written rules.
-	ClashRuleSets   []RuleSetPick `json:"clashRuleSets"`
-	ClashExtraRules string        `json:"clashExtraRules"`
+	ClashRuleSets   []RuleSetPick `json:"clashRuleSets" gorm:"-"`
+	ClashExtraRules string        `json:"clashExtraRules" gorm:"-"`
 }
 
 func (s *ClientService) ListGroups() ([]GroupSummary, error) {

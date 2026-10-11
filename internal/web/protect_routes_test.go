@@ -66,8 +66,8 @@ func TestDecoyAnswersOutsideTheSecretPath(t *testing.T) {
 		!strings.Contains(probe.Body.String(), "nginx") {
 		t.Fatalf("an unknown path must get the decoy's 404, got %d %q", probe.Code, probe.Body.String())
 	}
-	if login := get(engine, "/s3cret/", "198.51.100.7:4000"); strings.Contains(login.Body.String(), "Welcome to nginx!") {
-		t.Fatal("the secret path must still reach the panel")
+	if w := get(engine, "/s3cret/csrf-token", "198.51.100.7:4000"); w.Code != http.StatusOK || !strings.Contains(w.Body.String(), `"success":true`) {
+		t.Fatalf("the secret path must still reach the panel, got %d %q", w.Code, w.Body.String())
 	}
 }
 
@@ -82,18 +82,18 @@ func TestAllowlistHidesThePanelButKeepsPublicRoutes(t *testing.T) {
 	engine := protectRouter(t, map[string]string{
 		"webBasePath": "/s3cret/", "decoyMode": "maintenance", "panelAllowIps": "203.0.113.5",
 	})
-	blocked := get(engine, "/s3cret/", "198.51.100.7:4000")
-	if !strings.Contains(blocked.Body.String(), decoy.DefaultTitle("maintenance")) {
-		t.Fatalf("an address off the allowlist must see the decoy, got %d %q", blocked.Code, blocked.Body.String())
+	if w := get(engine, "/s3cret/csrf-token", "198.51.100.7:4000"); w.Code != http.StatusNotFound || !strings.Contains(w.Body.String(), "404 Not Found") {
+		t.Fatalf("an address off the allowlist must get the decoy's 404, got %d %q", w.Code, w.Body.String())
 	}
-	if allowed := get(engine, "/s3cret/", "203.0.113.5:4000"); strings.Contains(allowed.Body.String(), decoy.DefaultTitle("maintenance")) {
-		t.Fatal("an allowed address must reach the panel")
+	if w := get(engine, "/", "198.51.100.7:4000"); w.Code != http.StatusOK || !strings.Contains(w.Body.String(), decoy.DefaultTitle(decoy.ModeMaintenance)) {
+		t.Fatalf("an address off the allowlist must see the decoy site, got %d", w.Code)
 	}
-	if local := get(engine, "/s3cret/", "127.0.0.1:4000"); strings.Contains(local.Body.String(), decoy.DefaultTitle("maintenance")) {
-		t.Fatal("loopback must always reach the panel")
+	for _, remote := range []string{"203.0.113.5:4000", "127.0.0.1:4000"} {
+		if w := get(engine, "/s3cret/csrf-token", remote); w.Code != http.StatusOK || !strings.Contains(w.Body.String(), `"success":true`) {
+			t.Fatalf("%s must reach the panel API, got %d %q", remote, w.Code, w.Body.String())
+		}
 	}
-	join := get(engine, "/s3cret/probe/unknown-token", "198.51.100.7:4000")
-	if strings.Contains(join.Body.String(), decoy.DefaultTitle("maintenance")) {
-		t.Fatal("ISP probe routes must stay reachable for outside systems")
+	if w := get(engine, "/s3cret/probe/unknown-token", "198.51.100.7:4000"); w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), "unknown probe") {
+		t.Fatalf("ISP probe routes must stay reachable for outside systems, got %d %q", w.Code, w.Body.String())
 	}
 }

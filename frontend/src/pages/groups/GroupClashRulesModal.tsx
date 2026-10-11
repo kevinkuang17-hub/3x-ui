@@ -94,6 +94,12 @@ export default function GroupClashRulesModal({
         </Form.Item>
         {own && (
           <>
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 12 }}
+              title={t('pages.groups.clashRulesOwnDesc')}
+            />
             <Form.Item label={t('pages.settings.subClashPreset')}>
               <Select
                 value={template}

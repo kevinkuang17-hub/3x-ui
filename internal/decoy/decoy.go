@@ -134,6 +134,8 @@ func serveCustom(c *gin.Context, dir string) {
 		notFound(c)
 		return
 	}
+	// The uploaded site shares the panel's origin; the sandbox keeps its scripts away from the admin session.
+	c.Header("Content-Security-Policy", "sandbox allow-scripts allow-forms allow-popups")
 	c.File(full)
 	c.Abort()
 }

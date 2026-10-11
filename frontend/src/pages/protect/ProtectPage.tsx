@@ -299,10 +299,12 @@ function CfRow({
   label,
   domain: initialDomain,
   port,
+  panel,
 }: {
   label: string;
   domain: string;
   port: number;
+  panel: boolean;
 }) {
   const { t } = useTranslation();
   const [domain, setDomain] = useState(initialDomain);
@@ -350,7 +352,7 @@ function CfRow({
             loading={busy}
             checkedChildren={t('pages.protect.cfHidden')}
             unCheckedChildren={t('pages.protect.cfExposed')}
-            onChange={(on) => run('/cf/proxied', { domain, port, on })}
+            onChange={(on) => run('/cf/proxied', { domain, port, on, panel })}
           />
         )}
       </Space>
@@ -398,11 +400,17 @@ function CloudflareCard() {
         <>
           <CfRow
             label={t('pages.protect.cfPanel')}
+            panel
             domain={info.panelDomain || (isIP(host) ? '' : host)}
             port={info.panelPort}
           />
           {info.subEnable && (
-            <CfRow label={t('pages.protect.cfSub')} domain={info.subDomain} port={info.subPort} />
+            <CfRow
+              label={t('pages.protect.cfSub')}
+              panel={false}
+              domain={info.subDomain}
+              port={info.subPort}
+            />
           )}
         </>
       )}
