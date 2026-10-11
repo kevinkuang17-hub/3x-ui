@@ -16573,6 +16573,156 @@
         }
       }
     },
+    "/{surgePath}{subid}": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Surge managed profile at the fixed path /surge/. Built from the same proxy list as the Clash subscription (hosts, line health and group routing apply); transports Surge cannot express (gRPC, xhttp, REALITY, WireGuard) are skipped.",
+        "operationId": "get_surgePath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "surgePath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{loonPath}{subid}": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Loon profile at the fixed path /loon/ (VLESS with REALITY supported). Unsupported transports are skipped.",
+        "operationId": "get_loonPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loonPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{qxPath}{subid}": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Quantumult X server list (server_remote) at the fixed path /qx/. Unsupported transports are skipped.",
+        "operationId": "get_qxPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "qxPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/ws": {
       "get": {
         "tags": [

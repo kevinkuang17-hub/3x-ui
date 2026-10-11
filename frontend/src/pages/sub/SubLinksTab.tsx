@@ -8,12 +8,19 @@ interface SubLinksTabProps {
   subUrl: string;
   subJsonUrl: string;
   subClashUrl: string;
+  appleUrls?: { surge: string; loon: string; qx: string };
   onCopy: (value: string) => void;
 }
 
 const appendRawView = (url: string) => `${url}${url.includes('?') ? '&' : '?'}view=raw`;
 
-export default function SubLinksTab({ subUrl, subJsonUrl, subClashUrl, onCopy }: SubLinksTabProps) {
+export default function SubLinksTab({
+  subUrl,
+  subJsonUrl,
+  subClashUrl,
+  appleUrls,
+  onCopy,
+}: SubLinksTabProps) {
   const { t } = useTranslation();
   const subLabel = t('pages.settings.subSettings');
   const rows = [
@@ -26,6 +33,21 @@ export default function SubLinksTab({ subUrl, subJsonUrl, subClashUrl, onCopy }:
       downloadable: true,
     },
     { kind: 'CLASH', color: 'gold', url: subClashUrl, title: 'Clash / Mihomo', downloadable: true },
+    {
+      kind: 'SURGE',
+      color: 'blue',
+      url: appleUrls?.surge ?? '',
+      title: 'Surge',
+      downloadable: false,
+    },
+    { kind: 'LOON', color: 'cyan', url: appleUrls?.loon ?? '', title: 'Loon', downloadable: false },
+    {
+      kind: 'QX',
+      color: 'magenta',
+      url: appleUrls?.qx ?? '',
+      title: 'Quantumult X',
+      downloadable: false,
+    },
   ].filter((row) => row.url);
 
   return (

@@ -361,6 +361,7 @@ func (a *SUBController) initRouter(g *gin.RouterGroup) {
 			gLegacy.HEAD(":subid", a.subClashLegacy)
 		}
 	}
+	a.initAppleFormats(g)
 }
 
 func sameSubscriptionPath(left, right string) bool {
@@ -671,7 +672,7 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 	subUpdates, _ := a.settingService.GetSubUpdates()
 	updateHours, _ := strconv.Atoi(subUpdates)
 
-	return map[string]any{
+	ctx := map[string]any{
 		"sId":           page.SId,
 		"enabled":       page.Enabled,
 		"isOnline":      page.IsOnline,
@@ -696,6 +697,10 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 		"datepicker":    datepicker,
 		"announce":      page.SubAnnounce,
 	}
+	for format, link := range a.appleURLs(page.SubUrl, page.SId) {
+		ctx["sub"+format+"Url"] = link
+	}
+	return ctx
 }
 
 func (a *SUBController) enforceHwid(c *gin.Context) bool {

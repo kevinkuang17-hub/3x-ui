@@ -2954,6 +2954,27 @@ export const sections: readonly Section[] = [
         params: [{ name: 'subid', in: 'path', type: 'string', desc: 'Client subscription ID.' }],
         responses: subscriptionHeadResponses,
       },
+      {
+        method: 'GET',
+        path: '/{surgePath}:subid',
+        summary:
+          'Surge managed profile at the fixed path /surge/. Built from the same proxy list as the Clash subscription (hosts, line health and group routing apply); transports Surge cannot express (gRPC, xhttp, REALITY, WireGuard) are skipped.',
+        params: [{ name: 'subid', in: 'path', type: 'string', desc: 'Client subscription ID.' }],
+      },
+      {
+        method: 'GET',
+        path: '/{loonPath}:subid',
+        summary:
+          'Loon profile at the fixed path /loon/ (VLESS with REALITY supported). Unsupported transports are skipped.',
+        params: [{ name: 'subid', in: 'path', type: 'string', desc: 'Client subscription ID.' }],
+      },
+      {
+        method: 'GET',
+        path: '/{qxPath}:subid',
+        summary:
+          'Quantumult X server list (server_remote) at the fixed path /qx/. Unsupported transports are skipped.',
+        params: [{ name: 'subid', in: 'path', type: 'string', desc: 'Client subscription ID.' }],
+      },
     ],
   },
 

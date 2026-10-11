@@ -14,6 +14,9 @@ interface SubPageData {
   subUrl?: string;
   subJsonUrl?: string;
   subClashUrl?: string;
+  subSurgeUrl?: string;
+  subLoonUrl?: string;
+  subQxUrl?: string;
   subTitle?: string;
   subSupportUrl?: string;
   subUpdates?: number;
