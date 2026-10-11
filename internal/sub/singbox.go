@@ -178,6 +178,9 @@ func singboxOutbound(p map[string]any) map[string]any {
 		if ports := strOf(p, "ports"); ports != "" {
 			var ranges []string
 			for _, r := range splitComma(ports) {
+				if !strings.Contains(r, "-") {
+					r += "-" + r
+				}
 				ranges = append(ranges, strings.ReplaceAll(r, "-", ":"))
 			}
 			out["server_ports"] = ranges
@@ -198,6 +201,9 @@ func singboxOutbound(p map[string]any) map[string]any {
 		return out
 	case "socks5":
 		out["type"] = "socks"
+		if u := strOf(p, "username"); u != "" {
+			out["username"], out["password"] = u, strOf(p, "password")
+		}
 		return out
 	default:
 		return nil
@@ -234,7 +240,7 @@ func singboxDNSServer(tag, s string) map[string]any {
 	if err != nil || u.Hostname() == "" {
 		return nil
 	}
-	kind := map[string]string{"https": "https", "tls": "tls", "quic": "quic", "h3": "h3"}[u.Scheme]
+	kind := map[string]string{"https": "https", "tls": "tls", "quic": "quic", "h3": "h3", "tcp": "tcp"}[u.Scheme]
 	if kind == "" {
 		return nil
 	}
@@ -254,6 +260,10 @@ func singboxDNSServer(tag, s string) map[string]any {
 type singboxRuleSets struct {
 	tags []string
 	sets []any
+}
+
+func newSingboxRuleSets() *singboxRuleSets {
+	return &singboxRuleSets{sets: []any{}}
 }
 
 func (r *singboxRuleSets) use(kind, name string) string {
@@ -286,15 +296,15 @@ func singboxRouteRules(rules []libraryRule, sets *singboxRuleSets) []any {
 		if len(values) == 0 {
 			return
 		}
-		rule := map[string]any{cur.field: values}
-		switch cur.target {
-		case "block":
-			rule["action"] = "reject"
-		default:
-			rule["outbound"] = cur.target
-		}
-		out = append(out, rule)
+		out = append(out, singboxAction(map[string]any{cur.field: values}, cur.target))
 		values = nil
+	}
+	push := func(k key, v any) {
+		if k != cur {
+			flush()
+			cur = k
+		}
+		values = append(values, v)
 	}
 	for _, r := range rules {
 		var field string
@@ -313,27 +323,45 @@ func singboxRouteRules(rules []libraryRule, sets *singboxRuleSets) []any {
 		case "GEOSITE":
 			field, value = "rule_set", sets.use("geosite", r.value)
 		case "GEOIP":
+			if geoipCode(r.value) == "private" {
+				flush()
+				cur = key{}
+				out = append(out, singboxAction(map[string]any{"ip_is_private": true}, basicTarget(r.policy)))
+				continue
+			}
 			field, value = "rule_set", sets.use("geoip", r.value)
 		case "PROCESS-NAME":
 			field = "process_name"
 		case "DST-PORT":
-			n, err := strconv.Atoi(r.value)
-			if err != nil {
-				continue
+			// Mihomo writes port lists as 80/443 and ranges as 8000-9000.
+			for _, token := range strings.FieldsFunc(r.value, func(c rune) bool { return c == '/' || c == ',' }) {
+				pf, pv := "port", any(nil)
+				if lo, hi, isRange := strings.Cut(token, "-"); isRange {
+					pf, pv = "port_range", strings.TrimSpace(lo)+":"+strings.TrimSpace(hi)
+				} else if n, err := strconv.Atoi(strings.TrimSpace(token)); err == nil {
+					pv = n
+				} else {
+					continue
+				}
+				push(key{pf, basicTarget(r.policy)}, pv)
 			}
-			field, value = "port", n
+			continue
 		default:
 			continue
 		}
-		k := key{field, basicTarget(r.policy)}
-		if k != cur {
-			flush()
-			cur = k
-		}
-		values = append(values, value)
+		push(key{field, basicTarget(r.policy)}, value)
 	}
 	flush()
 	return out
+}
+
+func singboxAction(rule map[string]any, target string) map[string]any {
+	if target == "block" {
+		rule["action"] = "reject"
+	} else {
+		rule["outbound"] = target
+	}
+	return rule
 }
 
 // renderSingbox builds a complete sing-box profile: TUN and mixed inbounds, the nodes under a
@@ -341,11 +369,29 @@ func singboxRouteRules(rules []libraryRule, sets *singboxRuleSets) []any {
 func renderSingbox(proxies []map[string]any, rules []libraryRule, cfg service.DnsConfig) string {
 	var nodes []any
 	var names []string
+	used := map[string]bool{"proxy": true, "auto": true, "direct": true}
+	hasNodes := false
 	for _, p := range proxies {
-		if ob := singboxOutbound(p); ob != nil {
-			nodes = append(nodes, ob)
-			names = append(names, ob["tag"].(string))
+		ob := singboxOutbound(p)
+		if ob == nil {
+			continue
 		}
+		// Node names are free text; one equal to a built-in tag would stop sing-box from starting.
+		tag := ob["tag"].(string)
+		for i := 2; used[tag]; i++ {
+			tag = ob["tag"].(string) + " (" + strconv.Itoa(i) + ")"
+		}
+		used[tag], ob["tag"] = true, tag
+		nodes = append(nodes, ob)
+		names = append(names, tag)
+		if !(ob["type"] == "socks" && ob["server"] == "127.0.0.1") {
+			hasNodes = true
+		}
+	}
+	if !hasNodes {
+		// Only the info node (expired or out of traffic): rule sets could not be downloaded through
+		// it, so the profile stays minimal and just shows the node.
+		rules, cfg = nil, service.DnsConfig{}
 	}
 	outbounds := []any{}
 	if len(names) > 0 {
@@ -361,7 +407,7 @@ func renderSingbox(proxies []map[string]any, rules []libraryRule, cfg service.Dn
 	outbounds = append(outbounds, nodes...)
 	outbounds = append(outbounds, map[string]any{"type": "direct", "tag": "direct"})
 
-	sets := &singboxRuleSets{}
+	sets := newSingboxRuleSets()
 	routeRules := []any{
 		map[string]any{"action": "sniff"},
 		map[string]any{"protocol": "dns", "action": "hijack-dns"},
@@ -371,9 +417,11 @@ func renderSingbox(proxies []map[string]any, rules []libraryRule, cfg service.Dn
 		routeRules = append(routeRules, map[string]any{"ip_cidr": ips, "outbound": "direct"})
 	}
 	routeRules = append(routeRules, singboxRouteRules(rules, sets)...)
-	routeRules = append(routeRules,
-		map[string]any{"rule_set": []string{sets.use("geosite", "cn")}, "outbound": "direct"},
-		map[string]any{"rule_set": []string{sets.use("geoip", "cn")}, "outbound": "direct"})
+	if hasNodes {
+		routeRules = append(routeRules,
+			map[string]any{"rule_set": []string{sets.use("geosite", "cn")}, "outbound": "direct"},
+			map[string]any{"rule_set": []string{sets.use("geoip", "cn")}, "outbound": "direct"})
+	}
 
 	domestic, foreign := cfg.Servers()
 	servers := []any{map[string]any{"type": "udp", "tag": "dns-bootstrap", "server": "223.5.5.5"}}
@@ -403,7 +451,7 @@ func renderSingbox(proxies []map[string]any, rules []libraryRule, cfg service.Dn
 			}
 		}
 	}
-	if addFirst("dns-foreign", foreign, cfg.ForeignViaProxy) {
+	if hasNodes && addFirst("dns-foreign", foreign, cfg.ForeignViaProxy) {
 		dnsRules = append(dnsRules, map[string]any{"rule_set": []string{sets.use("geosite", "geolocation-!cn")}, "server": "dns-foreign"})
 	}
 	strategy := "ipv4_only"

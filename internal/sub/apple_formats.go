@@ -101,7 +101,7 @@ func (a *SUBController) subApple(c *gin.Context, format string) {
 		lib, dnsCfg := libraryRulesForSub(subID)
 		contentType, body = "application/json; charset=utf-8", renderSingbox(doc.Proxies, lib, dnsCfg)
 	case formatShadowrocket:
-		body = renderShadowrocket(self, hours, rules, dns)
+		body = renderShadowrocket(self, rules, dns, service.DnsForSub(subID).IPv6)
 	default:
 		body = renderAppleProfile(format, doc.Proxies, self, hours, appleRules(rules), dns)
 	}
@@ -490,14 +490,11 @@ func appleDNSFor(cfg service.DnsConfig) appleDNS {
 
 // renderShadowrocket writes a Shadowrocket config: DNS, the library rules and mainland-direct, with
 // PROXY meaning the node chosen in the app.
-func renderShadowrocket(selfURL string, updateHours int, rules []string, dns appleDNS) string {
-	if updateHours <= 0 {
-		updateHours = 12
-	}
+func renderShadowrocket(selfURL string, rules []string, dns appleDNS, ipv6 bool) string {
 	var b strings.Builder
 	b.WriteString("[General]\nbypass-system = true\n")
 	b.WriteString("skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local, captive.apple.com\n")
-	b.WriteString("dns-server = " + dns.serverLine() + "\nipv6 = false\n")
+	fmt.Fprintf(&b, "dns-server = %s\nipv6 = %t\n", dns.serverLine(), ipv6)
 	if selfURL != "" {
 		fmt.Fprintf(&b, "update-url = %s\n", selfURL)
 	}
@@ -508,7 +505,7 @@ func renderShadowrocket(selfURL string, updateHours int, rules []string, dns app
 			continue
 		}
 		switch parts[0] {
-		case "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "IP-CIDR", "IP-CIDR6", "GEOIP":
+		case "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "IP-CIDR", "IP-CIDR6", "GEOIP", "DST-PORT":
 		default:
 			continue
 		}

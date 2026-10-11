@@ -118,7 +118,7 @@ func TestHappRoutingFromLibrary(t *testing.T) {
 func TestShadowrocketConfig(t *testing.T) {
 	dns := appleDNSFor(service.DnsConfig{Enable: true, Company: "kstar.com = 192.168.8.10", CompanyDirect: true})
 	rules := append(dns.direct, "DOMAIN-SUFFIX,maersk.com,🇭🇰 香港节点", "GEOSITE,openai,PROXY", "GEOIP,TELEGRAM,PROXY,no-resolve")
-	out := renderShadowrocket("https://sub.example.com/shadowrocket/x", 6, rules, dns)
+	out := renderShadowrocket("https://sub.example.com/shadowrocket/x", rules, dns, false)
 	for _, want := range []string{
 		"DOMAIN-SUFFIX,kstar.com,DIRECT\nDOMAIN-SUFFIX,maersk.com,PROXY\nGEOIP,TELEGRAM,PROXY,no-resolve\nGEOIP,CN,DIRECT\nFINAL,PROXY",
 		"kstar.com = server:192.168.8.10",
@@ -149,12 +149,15 @@ func TestRenderSingbox(t *testing.T) {
 			"congestion-controller": "bbr", "alpn": []any{"h3"}},
 		{"name": "XH", "type": "vless", "server": "x.example.com", "port": 443, "uuid": "u4", "network": "xhttp", "tls": true},
 		{"name": "WG", "type": "wireguard", "server": "w.example.com", "port": 51820},
+		{"name": "auto", "type": "trojan", "server": "a.example.com", "port": 443, "password": "pw", "tls": true},
 	}
 	rules := []libraryRule{
 		{"DOMAIN-SUFFIX", "kstar.com", "DIRECT"},
 		{"DOMAIN-SUFFIX", "ads.example", "REJECT"},
 		{"DOMAIN-SUFFIX", "maersk.com", "🇭🇰 香港节点"},
 		{"GEOSITE", "openai", "PROXY"},
+		{"GEOIP", "LAN", "DIRECT"},
+		{"DST-PORT", "80/8000-9000", "PROXY"},
 	}
 	out := renderSingbox(proxies, rules, service.DnsConfig{Enable: true, Company: "kstar.com = 192.168.8.10"})
 	writeSample(t, "singbox.json", out)
@@ -190,11 +193,17 @@ func TestRenderSingbox(t *testing.T) {
 		t.Fatalf("transports = %+v / %+v", tags["US A"], tags["KR A"])
 	}
 	sel := tags["proxy"]["outbounds"].([]any)
-	if len(sel) != 7 || sel[0] != "auto" {
-		t.Fatalf("selector = %v", sel)
+	if len(sel) != 8 || sel[0] != "auto" || sel[7] != "auto (2)" {
+		t.Fatalf("a node named like a built-in tag must be renamed, selector = %v", sel)
 	}
-	var sawReject, sawRuleSet bool
+	var sawReject, sawRuleSet, sawPrivate, sawPorts bool
 	for _, r := range doc.Route.Rules {
+		if r["ip_is_private"] == true && r["outbound"] == "direct" && len(r) == 2 {
+			sawPrivate = true
+		}
+		if pr, ok := r["port_range"].([]any); ok && pr[0] == "8000:9000" {
+			sawPorts = true
+		}
 		if r["action"] == "reject" {
 			sawReject = true
 		}
@@ -202,10 +211,30 @@ func TestRenderSingbox(t *testing.T) {
 			sawRuleSet = true
 		}
 	}
-	if !sawReject || !sawRuleSet || len(doc.Route.RuleSet) != 4 {
+	if !sawReject || !sawRuleSet || !sawPrivate || !sawPorts || len(doc.Route.RuleSet) != 4 {
 		t.Fatalf("route = %+v", doc.Route)
 	}
 	if doc.DNS.Rules[0]["server"] != "dns-company-1" {
 		t.Fatalf("company DNS must come first: %+v", doc.DNS.Rules)
+	}
+}
+
+func TestSingboxInfoNodeOnly(t *testing.T) {
+	dummy := []map[string]any{{"name": "Expired", "type": "socks5", "server": "127.0.0.1", "port": uint64(1080)}}
+	out := renderSingbox(dummy, []libraryRule{{"GEOSITE", "openai", "PROXY"}}, service.DnsConfig{Enable: true})
+	if strings.Contains(out, ".srs") {
+		t.Fatalf("rule sets cannot be downloaded through the info node and would stop sing-box:\n%s", out)
+	}
+	if !strings.Contains(out, `"Expired"`) {
+		t.Fatal("the info node must still be shown")
+	}
+}
+
+func TestXrayGeoAndPorts(t *testing.T) {
+	if _, entry, _ := xrayMatch(libraryRule{"GEOIP", "LAN", "DIRECT"}); entry != "geoip:private" {
+		t.Fatalf("GEOIP,LAN = %q", entry)
+	}
+	if _, entry, _ := xrayMatch(libraryRule{"DST-PORT", "80/443", "PROXY"}); entry != "80,443" {
+		t.Fatalf("DST-PORT = %q", entry)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -74,17 +75,26 @@ func xrayMatch(r libraryRule) (field, entry string, ok bool) {
 	case "IP-CIDR", "IP-CIDR6":
 		return "ip", r.value, true
 	case "GEOIP":
-		return "ip", "geoip:" + strings.ToLower(r.value), true
+		return "ip", "geoip:" + geoipCode(r.value), true
 	case "DST-PORT":
-		return "port", r.value, true
+		return "port", strings.ReplaceAll(r.value, "/", ","), true
 	}
 	return "", "", false
+}
+
+// geoipCode maps Mihomo's LAN/PRIVATE pseudo-codes onto the "private" list the other cores ship.
+func geoipCode(v string) string {
+	v = strings.ToLower(v)
+	if v == "lan" {
+		return "private"
+	}
+	return v
 }
 
 // dnsServerHost returns the IP and port of a plain DNS server entry ("10.0.0.53", "10.0.0.53:5353",
 // "udp://10.0.0.53"); ok is false for DoH/DoT and names.
 func dnsServerHost(s string) (string, int, bool) {
-	s = strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(s), "udp://"), "tcp://")
+	s = strings.TrimPrefix(strings.TrimSpace(s), "udp://")
 	if ip := net.ParseIP(s); ip != nil {
 		return ip.String(), 53, true
 	}
@@ -107,10 +117,29 @@ func xrayDNSServer(s string) (any, bool) {
 		}
 		return map[string]any{"address": ip, "port": port}, true
 	}
-	if strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "quic+local://") || s == "localhost" {
+	if strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "tcp://") || strings.HasPrefix(s, "quic+local://") || s == "localhost" {
 		return s, true
 	}
+	if s == "system" {
+		return "localhost", true
+	}
 	return nil, false
+}
+
+// resolverIPs lists the literal IPs of resolvers (plain or DoH by IP); queries to them must not
+// ride the proxy, or mainland lookups would leave the country.
+func resolverIPs(list []string) []string {
+	var ips []string
+	for _, s := range list {
+		if ip, _, ok := dnsServerHost(s); ok {
+			ips = append(ips, ip)
+			continue
+		}
+		if u, err := url.Parse(s); err == nil && net.ParseIP(u.Hostname()) != nil {
+			ips = append(ips, u.Hostname())
+		}
+	}
+	return ips
 }
 
 func xrayDNS(cfg service.DnsConfig) map[string]any {
@@ -200,7 +229,12 @@ func xrayRoutingRules(rules []libraryRule, cfg service.DnsConfig, balancer bool)
 		}
 		entries = append(entries, entry)
 	}
-	for _, ip := range companyDNSIPs(cfg) {
+	direct := companyDNSIPs(cfg)
+	if cfg.Enable {
+		domestic, _ := cfg.Servers()
+		direct = append(direct, resolverIPs(domestic)...)
+	}
+	for _, ip := range direct {
 		add(key{"ip", "direct"}, ip)
 	}
 	for _, r := range rules {
@@ -214,7 +248,7 @@ func xrayRoutingRules(rules []libraryRule, cfg service.DnsConfig, balancer bool)
 
 // applyLibraryToXrayConfigs puts the library rules in front of every config's routing and, when
 // DNS is managed, replaces its dns block.
-func applyLibraryToXrayConfigs(configs []json_util.RawMessage, rules []libraryRule, cfg service.DnsConfig) []json_util.RawMessage {
+func applyLibraryToXrayConfigs(configs []json_util.RawMessage, rules []libraryRule, cfg service.DnsConfig, keepDNS bool) []json_util.RawMessage {
 	if len(rules) == 0 && !cfg.Enable {
 		return configs
 	}
@@ -234,7 +268,8 @@ func applyLibraryToXrayConfigs(configs []json_util.RawMessage, rules []libraryRu
 		existing, _ := routing["rules"].([]any)
 		routing["rules"] = append(added, existing...)
 		doc["routing"] = routing
-		if cfg.Enable {
+		// A DNS block set for the JSON subscription itself is an explicit choice and stays.
+		if cfg.Enable && !keepDNS {
 			doc["dns"] = xrayDNS(cfg)
 		}
 		patched, err := json.MarshalIndent(doc, "", "  ")
@@ -280,20 +315,23 @@ func happRoutingFromLibrary(rules []libraryRule, cfg service.DnsConfig) string {
 		spec[k] = v
 	}
 	domestic, foreign := cfg.Servers()
-	setDNS := func(list []string, domainKey, ipKey string) {
+	setDNS := func(list []string, prefix string) {
 		for _, s := range list {
-			if ip, _, ok := dnsServerHost(s); ok {
-				spec[ipKey] = ip
+			if ip, port, ok := dnsServerHost(s); ok && port == 53 {
+				spec[prefix+"DNSType"], spec[prefix+"DNSIP"] = "DoU", ip
 				return
 			}
-			if strings.HasPrefix(s, "https://") {
-				spec[domainKey] = s
+			if u, err := url.Parse(s); err == nil && u.Scheme == "https" && u.Hostname() != "" {
+				spec[prefix+"DNSType"], spec[prefix+"DNSDomain"] = "DoH", s
+				if net.ParseIP(u.Hostname()) != nil {
+					spec[prefix+"DNSIP"] = u.Hostname()
+				}
 				return
 			}
 		}
 	}
-	setDNS(domestic, "DomesticDNSDomain", "DomesticDNSIP")
-	setDNS(foreign, "RemoteDNSDomain", "RemoteDNSIP")
+	setDNS(domestic, "Domestic")
+	setDNS(foreign, "Remote")
 	body, err := json.Marshal(spec)
 	if err != nil {
 		return ""
