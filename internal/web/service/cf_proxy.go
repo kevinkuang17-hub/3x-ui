@@ -100,22 +100,25 @@ func (s *NodeDnsService) SetProxied(ctx context.Context, fqdn string, port int, 
 			return nil, common.NewError("set Cloudflare SSL/TLS mode to Full or Full (strict) first; it is", st.SslMode)
 		}
 	}
-	if st.Proxied == on {
-		return st, nil
-	}
 	zid, err := s.zoneFor(ctx, st.Domain)
 	if err != nil {
 		return nil, err
 	}
-	var records []cfRecord
-	if err := s.call(ctx, http.MethodGet, "/zones/"+zid+"/dns_records?type=A&name="+url.QueryEscape(st.Domain), nil, &records); err != nil {
-		return nil, err
-	}
-	if len(records) == 0 {
-		return nil, common.NewError("no A record for", st.Domain, "in Cloudflare")
-	}
-	if err := s.call(ctx, http.MethodPatch, "/zones/"+zid+"/dns_records/"+records[0].ID, map[string]any{"proxied": on}, nil); err != nil {
-		return nil, err
+	// AAAA records are switched too, or the origin would stay visible over IPv6.
+	for _, kind := range []string{"A", "AAAA"} {
+		var records []cfRecord
+		q := "/zones/" + zid + "/dns_records?type=" + kind + "&name=" + url.QueryEscape(st.Domain)
+		if err := s.call(ctx, http.MethodGet, q, nil, &records); err != nil {
+			return nil, err
+		}
+		for _, r := range records {
+			if r.Proxied == on {
+				continue
+			}
+			if err := s.call(ctx, http.MethodPatch, "/zones/"+zid+"/dns_records/"+r.ID, map[string]any{"proxied": on}, nil); err != nil {
+				return nil, err
+			}
+		}
 	}
 	st.Proxied = on
 	return st, nil

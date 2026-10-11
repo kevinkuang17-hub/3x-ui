@@ -140,6 +140,8 @@ type cfProxyBody struct {
 	Domain string `json:"domain"`
 	Port   int    `json:"port"`
 	On     bool   `json:"on"`
+	// Panel marks the panel's own domain: behind Cloudflare every visitor arrives from its edge IPs.
+	Panel bool `json:"panel"`
 }
 
 func (a *ProtectController) cfStatus(c *gin.Context) {
@@ -158,6 +160,10 @@ func (a *ProtectController) cfProxied(c *gin.Context) {
 	var body cfProxyBody
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if body.On && body.Panel && panelaccess.Active() {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), errProxyWithAllowlist)
 		return
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
@@ -260,4 +266,5 @@ var (
 	errNoRuntime            = errors.New("runtime manager unavailable")
 	errNodeNotFound         = errors.New("node not found")
 	errUnknownProtectAction = errors.New("unknown node action")
+	errProxyWithAllowlist   = errors.New("clear the panel access list first: behind Cloudflare every visitor, you included, comes from Cloudflare addresses")
 )

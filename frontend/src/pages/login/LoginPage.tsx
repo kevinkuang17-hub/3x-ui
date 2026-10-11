@@ -72,7 +72,7 @@ export default function LoginPage() {
       const [msg, passkeys] = await Promise.all([
         HttpUtil.post('/getTwoFactorEnable'),
         passkeysSupported()
-          ? HttpUtil.post<boolean>('/passkey/login/available', undefined, { silentSuccess: true })
+          ? HttpUtil.post<boolean>('/passkey/login/available', undefined, { silent: true })
           : Promise.resolve(null),
       ]);
       if (cancelled) return;

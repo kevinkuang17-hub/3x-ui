@@ -152,7 +152,12 @@ func extraRule(line string) (string, error) {
 	if kind == "MATCH" {
 		return "", fmt.Errorf("MATCH would hide every rule after it; set the default in the template instead")
 	}
-	if !ruleSetMatchTypes[kind] || len(parts) < 3 || parts[1] == "" || parts[2] == "" {
+	policyAt := len(parts) - 1
+	for policyAt >= 2 && (strings.EqualFold(parts[policyAt], "no-resolve") || strings.EqualFold(parts[policyAt], "src")) {
+		policyAt--
+	}
+	if !ruleSetMatchTypes[kind] || policyAt < 2 || parts[1] == "" || parts[policyAt] == "" ||
+		strings.EqualFold(parts[policyAt], "no-resolve") || strings.EqualFold(parts[policyAt], "src") {
 		return "", fmt.Errorf("write a domain, \"domain,DIRECT|PROXY|REJECT\" or TYPE,value,POLICY: %q", line)
 	}
 	parts[0] = kind

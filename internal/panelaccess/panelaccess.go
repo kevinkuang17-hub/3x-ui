@@ -70,13 +70,27 @@ func Allows(ip net.IP) bool {
 	return false
 }
 
-// RemoteIP is the TCP peer, never a forwarded header a client could forge.
+// RemoteIP is the TCP peer. Only a reverse proxy on this host is trusted to name the client, via
+// X-Real-IP or the last X-Forwarded-For hop it appended; a remote client cannot forge either.
 func RemoteIP(r *http.Request) net.IP {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		host = r.RemoteAddr
 	}
-	return net.ParseIP(host)
+	peer := net.ParseIP(host)
+	if peer == nil || !peer.IsLoopback() {
+		return peer
+	}
+	if ip := net.ParseIP(strings.TrimSpace(r.Header.Get("X-Real-IP"))); ip != nil {
+		return ip
+	}
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		hops := strings.Split(xff, ",")
+		if ip := net.ParseIP(strings.TrimSpace(hops[len(hops)-1])); ip != nil {
+			return ip
+		}
+	}
+	return peer
 }
 
 // Middleware turns away blocked addresses with deny; public prefixes (node join, ISP probes, SSO)

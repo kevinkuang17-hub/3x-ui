@@ -1024,7 +1024,8 @@
       "clashRulesCustomPlaceholder": "HTTPS-URL YAML маршрутизації або одне правило на рядок, напр. DOMAIN-SUFFIX,example.com,DIRECT",
       "clashRulesSaved": "Правила маршрутизації для {name} збережено",
       "clashRulesOwn": "Own routing for this group",
-      "clashRulesNoTemplate": "No template (only the rules below)"
+      "clashRulesNoTemplate": "No template (only the rules below)",
+      "clashRulesOwnDesc": "With its own routing this group no longer uses the global template or rules: pick a template below as well if you still want one."
     },
     "nodes": {
       "addNode": "Додати вузол",

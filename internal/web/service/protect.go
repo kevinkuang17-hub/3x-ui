@@ -2,6 +2,7 @@ package service
 
 import (
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -103,6 +104,9 @@ func (s *ProtectService) SaveAllowIps(raw, callerIP string) error {
 		parts = append(parts, n.String())
 	}
 	normalized := strings.Join(parts, ",")
+	if len(nets) > 0 && isLoopback(callerIP) {
+		return common.NewError("the panel cannot see your real address (a local proxy without X-Real-IP?); open the panel directly to set the allowlist")
+	}
 	if len(nets) > 0 && !allowsWith(normalized, callerIP) {
 		return common.NewError("the list must include the address you are using now:", callerIP)
 	}
@@ -120,20 +124,22 @@ func (s *ProtectService) LockToCaller(callerIP string) (string, error) {
 	return callerIP, s.SaveAllowIps(callerIP, callerIP)
 }
 
+func isLoopback(ip string) bool {
+	parsed := net.ParseIP(ip)
+	return parsed != nil && parsed.IsLoopback()
+}
+
 func allowsWith(raw, ip string) bool {
 	nets, err := panelaccess.Parse(raw)
 	if err != nil {
 		return false
 	}
-	parsed, _ := panelaccess.Parse(ip)
-	if len(parsed) == 0 {
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
 		return false
 	}
-	if parsed[0].IP.IsLoopback() {
-		return true
-	}
 	for _, n := range nets {
-		if n.Contains(parsed[0].IP) {
+		if n.Contains(parsed) {
 			return true
 		}
 	}

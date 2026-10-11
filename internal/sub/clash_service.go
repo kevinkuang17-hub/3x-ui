@@ -230,12 +230,16 @@ func prependLibraryRules(config map[string]any, choice service.RoutingChoice) {
 	}
 	known := clashRuleTargets(config)
 	added := make([]any, 0, len(rules))
+	skipped := 0
 	for _, r := range rules {
 		if _, ok := known[clashRuleTarget(r)]; !ok {
-			logger.Warning("clash routing: skipped rule with an unknown policy:", r)
+			skipped++
 			continue
 		}
 		added = append(added, r)
+	}
+	if skipped > 0 {
+		logger.Warningf("clash routing: skipped %d custom rule(s) naming a policy group the profile does not define", skipped)
 	}
 	existing, _ := asAnySlice(config["rules"])
 	config["rules"] = append(added, existing...)

@@ -18,8 +18,9 @@ import (
 // speedupSysctls is the network tuning applied in one click: BBR with fq pacing, TCP Fast Open and
 // larger socket buffers for long, fast links. Values only raise limits; they never cap a server.
 var speedupSysctls = [][2]string{
-	{"net.core.default_qdisc", "fq"},
+	// Congestion control goes first: if the kernel refuses it, Apply stops before changing anything else.
 	{"net.ipv4.tcp_congestion_control", "bbr"},
+	{"net.core.default_qdisc", "fq"},
 	{"net.ipv4.tcp_fastopen", "3"},
 	{"net.core.rmem_max", "33554432"},
 	{"net.core.wmem_max", "33554432"},

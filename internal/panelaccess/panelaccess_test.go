@@ -59,6 +59,12 @@ func TestMiddlewareUsesThePeerNotForwardedHeaders(t *testing.T) {
 	if got := do("/s/", "203.0.113.5:1000", ""); got != http.StatusOK {
 		t.Fatalf("the allowed peer must pass, got %d", got)
 	}
+	if got := do("/s/", "127.0.0.1:1000", "198.51.100.7"); got != http.StatusTeapot {
+		t.Fatalf("a client behind a local reverse proxy must be judged by its own address, got %d", got)
+	}
+	if got := do("/s/", "127.0.0.1:1000", "203.0.113.5"); got != http.StatusOK {
+		t.Fatalf("an allowed client behind a local reverse proxy must pass, got %d", got)
+	}
 	if got := do("/s/probe/abc", "198.51.100.7:1000", ""); got != http.StatusOK {
 		t.Fatalf("public routes must pass, got %d", got)
 	}

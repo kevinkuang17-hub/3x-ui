@@ -1024,7 +1024,8 @@
       "clashRulesCustomPlaceholder": "填写分流 YAML 的 HTTPS 地址，或每行一条规则，如 DOMAIN-SUFFIX,example.com,DIRECT",
       "clashRulesSaved": "{name} 的分流规则已保存",
       "clashRulesOwn": "该组单独设置",
-      "clashRulesNoTemplate": "不使用模板（只用下面的规则）"
+      "clashRulesNoTemplate": "不使用模板（只用下面的规则）",
+      "clashRulesOwnDesc": "单独设置后，该组不再使用全局的模板和规则；如仍需要模板，请在下面一并选择。"
     },
     "nodes": {
       "addNode": "添加节点",
