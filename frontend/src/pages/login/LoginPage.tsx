@@ -50,6 +50,7 @@ export default function LoginPage() {
   const [fetched, setFetched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [twoFactorEnable, setTwoFactorEnable] = useState(false);
+  const [passkeyAvailable, setPasskeyAvailable] = useState(false);
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const methods = useForm<LoginForm>({
     defaultValues: { username: '', password: '', twoFactorCode: '' },
@@ -68,9 +69,15 @@ export default function LoginPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const msg = await HttpUtil.post('/getTwoFactorEnable');
+      const [msg, passkeys] = await Promise.all([
+        HttpUtil.post('/getTwoFactorEnable'),
+        passkeysSupported()
+          ? HttpUtil.post<boolean>('/passkey/login/available', undefined, { silentSuccess: true })
+          : Promise.resolve(null),
+      ]);
       if (cancelled) return;
       if (msg.success) setTwoFactorEnable(!!msg.obj);
+      setPasskeyAvailable(!!passkeys?.success && passkeys.obj === true);
       setFetched(true);
     })();
     return () => {
@@ -264,29 +271,29 @@ export default function LoginPage() {
                     )}
 
                     <Form.Item className="submit-row">
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={submitting}
-                        size="large"
-                        block
-                      >
-                        {t('login')}
-                      </Button>
-                    </Form.Item>
-                    {passkeysSupported() && (
-                      <Form.Item>
+                      <div className="login-actions">
                         <Button
-                          icon={<KeyOutlined />}
+                          type="primary"
+                          htmlType="submit"
+                          loading={submitting}
                           size="large"
                           block
-                          loading={passkeyBusy}
-                          onClick={onPasskey}
                         >
-                          {t('pages.login.passkey')}
+                          {t('login')}
                         </Button>
-                      </Form.Item>
-                    )}
+                        {passkeyAvailable && (
+                          <Button
+                            icon={<KeyOutlined />}
+                            size="large"
+                            block
+                            loading={passkeyBusy}
+                            onClick={onPasskey}
+                          >
+                            {t('pages.login.passkey')}
+                          </Button>
+                        )}
+                      </div>
+                    </Form.Item>
                   </Form>
                 </FormProvider>
                 <SponsorSlot slot="login" variant="compact" className="login-sponsor" />
