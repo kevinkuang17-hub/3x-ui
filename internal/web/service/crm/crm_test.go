@@ -192,8 +192,10 @@ func TestSSOTicketIsSingleUseAndShortLived(t *testing.T) {
 	if err != nil || exp != testNow.Add(ssoTTL).Unix() || len(token) != 64 {
 		t.Fatalf("mint: token=%q exp=%d err=%v", token, exp, err)
 	}
-	if !s.PeekSSO(token) || !s.PeekSSO(token) {
-		t.Fatal("peeking must not consume the ticket")
+	for range 2 {
+		if !s.PeekSSO(token) {
+			t.Fatal("peeking must not consume the ticket")
+		}
 	}
 	user, redirect, err := s.ConsumeSSO(token)
 	if err != nil || user.Username != "crm-admin" || redirect != "/panel/clients" {
