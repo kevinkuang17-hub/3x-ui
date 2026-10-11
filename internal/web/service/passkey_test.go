@@ -2,24 +2,25 @@ package service
 
 import (
 	"crypto/tls"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestPasskeyRelyingParty(t *testing.T) {
-	ip := httptest.NewRequest("GET", "https://203.0.113.5:2053/", nil)
+	ip := httptest.NewRequest(http.MethodGet, "https://203.0.113.5:2053/", nil)
 	ip.TLS = &tls.ConnectionState{}
 	if _, _, err := RelyingParty(ip, false); err == nil {
 		t.Fatal("IP hosts cannot be a WebAuthn relying party")
 	}
-	plain := httptest.NewRequest("GET", "http://panel.example.com:2053/", nil)
+	plain := httptest.NewRequest(http.MethodGet, "http://panel.example.com:2053/", nil)
 	if _, _, err := RelyingParty(plain, false); err == nil {
 		t.Fatal("plain http must be refused")
 	}
 	if _, rp, err := RelyingParty(plain, true); err != nil || rp != "panel.example.com" {
 		t.Fatalf("https via a trusted proxy: rp=%q err=%v", rp, err)
 	}
-	secure := httptest.NewRequest("GET", "https://panel.example.com:2053/", nil)
+	secure := httptest.NewRequest(http.MethodGet, "https://panel.example.com:2053/", nil)
 	secure.TLS = &tls.ConnectionState{}
 	if w, rp, err := RelyingParty(secure, false); err != nil || w == nil || rp != "panel.example.com" {
 		t.Fatalf("rp=%q err=%v", rp, err)
