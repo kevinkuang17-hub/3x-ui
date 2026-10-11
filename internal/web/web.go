@@ -919,13 +919,18 @@ func denyPanelAccess(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNotFound)
 }
 
-// startFront serves the panel engine on port 443 too when the admin turned that on, so the decoy is
-// an ordinary https site with no port in its address. It reports whether the panel's own port may
-// then listen on loopback only; a failed 443 bind keeps the port open so the admin is not locked out.
+// startFront also serves the panel on 443 when enabled and reports whether the panel port may go
+// loopback-only; any failure keeps that port open so the admin is not locked out.
 func (s *Server) startFront(engine http.Handler, certFile, keyFile string) bool {
-	enabled, frontOnly := (&service.ProtectService{}).FrontSettings()
+	protect := &service.ProtectService{}
+	enabled, frontOnly := protect.FrontSettings()
 	if !enabled {
 		service.SetFrontStatus(service.FrontStatus{})
+		return false
+	}
+	if conflict := protect.FrontConflict(); conflict != "" {
+		logger.Warning("Front website on port 443 not started: already used by", conflict)
+		service.SetFrontStatus(service.FrontStatus{Error: "port 443 is used by " + conflict})
 		return false
 	}
 	fail := func(err error) bool {

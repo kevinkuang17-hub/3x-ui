@@ -180,7 +180,8 @@ type groupClashRulesBody struct {
 	RuleSets   *[]service.RuleSetPick `json:"ruleSets"`
 	ExtraRules *string                `json:"extraRules"`
 	// Dns: omitted keeps the group's DNS, null makes it follow the global DNS, an object sets its own.
-	Dns *json.RawMessage `json:"dns"`
+	// A plain RawMessage keeps "null" (a pointer would turn it into "omitted").
+	Dns json.RawMessage `json:"dns"`
 }
 
 func (a *GroupController) setClashRules(c *gin.Context) {
@@ -203,11 +204,11 @@ func (a *GroupController) setClashRules(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if body.Dns != nil {
+	if len(body.Dns) > 0 {
 		var dns *service.DnsConfig
-		if string(*body.Dns) != "null" {
+		if string(body.Dns) != "null" {
 			dns = &service.DnsConfig{}
-			if err := json.Unmarshal(*body.Dns, dns); err != nil {
+			if err := json.Unmarshal(body.Dns, dns); err != nil {
 				jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 				return
 			}

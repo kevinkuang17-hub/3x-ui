@@ -188,6 +188,7 @@ var defaultValueMap = map[string]string{
 	"subClashRules":               "",
 	"subClashRuleSets":            "",
 	"subClashExtraRules":          "",
+	"subClashDns":                 "",
 	"decoyMode":                   "off",
 	"decoyTitle":                  "",
 	"decoyTagline":                "",

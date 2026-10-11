@@ -24,7 +24,7 @@ export default function ImportModal({ open, onClose, onImported }: Props) {
   const [source, setSource] = useState<'url' | 'paste'>('url');
   const [url, setUrl] = useState('');
   const [content, setContent] = useState('');
-  const [importDns, setImportDns] = useState(true);
+  const [importDns, setImportDns] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
 
