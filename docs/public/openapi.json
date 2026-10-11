@@ -15245,7 +15245,7 @@
         "tags": [
           "Xray config history"
         ],
-        "summary": "Save that version as the current template (validated like a normal save) and restart Xray when it is running.",
+        "summary": "Save that version as the current template and restart Xray when it is running.",
         "operationId": "post_panel_api_xray_history_restore_id",
         "parameters": [
           {

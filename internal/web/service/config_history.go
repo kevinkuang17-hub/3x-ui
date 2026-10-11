@@ -18,8 +18,7 @@ const configHistoryKeep = 50
 // ConfigHistoryService versions the Xray template config without touching the save path:
 // a job snapshots whatever is stored, so edits from the UI, API or bots are all covered.
 type ConfigHistoryService struct {
-	settingService     SettingService
-	xraySettingService XraySettingService
+	settingService SettingService
 }
 
 func configHash(content string) string {
@@ -91,14 +90,14 @@ func (s *ConfigHistoryService) Get(id int) (*model.ConfigSnapshot, error) {
 	return &snap, nil
 }
 
-// Restore saves an older version as the current template (validated like a normal save) and
-// records the switch as a new snapshot.
+// Restore puts an older version back as the current template and records the switch as a new
+// snapshot. Versions were validated when first saved, so the core is not consulted again.
 func (s *ConfigHistoryService) Restore(id int, note string) (*model.ConfigSnapshot, error) {
 	snap, err := s.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := s.xraySettingService.SaveXraySetting(snap.Content); err != nil {
+	if err := s.settingService.saveSetting("xrayTemplateConfig", snap.Content); err != nil {
 		return nil, err
 	}
 	cur, err := s.Capture(time.Now(), note)

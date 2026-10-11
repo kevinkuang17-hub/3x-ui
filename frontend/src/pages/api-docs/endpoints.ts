@@ -2662,8 +2662,7 @@ export const sections: readonly Section[] = [
       {
         method: 'POST',
         path: '/panel/api/xray/history/restore/:id',
-        summary:
-          'Save that version as the current template (validated like a normal save) and restart Xray when it is running.',
+        summary: 'Save that version as the current template and restart Xray when it is running.',
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Version id.' }],
       },
     ],
