@@ -118,6 +118,8 @@ func EmbeddedDist() embed.FS {
 type Server struct {
 	httpServer *http.Server
 	listener   net.Listener
+	// frontServer serves the same panel on port 443, where the decoy site looks like any website.
+	frontServer *http.Server
 
 	index *controller.IndexController
 	panel *controller.XUIController
@@ -649,6 +651,9 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 			logger.Info("Using XUI_PORT override for web panel port:", port)
 		}
 	}
+	if s.startFront(engine, certFile, keyFile) {
+		listen = "127.0.0.1"
+	}
 	listenAddr := net.JoinHostPort(listen, strconv.Itoa(port))
 	listener, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", listenAddr)
 	if err != nil {
@@ -837,6 +842,12 @@ func (s *Server) stop(stopXray bool, stopTgBot bool) error {
 		err1 = s.httpServer.Shutdown(shutdownCtx)
 		shutdownCancel()
 	}
+	if s.frontServer != nil {
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		err1 = common.Combine(err1, s.frontServer.Shutdown(shutdownCtx))
+		shutdownCancel()
+		s.frontServer = nil
+	}
 	if s.cron != nil {
 		<-s.cron.Stop().Done()
 	}
@@ -906,4 +917,40 @@ func denyPanelAccess(c *gin.Context) {
 		return
 	}
 	c.AbortWithStatus(http.StatusNotFound)
+}
+
+// startFront serves the panel engine on port 443 too when the admin turned that on, so the decoy is
+// an ordinary https site with no port in its address. It reports whether the panel's own port may
+// then listen on loopback only; a failed 443 bind keeps the port open so the admin is not locked out.
+func (s *Server) startFront(engine http.Handler, certFile, keyFile string) bool {
+	enabled, frontOnly := (&service.ProtectService{}).FrontSettings()
+	if !enabled {
+		service.SetFrontStatus(service.FrontStatus{})
+		return false
+	}
+	fail := func(err error) bool {
+		logger.Warning("Front website on port 443 not started:", err)
+		service.SetFrontStatus(service.FrontStatus{Error: err.Error()})
+		return false
+	}
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return fail(err)
+	}
+	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", net.JoinHostPort("", strconv.Itoa(service.FrontPort)))
+	if err != nil {
+		return fail(err)
+	}
+	s.frontServer = &http.Server{
+		Handler:           engine,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       120 * time.Second,
+	}
+	tlsLn := tls.NewListener(ln, &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12})
+	go network.ServeHTTP(s.frontServer, tlsLn, "Front website")
+	logger.Info("Front website running HTTPS on", ln.Addr())
+	service.SetFrontStatus(service.FrontStatus{Listening: true, FrontOnly: frontOnly})
+	return frontOnly
 }

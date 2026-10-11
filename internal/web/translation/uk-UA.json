@@ -1025,7 +1025,9 @@
       "clashRulesSaved": "Правила маршрутизації для {name} збережено",
       "clashRulesOwn": "Own routing for this group",
       "clashRulesNoTemplate": "No template (only the rules below)",
-      "clashRulesOwnDesc": "With its own routing this group no longer uses the global template or rules: pick a template below as well if you still want one."
+      "clashRulesOwnDesc": "With its own routing this group no longer uses the global template or rules: pick a template below as well if you still want one.",
+      "dnsFollowGlobal": "Use the global DNS",
+      "dnsOwn": "Own DNS for this group (e.g. its company DNS)"
     },
     "nodes": {
       "addNode": "Додати вузол",
@@ -2627,7 +2629,30 @@
       "templateDesc": "The rule sets and custom rules below go in front of this template. \"Proxy\" sends traffic to the template's main node choice, and each of its groups (Hong Kong nodes, AI services, …) can be picked as a destination.",
       "templateGroups": "Groups in this template ({count}); the first is the one \"Proxy\" uses",
       "templateGroupsFailed": "Could not read the template groups: {msg}",
-      "clashOffNote": "The Clash/Mihomo subscription is off. Saving a template switches it on; restart the panel once for it to take effect."
+      "clashOffNote": "The Clash/Mihomo subscription is off. Saving a template switches it on; restart the panel once for it to take effect.",
+      "dnsTitle": "DNS",
+      "dnsEnable": "Write DNS settings into subscriptions",
+      "dnsEnableDesc": "Clash/Mihomo, Surge and Loon get these resolvers. Off leaves the client's own DNS untouched.",
+      "dnsCompany": "Company DNS",
+      "dnsCompanyDesc": "One line per company: its domains, \"=\", then its DNS servers. Those domains (and subdomains) are resolved by the company servers and get real IPs.",
+      "dnsCompanyDirect": "Company domains connect directly (not through the proxy)",
+      "dnsDomestic": "Domestic DNS",
+      "dnsForeign": "Foreign DNS (non-mainland domains)",
+      "dnsDefaultHint": "Empty uses the default shown in the box.",
+      "dnsMode": "DNS mode",
+      "dnsForeignViaProxy": "Query foreign DNS through the proxy",
+      "import": "Import",
+      "importTitle": "Import routing from a Clash config",
+      "importDesc": "Give the address of a Clash/Mihomo config or subscription, or paste one. Its rules become rule sets, one per destination group; RULE-SET and MATCH lines are skipped. Its DNS (servers and company DNS) can be taken over too.",
+      "importFromUrl": "From an address",
+      "importPaste": "Paste the config",
+      "importUrl": "Config or subscription address (https)",
+      "importContent": "Config (YAML)",
+      "importDns": "Also take over its DNS settings",
+      "importResult": "Imported {rules} rules into {sets} rule sets ({skipped} skipped)",
+      "importDnsDone": "DNS settings were taken over; check them on the Global routing tab.",
+      "importPasted": "Imported",
+      "imported": "Import finished"
     },
     "protect": {
       "saved": "Saved",
@@ -2711,7 +2736,19 @@
       "decoyModeDesc_tech": "Small software company with services and a contact button.",
       "decoyModeDesc_blog": "Personal blog with a few posts on travel and photography.",
       "decoyModeDesc_photo": "Dark photo gallery page for a photographer.",
-      "decoyModeDesc_maintenance": "A short \"under maintenance\" notice."
+      "decoyModeDesc_maintenance": "A short \"under maintenance\" notice.",
+      "frontSaved": "Saved; the panel is restarting",
+      "frontTitle": "Publish on port 443 (address without a port)",
+      "frontDesc": "Serves this panel on port {port} too, so the decoy is at https://your-domain/ like any website, and the panel at https://your-domain/secret-path/. Uses the panel certificate; needs a panel restart.",
+      "frontNoCert": "The panel has no certificate yet; set one up with the x-ui menu (SSL) first.",
+      "frontConflict": "Port {port} is used by the inbound \"{name}\" on this server; move that inbound first.",
+      "frontFailed": "Port 443 could not be opened at the last start: {msg}",
+      "frontRunning": "Live at {url}",
+      "frontPanelURL": "Panel without a port: {url}",
+      "frontRestarting": "The panel is restarting; this page reloads in a few seconds.",
+      "frontEnable": "Serve the website on port {port}",
+      "frontOnly": "Close the panel port {port} to the outside (panel only via port 443)",
+      "frontOnlyNote": "Only on the master. Can be switched on once port 443 is running. If you get locked out, run on the server: x-ui setting -resetPanelAccess && x-ui restart"
     }
   },
   "tgbot": {

@@ -475,6 +475,8 @@ type GroupRouting struct {
 	Template string
 	Choice   RoutingChoice
 	Override bool
+	// Dns is the group's own DNS; nil follows the global DNS whether or not routing is overridden.
+	Dns *DnsConfig
 }
 
 // GroupRoutingBySubID finds the routing of the subscriber's group, using the oldest client of the
@@ -497,5 +499,6 @@ func GroupRoutingBySubID(subID string) GroupRouting {
 		Choice:   RoutingChoice{RuleSets: ParseRuleSetPicks(group.ClashRuleSets), ExtraRules: group.ClashExtraRules},
 	}
 	g.Override = g.Template != "" || !g.Choice.Empty()
+	g.Dns = ParseDns(group.ClashDns)
 	return g
 }

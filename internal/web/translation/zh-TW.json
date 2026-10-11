@@ -1025,7 +1025,9 @@
       "clashRulesSaved": "{name} 的分流規則已儲存",
       "clashRulesOwn": "该组单独设置",
       "clashRulesNoTemplate": "不使用模板（只用下面的规则）",
-      "clashRulesOwnDesc": "单独设置后，该组不再使用全局的模板和规则；如仍需要模板，请在下面一并选择。"
+      "clashRulesOwnDesc": "单独设置后，该组不再使用全局的模板和规则；如仍需要模板，请在下面一并选择。",
+      "dnsFollowGlobal": "使用全局 DNS",
+      "dnsOwn": "该组单独的 DNS（如该公司的 DNS）"
     },
     "nodes": {
       "addNode": "新增節點",
@@ -2627,7 +2629,30 @@
       "templateDesc": "下面的规则集和自定义规则排在这个模板前面。“走代理”使用模板的主节点选择，也可以把流量指定给模板里的任意分组（香港节点、AI 服务等）。",
       "templateGroups": "模板里的分组（{count} 个），第一个是“走代理”使用的主分组",
       "templateGroupsFailed": "读取模板分组失败：{msg}",
-      "clashOffNote": "Clash/Mihomo 订阅当前未开启。保存模板时会自动开启，需要重启一次面板才生效。"
+      "clashOffNote": "Clash/Mihomo 订阅当前未开启。保存模板时会自动开启，需要重启一次面板才生效。",
+      "dnsTitle": "DNS",
+      "dnsEnable": "在订阅中下发 DNS 设置",
+      "dnsEnableDesc": "Clash/Mihomo、Surge、Loon 会使用这里的 DNS。关闭则不改动客户端自己的 DNS。",
+      "dnsCompany": "公司 DNS",
+      "dnsCompanyDesc": "每个公司一行：域名，等号，再写该公司的 DNS 服务器。这些域名（含子域名）用公司 DNS 解析，并拿到真实 IP。",
+      "dnsCompanyDirect": "公司域名直连（不走代理）",
+      "dnsDomestic": "国内 DNS",
+      "dnsForeign": "境外 DNS（境外域名使用）",
+      "dnsDefaultHint": "留空使用框里显示的默认值。",
+      "dnsMode": "DNS 模式",
+      "dnsForeignViaProxy": "境外 DNS 通过代理查询",
+      "import": "导入",
+      "importTitle": "从 Clash 配置导入分流",
+      "importDesc": "填写 Clash/Mihomo 配置或订阅地址，或直接粘贴配置。规则会按去向分组变成规则集；RULE-SET 和 MATCH 行会跳过。也可以一起导入它的 DNS（服务器和公司 DNS）。",
+      "importFromUrl": "从地址导入",
+      "importPaste": "粘贴配置",
+      "importUrl": "配置或订阅地址（https）",
+      "importContent": "配置内容（YAML）",
+      "importDns": "同时导入它的 DNS 设置",
+      "importResult": "已导入 {rules} 条规则，生成 {sets} 个规则集（跳过 {skipped} 条）",
+      "importDnsDone": "DNS 设置已导入，请到“全局分流”页检查。",
+      "importPasted": "导入",
+      "imported": "导入完成"
     },
     "protect": {
       "saved": "已保存",
@@ -2711,7 +2736,19 @@
       "decoyModeDesc_tech": "小型软件公司：业务介绍和联系按钮。",
       "decoyModeDesc_blog": "个人博客：几篇旅行和摄影文章。",
       "decoyModeDesc_photo": "深色风格的摄影师作品展示页。",
-      "decoyModeDesc_maintenance": "一个简单的“网站维护中”提示页。"
+      "decoyModeDesc_maintenance": "一个简单的“网站维护中”提示页。",
+      "frontSaved": "已保存，面板正在重启",
+      "frontTitle": "在 443 端口发布（网址不带端口）",
+      "frontDesc": "面板同时在 {port} 端口提供服务：伪装网站是 https://你的域名/，像普通网站一样不带端口；面板地址是 https://你的域名/秘密路径/。使用面板证书，保存后面板会自动重启。",
+      "frontNoCert": "面板还没有证书，请先用 x-ui 菜单（SSL 证书）申请。",
+      "frontConflict": "本机入站“{name}”正在使用 {port} 端口，请先把它换到其他端口。",
+      "frontFailed": "上次启动时没能打开 443 端口：{msg}",
+      "frontRunning": "已上线：{url}",
+      "frontPanelURL": "不带端口的面板地址：{url}",
+      "frontRestarting": "面板正在重启，几秒后自动刷新本页。",
+      "frontEnable": "在 {port} 端口发布网站",
+      "frontOnly": "对外关闭面板端口 {port}（面板只能通过 443 访问）",
+      "frontOnlyNote": "只在主控上使用；443 正常运行后才能开启。万一进不去，在服务器上执行：x-ui setting -resetPanelAccess && x-ui restart"
     }
   },
   "tgbot": {

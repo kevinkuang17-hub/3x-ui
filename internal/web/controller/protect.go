@@ -15,11 +15,13 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/panelaccess"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
 )
 
 // ProtectController serves Protect & speed under /panel/api/protect: the decoy site, the panel
 // allowlist, Cloudflare proxying and network tuning, for this server and (from a master) its nodes.
 type ProtectController struct {
+	panel       panel.PanelService
 	protect     service.ProtectService
 	speedup     service.SpeedupService
 	dns         service.NodeDnsService
@@ -39,6 +41,8 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.POST("/decoy", a.saveDecoy)
 	g.POST("/decoy/upload", a.uploadDecoy)
 	g.POST("/decoy/preview", a.previewDecoy)
+	g.GET("/front", a.front)
+	g.POST("/front", a.saveFront)
 	g.GET("/cf", a.cfInfo)
 	g.POST("/cf/status", a.cfStatus)
 	g.POST("/cf/proxied", a.cfProxied)
@@ -94,6 +98,27 @@ func (a *ProtectController) lockToCaller(c *gin.Context) {
 func (a *ProtectController) decoy(c *gin.Context) {
 	st, err := a.protect.Decoy()
 	jsonObj(c, st, err)
+}
+
+func (a *ProtectController) front(c *gin.Context) {
+	jsonObj(c, a.protect.Front(), nil)
+}
+
+// saveFront stores the port-443 switches and restarts the panel, since listeners only change on start.
+func (a *ProtectController) saveFront(c *gin.Context) {
+	var body struct {
+		Enabled   bool `json:"enabled"`
+		FrontOnly bool `json:"frontOnly"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if err := a.protect.SaveFront(body.Enabled, body.FrontOnly); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.protect.frontSaved"), a.panel.RestartPanel(3*time.Second))
 }
 
 type decoyBody struct {

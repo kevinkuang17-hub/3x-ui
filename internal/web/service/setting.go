@@ -193,6 +193,8 @@ var defaultValueMap = map[string]string{
 	"decoyTagline":                "",
 	"decoyEmail":                  "",
 	"panelAllowIps":               "",
+	"decoyFront":                  "false",
+	"panelFrontOnly":              "false",
 	"subLineHealth":               "false",
 	"crmWebhookEnable":            "false",
 	"crmWebhookUrl":               "",

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
@@ -178,6 +179,8 @@ type groupClashRulesBody struct {
 	// With both omitted the stored picks and custom rules stay (older clients send only clashRules).
 	RuleSets   *[]service.RuleSetPick `json:"ruleSets"`
 	ExtraRules *string                `json:"extraRules"`
+	// Dns: omitted keeps the group's DNS, null makes it follow the global DNS, an object sets its own.
+	Dns *json.RawMessage `json:"dns"`
 }
 
 func (a *GroupController) setClashRules(c *gin.Context) {
@@ -199,6 +202,20 @@ func (a *GroupController) setClashRules(c *gin.Context) {
 	if err := a.clientService.SetGroupRouting(body.Name, body.ClashRules, choice); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
+	}
+	if body.Dns != nil {
+		var dns *service.DnsConfig
+		if string(*body.Dns) != "null" {
+			dns = &service.DnsConfig{}
+			if err := json.Unmarshal(*body.Dns, dns); err != nil {
+				jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+				return
+			}
+		}
+		if err := a.clientService.SetGroupDns(body.Name, dns); err != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+			return
+		}
 	}
 	jsonObj(c, gin.H{"name": strings.TrimSpace(body.Name)}, nil)
 	notifyClientsChanged()

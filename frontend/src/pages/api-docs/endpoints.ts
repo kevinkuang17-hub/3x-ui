@@ -1516,7 +1516,7 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/clients/groups/clashRules',
         summary:
-          "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+          "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. dns sets the group's own DNS (null follows the global DNS; omitted keeps it). With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
         body: '{\n  "name": "customer-a",\n  "clashRules": "https://example.com/rules/standard.yaml",\n  "ruleSets": [{ "id": 5, "policy": "PROXY" }],\n  "extraRules": "bank.example,DIRECT"\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "name": "customer-a"\n  }\n}',
       },
@@ -2850,6 +2850,25 @@ export const sections: readonly Section[] = [
         body: '{\n  "template": "https://raw.githubusercontent.com/kevinkuang17-hub/pxc/main/rules/3x-ui/standard.yaml"\n}',
       },
       {
+        method: 'GET',
+        path: '/panel/api/ruleSets/dns',
+        summary: 'The global DNS written into Clash/Mihomo, Surge and Loon subscriptions.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/dns',
+        summary:
+          'Save the global DNS: domestic and foreign resolvers, and company lines "domains = servers" whose domains resolve through company DNS (and optionally connect directly).',
+        body: '{\n  "enable": true,\n  "mode": "fake-ip",\n  "domestic": ["https://223.5.5.5/dns-query"],\n  "foreign": ["https://1.1.1.1/dns-query"],\n  "foreignViaProxy": true,\n  "company": "corp.com = 10.0.0.53",\n  "companyDirect": true\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/import',
+        summary:
+          'Import a Clash/Mihomo config (https url, fetched as a Clash client, or pasted content): rules become rule sets per destination; importDns also takes over its DNS.',
+        body: '{\n  "url": "https://example.com/config.yaml",\n  "importDns": true\n}',
+      },
+      {
         method: 'POST',
         path: '/panel/api/ruleSets/preview',
         summary: 'The Clash rules a choice would add in front of the template, without saving it.',
@@ -2908,6 +2927,19 @@ export const sections: readonly Section[] = [
         summary:
           'Deploy the decoy at once: mode off, nginx, company, logistics, tech, blog, photo, maintenance or custom, with the site name, optional slogan and contact email.',
         body: '{\n  "mode": "company",\n  "title": "Evergreen Trading Ltd.",\n  "tagline": "",\n  "email": "info@example.com"\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/front',
+        summary:
+          'Whether the panel is also served on port 443 (decoy without a port), whether its own port is closed, and what happened at the last start.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/front',
+        summary:
+          'Switch the port-443 site and closing the panel port; the panel restarts. Closing is refused until 443 is running.',
+        body: '{\n  "enabled": true,\n  "frontOnly": false\n}',
       },
       {
         method: 'POST',

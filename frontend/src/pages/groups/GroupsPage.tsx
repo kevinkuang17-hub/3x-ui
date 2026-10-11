@@ -59,6 +59,7 @@ import {
 import { parseMsg } from '@/utils/zodValidate';
 import { presetOf } from '@/pages/settings/clashRoutingPresets';
 import type { RoutingChoice } from '@/pages/rule-sets/ruleSetApi';
+import type { DnsConfig } from '@/pages/rule-sets/DnsEditor';
 
 const ClientRecordListSchema = z
   .array(ClientRecordSchema)
@@ -157,6 +158,7 @@ export default function GroupsPage() {
       clashRules: string;
       ruleSets: RoutingChoice['ruleSets'];
       extraRules: string;
+      dns: DnsConfig | null;
     }) => HttpUtil.post('/panel/api/clients/groups/clashRules', body, JSON_HEADERS),
     onSuccess: (msg) => {
       if (msg?.success) invalidate();
@@ -487,7 +489,8 @@ export default function GroupsPage() {
       width: 200,
       render: (rules: string, row) => {
         const preset = presetOf(rules);
-        const own = !!rules || row.clashRuleSets.length > 0 || !!row.clashExtraRules.trim();
+        const own =
+          !!rules || row.clashRuleSets.length > 0 || !!row.clashExtraRules.trim() || !!row.clashDns;
         const label = !own
           ? t('pages.groups.clashRulesFollowGlobal')
           : preset
@@ -713,15 +716,17 @@ export default function GroupsPage() {
               ruleSets: clashRulesTarget?.clashRuleSets ?? [],
               extraRules: clashRulesTarget?.clashExtraRules ?? '',
             }}
+            initialDns={(clashRulesTarget?.clashDns as DnsConfig | null | undefined) ?? null}
             saving={clashRulesMut.isPending}
             onClose={() => setClashRulesTarget(null)}
-            onSubmit={async (rules, choice) => {
+            onSubmit={async (rules, choice, dns) => {
               const name = clashRulesTarget?.name ?? '';
               const msg = await clashRulesMut.mutateAsync({
                 name,
                 clashRules: rules,
                 ruleSets: choice.ruleSets,
                 extraRules: choice.extraRules,
+                dns,
               });
               if (msg?.success) messageApi.success(t('pages.groups.clashRulesSaved', { name }));
               return !!msg?.success;

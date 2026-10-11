@@ -6,9 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/config"
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 	"github.com/mhsanaei/3x-ui/v3/internal/panelaccess"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
@@ -176,7 +180,93 @@ func allowsWith(raw, ip string) bool {
 	return false
 }
 
-// ClearPanelAccess empties the stored allowlist; the CLI uses it to recover a locked-out panel.
+// ClearPanelAccess empties the allowlist and reopens the panel port; the CLI uses it to recover
+// a locked-out panel.
 func (s *SettingService) ClearPanelAccess() error {
+	if err := s.setString("panelFrontOnly", "false"); err != nil {
+		return err
+	}
 	return s.setString("panelAllowIps", "")
+}
+
+// FrontPort is where the decoy site is served as a normal website, so its address has no port.
+const FrontPort = 443
+
+// FrontStatus is what the running panel did with the front website at its last start.
+type FrontStatus struct {
+	Listening bool   `json:"listening"`
+	FrontOnly bool   `json:"frontOnly"`
+	Error     string `json:"error"`
+}
+
+var frontStatus atomic.Pointer[FrontStatus]
+
+func SetFrontStatus(st FrontStatus) { frontStatus.Store(&st) }
+
+func CurrentFrontStatus() FrontStatus {
+	if st := frontStatus.Load(); st != nil {
+		return *st
+	}
+	return FrontStatus{}
+}
+
+// FrontSettings reports whether the panel should also serve on port 443 and whether its own port
+// should then be closed to the outside.
+func (s *ProtectService) FrontSettings() (enabled, frontOnly bool) {
+	enabled, _ = s.settingService.getBool("decoyFront")
+	frontOnly, _ = s.settingService.getBool("panelFrontOnly")
+	return enabled, enabled && frontOnly
+}
+
+type FrontView struct {
+	Enabled   bool        `json:"enabled"`
+	FrontOnly bool        `json:"frontOnly"`
+	HasCert   bool        `json:"hasCert"`
+	Conflict  string      `json:"conflict"`
+	Port      int         `json:"port"`
+	PanelPort int         `json:"panelPort"`
+	Running   FrontStatus `json:"running"`
+}
+
+// frontConflict names a local Xray inbound already using port 443, which the front site would collide with.
+func frontConflict() string {
+	var ib model.Inbound
+	err := database.GetDB().Where("port = ? AND enable = ? AND node_id IS NULL", FrontPort, true).First(&ib).Error
+	if err != nil {
+		return ""
+	}
+	if ib.Remark != "" {
+		return ib.Remark
+	}
+	return ib.Tag
+}
+
+func (s *ProtectService) Front() *FrontView {
+	enabled, frontOnly := s.FrontSettings()
+	cert, _ := s.settingService.GetCertFile()
+	key, _ := s.settingService.GetKeyFile()
+	port, _ := s.settingService.GetPort()
+	return &FrontView{
+		Enabled: enabled, FrontOnly: frontOnly, HasCert: cert != "" && key != "", Conflict: frontConflict(),
+		Port: FrontPort, PanelPort: port, Running: CurrentFrontStatus(),
+	}
+}
+
+// SaveFront stores the front-site switches; they apply when the panel restarts. Closing the panel
+// port is only allowed while the front site is already up, so the admin keeps a way in.
+func (s *ProtectService) SaveFront(enabled, frontOnly bool) error {
+	v := s.Front()
+	if enabled && !v.HasCert {
+		return common.NewError("the panel has no certificate; set one up first (x-ui menu → SSL)")
+	}
+	if enabled && v.Conflict != "" {
+		return common.NewErrorf("port %d is used by the inbound %q; move it or keep the site on the panel port", FrontPort, v.Conflict)
+	}
+	if frontOnly && (!enabled || !v.Running.Listening) {
+		return common.NewErrorf("turn on the website on port %d and restart the panel first, then close the panel port", FrontPort)
+	}
+	if err := s.settingService.setString("decoyFront", strconv.FormatBool(enabled)); err != nil {
+		return err
+	}
+	return s.settingService.setString("panelFrontOnly", strconv.FormatBool(enabled && frontOnly))
 }

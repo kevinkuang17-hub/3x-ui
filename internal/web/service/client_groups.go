@@ -22,6 +22,7 @@ type GroupSummary struct {
 	// ClashRuleSets and ClashExtraRules are the group's own rule-library picks and hand-written rules.
 	ClashRuleSets   []RuleSetPick `json:"clashRuleSets" gorm:"-"`
 	ClashExtraRules string        `json:"clashExtraRules" gorm:"-"`
+	ClashDns        *DnsConfig    `json:"clashDns" gorm:"-"`
 }
 
 func (s *ClientService) ListGroups() ([]GroupSummary, error) {
@@ -68,6 +69,7 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 		out = append(out, GroupSummary{
 			Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down, ClashRules: clashRules[name],
 			ClashRuleSets: ParseRuleSetPicks(routing[name].ClashRuleSets), ClashExtraRules: routing[name].ClashExtraRules,
+			ClashDns: ParseDns(routing[name].ClashDns),
 		})
 	}
 	sort.Slice(out, func(i, j int) bool {

@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, Col, Form, Input, Modal, Row, Space, Tag, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Space,
+  Tag,
+  Typography,
+} from 'antd';
 import {
   CheckCircleFilled,
   EyeOutlined,
@@ -12,6 +25,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { HttpUtil } from '@/utils';
 import { keys } from '@/api/queryKeys';
+import FrontSection, { publicSiteURL, useFront } from './FrontSection';
 
 const API = '/panel/api/protect';
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
@@ -53,6 +67,8 @@ export default function DecoyCard() {
     <Card size="small" title={t('pages.protect.decoyTitle')}>
       <Typography.Paragraph type="secondary">{t('pages.protect.decoyDesc')}</Typography.Paragraph>
       {query.data && <DecoyForm key={query.dataUpdatedAt} initial={query.data} />}
+      <Divider />
+      <FrontSection />
     </Card>
   );
 }
@@ -67,6 +83,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
     email: initial.email,
   });
   const [preview, setPreview] = useState<string | null>(null);
+  const siteURL = publicSiteURL(useFront().data);
   // Turning off or switching to the uploaded site keeps the deployed details, not half-typed ones.
   const saved: SiteDraft = {
     mode: initial.mode,
@@ -138,7 +155,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
           })}
           action={
             <Space wrap>
-              <Button size="small" href="/" target="_blank" rel="noreferrer">
+              <Button size="small" href={siteURL} target="_blank" rel="noreferrer">
                 {t('pages.protect.decoyOpen')}
               </Button>
               <Button

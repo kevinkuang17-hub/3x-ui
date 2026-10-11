@@ -2,6 +2,7 @@ package sub
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"sort"
 	"strconv"
@@ -82,7 +83,9 @@ func (a *SUBController) subApple(c *gin.Context, format string) {
 	self := fmt.Sprintf("%s://%s%s", scheme, hostWithPort, c.Request.URL.EscapedPath())
 	hours, _ := strconv.Atoi(a.updateInterval)
 	rules, _ := (&service.RuleSetService{}).BuildRules(libraryChoiceForSub(subID))
-	body := renderAppleProfile(format, doc.Proxies, self, hours, appleRules(rules))
+	dns := appleDNSFor(service.DnsForSub(subID))
+	rules = append(dns.direct, rules...)
+	body := renderAppleProfile(format, doc.Proxies, self, hours, appleRules(rules), dns)
 	a.ApplyCommonHeaders(c, header, a.updateInterval, "", "", "", "", false, "", false)
 	c.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(body))
 	a.recordSubscriptionFetch(c)
@@ -323,7 +326,7 @@ func qxLine(p map[string]any) string {
 
 // renderAppleProfile builds a Surge/Loon managed profile or a Quantumult X server list.
 // Proxies the target app cannot express (grpc, xhttp, wireguard, ...) are skipped.
-func renderAppleProfile(format string, proxies []map[string]any, selfURL string, updateHours int, rules []string) string {
+func renderAppleProfile(format string, proxies []map[string]any, selfURL string, updateHours int, rules []string, dns appleDNS) string {
 	var lines, names []string
 	seen := map[string]bool{}
 	for _, p := range proxies {
@@ -359,10 +362,10 @@ func renderAppleProfile(format string, proxies []map[string]any, selfURL string,
 	if format == formatSurge {
 		fmt.Fprintf(&b, "#!MANAGED-CONFIG %s interval=%d strict=false\n\n", selfURL, updateHours*3600)
 		b.WriteString("[General]\nloglevel = notify\nskip-proxy = 127.0.0.1, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local\n")
-		b.WriteString("dns-server = 223.5.5.5, 119.29.29.29, system\n\n[Proxy]\n")
+		b.WriteString("dns-server = " + dns.serverLine() + "\n\n[Proxy]\n")
 	} else {
 		b.WriteString("[General]\nskip-proxy = 127.0.0.1, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local\n")
-		b.WriteString("dns-server = 223.5.5.5, 119.29.29.29, system\n\n[Proxy]\n")
+		b.WriteString("dns-server = " + dns.serverLine() + "\n\n[Proxy]\n")
 	}
 	for _, l := range lines {
 		b.WriteString(l + "\n")
@@ -381,6 +384,12 @@ func renderAppleProfile(format string, proxies []map[string]any, selfURL string,
 			auto = "Auto = url-test," + strings.Join(sorted, ",") + ",url = http://www.gstatic.com/generate_204,interval = 600"
 		}
 		b.WriteString(auto + "\n")
+	}
+	if len(dns.hosts) > 0 {
+		b.WriteString("\n[Host]\n")
+		for _, h := range dns.hosts {
+			b.WriteString(h + "\n")
+		}
 	}
 	b.WriteString("\n[Rule]\n")
 	for _, r := range rules {
@@ -412,4 +421,50 @@ func appleRules(rules []string) []string {
 		out = append(out, strings.Join(parts, ","))
 	}
 	return out
+}
+
+// appleDNS is the DNS part of a Surge/Loon profile: plain-IP resolvers and per-domain company servers.
+type appleDNS struct {
+	servers []string
+	hosts   []string
+	direct  []string
+}
+
+func (d appleDNS) serverLine() string {
+	if len(d.servers) == 0 {
+		return "223.5.5.5, 119.29.29.29, system"
+	}
+	return strings.Join(d.servers, ", ") + ", system"
+}
+
+// appleDNSFor maps the DNS config onto what Surge and Loon accept: they take plain IPs only.
+func appleDNSFor(cfg service.DnsConfig) appleDNS {
+	var d appleDNS
+	if !cfg.Enable {
+		return d
+	}
+	for _, s := range cfg.Domestic {
+		if ip := net.ParseIP(strings.TrimSpace(s)); ip != nil {
+			d.servers = append(d.servers, ip.String())
+		}
+	}
+	company, _ := service.ParseCompanyDNS(cfg.Company)
+	for _, r := range company {
+		server := ""
+		for _, s := range r.Servers {
+			if net.ParseIP(s) != nil {
+				server = s
+				break
+			}
+		}
+		for _, dom := range r.Domains {
+			if server != "" {
+				d.hosts = append(d.hosts, dom+" = server:"+server, "*."+dom+" = server:"+server)
+			}
+			if cfg.CompanyDirect {
+				d.direct = append(d.direct, "DOMAIN-SUFFIX,"+dom+",DIRECT")
+			}
+		}
+	}
+	return d
 }
