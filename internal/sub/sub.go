@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
@@ -54,6 +55,13 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 
 	engine := gin.Default()
+	(&service.ProtectService{}).ApplyStored()
+	// Unknown paths get the decoy site when it is on, else gin's usual 404.
+	engine.NoRoute(func(c *gin.Context) {
+		if decoy.Enabled() {
+			decoy.Serve(c)
+		}
+	})
 
 	subDomain, err := s.settingService.GetSubDomain()
 	if err != nil {

@@ -13,11 +13,12 @@ import (
 	yaml "github.com/goccy/go-yaml"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/linehealth"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 type SubClashService struct {
@@ -168,9 +169,11 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	// Custom Clash routing can inject Mihomo-only groups, rules, providers or a
 	// top-level proxies key — exactly what the legacy filter just removed.
 	clashRules, enableRouting := s.clashRules, s.enableRouting
-	if groupRules := groupClashRulesBySubID(subId); groupRules != "" {
-		clashRules, enableRouting = groupRules, true
+	group := service.GroupRoutingBySubID(subId)
+	if group.Override {
+		clashRules, enableRouting = group.Template, group.Template != ""
 	}
+	choice := libraryChoice(group)
 	if enableRouting && !legacy {
 		resolved, remoteDocument, remote, resolveErr := resolveClashRoutingSource(clashRules)
 		if resolveErr == nil && strings.TrimSpace(resolved) != "" {
@@ -184,12 +187,88 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 		}
 	}
 
+	if !legacy {
+		prependLibraryRules(config, choice)
+	}
+
 	finalYAML, err := marshalClashYAML(config)
 	if err != nil {
 		return "", "", err
 	}
 
 	return string(finalYAML), header, nil
+}
+
+// libraryChoice is the group's own rule-library choice, or the global one when the group follows it.
+func libraryChoice(group service.GroupRouting) service.RoutingChoice {
+	if group.Override {
+		return group.Choice
+	}
+	global, err := (&service.RuleSetService{}).GlobalRouting()
+	if err != nil {
+		return service.RoutingChoice{}
+	}
+	return global
+}
+
+func libraryChoiceForSub(subID string) service.RoutingChoice {
+	return libraryChoice(service.GroupRoutingBySubID(subID))
+}
+
+// prependLibraryRules puts the profile's hand-written and rule-library rules ahead of the template's,
+// keeping the profile unchanged when a rule names a policy group the template does not define.
+func prependLibraryRules(config map[string]any, choice service.RoutingChoice) {
+	if choice.Empty() {
+		return
+	}
+	rules, err := (&service.RuleSetService{}).BuildRules(choice)
+	if err != nil || len(rules) == 0 {
+		if err != nil {
+			logger.Warning("clash routing: rule library skipped:", err)
+		}
+		return
+	}
+	known := clashRuleTargets(config)
+	added := make([]any, 0, len(rules))
+	for _, r := range rules {
+		if _, ok := known[clashRuleTarget(r)]; !ok {
+			logger.Warning("clash routing: skipped rule with an unknown policy:", r)
+			continue
+		}
+		added = append(added, r)
+	}
+	existing, _ := asAnySlice(config["rules"])
+	config["rules"] = append(added, existing...)
+}
+
+// clashRuleTargets lists the policies a rule may name: built-ins, proxies and proxy groups.
+func clashRuleTargets(config map[string]any) map[string]struct{} {
+	known := map[string]struct{}{"DIRECT": {}, "REJECT": {}, "REJECT-DROP": {}, "PASS": {}, "GLOBAL": {}}
+	proxies, _ := asAnySlice(config["proxies"])
+	for _, value := range proxies {
+		if proxy, ok := value.(map[string]any); ok {
+			if name, ok := proxy["name"].(string); ok {
+				known[strings.TrimSpace(name)] = struct{}{}
+			}
+		}
+	}
+	groups, _ := asAnySlice(config["proxy-groups"])
+	for _, value := range groups {
+		if name := clashProxyGroupName(value); name != "" {
+			known[name] = struct{}{}
+		}
+	}
+	return known
+}
+
+// clashRuleTarget returns the policy of a rule, skipping trailing no-resolve/src flags.
+func clashRuleTarget(rule string) string {
+	parts := strings.Split(rule, ",")
+	i := len(parts) - 1
+	for i >= 1 && (strings.EqualFold(strings.TrimSpace(parts[i]), "no-resolve") || strings.EqualFold(strings.TrimSpace(parts[i]), "src")) {
+		i--
+	}
+	return strings.TrimSpace(parts[i])
 }
 
 func legacyClashProxies(proxies []map[string]any) []map[string]any {
@@ -1597,22 +1676,4 @@ func linesToClashRules(raw string) []any {
 		rules = append(rules, line)
 	}
 	return rules
-}
-
-// groupClashRulesBySubID returns the routing source of the subscriber's client group. A subId shared by
-// clients in several groups follows its oldest client, matching subscriptionTemplateContextBySubID.
-func groupClashRulesBySubID(subID string) string {
-	if subID == "" {
-		return ""
-	}
-	db := database.GetDB()
-	var rec model.ClientRecord
-	if err := db.Where("sub_id = ?", subID).Order("id ASC").First(&rec).Error; err != nil || rec.Group == "" {
-		return ""
-	}
-	var group model.ClientGroup
-	if err := db.Where("name = ?", rec.Group).First(&group).Error; err != nil {
-		return ""
-	}
-	return strings.TrimSpace(group.ClashRules)
 }

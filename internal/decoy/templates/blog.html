@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<style>
+:root { color-scheme: light dark; --ink: #222; --muted: #6b6b6b; --line: #e8e8e8; --bg: #fdfdfc; }
+@media (prefers-color-scheme: dark) { :root { --ink: #e6e6e6; --muted: #a0a0a0; --line: #2c2c2c; --bg: #151515; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.7 Georgia, "Times New Roman", serif; }
+main { max-width: 680px; margin: 0 auto; padding: 56px 20px; }
+h1.site { font: 600 26px/1.2 -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0 0 6px; }
+.tag { color: var(--muted); margin: 0 0 48px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 15px; }
+article { border-top: 1px solid var(--line); padding: 28px 0; }
+article h2 { font-size: 22px; margin: 0 0 4px; }
+time { color: var(--muted); font-size: 14px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+article p { margin: 12px 0 0; }
+footer { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px; color: var(--muted); font-size: 14px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<main>
+<h1 class="site">{{.Title}}</h1>
+<p class="tag">Notes on photography, slow travel and small software projects.</p>
+<article><h2>Shooting film again after ten years</h2><time>Spring, {{.Year}}</time>
+<p>I dug an old rangefinder out of a drawer and spent a month with two rolls of black-and-white. A few thoughts on patience, metering by eye and why I stopped checking the back of the camera.</p></article>
+<article><h2>A week of trains through the countryside</h2><time>Winter, {{.Year}}</time>
+<p>No flights, no rental car — just regional lines, a paperback and whatever the station café had left. What worked, what didn't, and the timetable trick that saved two connections.</p></article>
+<article><h2>Keeping a personal wiki in plain text</h2><time>Autumn, {{.Year}}</time>
+<p>After trying every notes app I went back to a folder of text files and a tiny search script. Here is the layout I settled on and the few conventions that make it stick.</p></article>
+<footer>&copy; {{.Year}} {{.Title}}</footer>
+</main>
+</body>
+</html>

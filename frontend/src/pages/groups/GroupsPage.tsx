@@ -58,6 +58,7 @@ import {
 } from '@/schemas/client';
 import { parseMsg } from '@/utils/zodValidate';
 import { presetOf } from '@/pages/settings/clashRoutingPresets';
+import type { RoutingChoice } from '@/pages/rule-sets/ruleSetApi';
 
 const ClientRecordListSchema = z
   .array(ClientRecordSchema)
@@ -151,8 +152,12 @@ export default function GroupsPage() {
   });
 
   const clashRulesMut = useMutation({
-    mutationFn: (body: { name: string; clashRules: string }) =>
-      HttpUtil.post('/panel/api/clients/groups/clashRules', body, JSON_HEADERS),
+    mutationFn: (body: {
+      name: string;
+      clashRules: string;
+      ruleSets: RoutingChoice['ruleSets'];
+      extraRules: string;
+    }) => HttpUtil.post('/panel/api/clients/groups/clashRules', body, JSON_HEADERS),
     onSuccess: (msg) => {
       if (msg?.success) invalidate();
     },
@@ -482,14 +487,15 @@ export default function GroupsPage() {
       width: 200,
       render: (rules: string, row) => {
         const preset = presetOf(rules);
-        const label = !rules
+        const own = !!rules || row.clashRuleSets.length > 0 || !!row.clashExtraRules.trim();
+        const label = !own
           ? t('pages.groups.clashRulesFollowGlobal')
           : preset
             ? t(`pages.settings.subClashPreset_${preset.key}`)
             : t('pages.groups.clashRulesCustom');
         return (
           <Tag
-            color={rules ? 'green' : 'default'}
+            color={own ? 'green' : 'default'}
             style={{
               margin: 0,
               cursor: 'pointer',
@@ -703,11 +709,20 @@ export default function GroupsPage() {
             open={clashRulesTarget !== null}
             groupName={clashRulesTarget?.name ?? null}
             initialRules={clashRulesTarget?.clashRules ?? ''}
+            initialChoice={{
+              ruleSets: clashRulesTarget?.clashRuleSets ?? [],
+              extraRules: clashRulesTarget?.clashExtraRules ?? '',
+            }}
             saving={clashRulesMut.isPending}
             onClose={() => setClashRulesTarget(null)}
-            onSubmit={async (rules) => {
+            onSubmit={async (rules, choice) => {
               const name = clashRulesTarget?.name ?? '';
-              const msg = await clashRulesMut.mutateAsync({ name, clashRules: rules });
+              const msg = await clashRulesMut.mutateAsync({
+                name,
+                clashRules: rules,
+                ruleSets: choice.ruleSets,
+                extraRules: choice.extraRules,
+              });
               if (msg?.success) messageApi.success(t('pages.groups.clashRulesSaved', { name }));
               return !!msg?.success;
             }}

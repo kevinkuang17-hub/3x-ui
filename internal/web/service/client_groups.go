@@ -19,6 +19,9 @@ type GroupSummary struct {
 	Up          int64  `json:"up"`
 	Down        int64  `json:"down"`
 	ClashRules  string `json:"clashRules"`
+	// ClashRuleSets and ClashExtraRules are the group's own rule-library picks and hand-written rules.
+	ClashRuleSets   []RuleSetPick `json:"clashRuleSets"`
+	ClashExtraRules string        `json:"clashExtraRules"`
 }
 
 func (s *ClientService) ListGroups() ([]GroupSummary, error) {
@@ -46,12 +49,14 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 	baseUp := make(map[string]int64, len(stored))
 	baseDown := make(map[string]int64, len(stored))
 	clashRules := make(map[string]string, len(stored))
+	routing := make(map[string]model.ClientGroup, len(stored))
 	merged := make(map[string]groupAgg, len(derived)+len(stored))
 	for _, g := range stored {
 		merged[g.Name] = groupAgg{}
 		baseUp[g.Name] = g.ResetUp
 		baseDown[g.Name] = g.ResetDown
 		clashRules[g.Name] = g.ClashRules
+		routing[g.Name] = g
 	}
 	for _, g := range derived {
 		merged[g.Name] = groupAgg{count: g.ClientCount, up: g.Up, down: g.Down}
@@ -60,7 +65,10 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 	for name, agg := range merged {
 		up := max(agg.up-baseUp[name], 0)
 		down := max(agg.down-baseDown[name], 0)
-		out = append(out, GroupSummary{Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down, ClashRules: clashRules[name]})
+		out = append(out, GroupSummary{
+			Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down, ClashRules: clashRules[name],
+			ClashRuleSets: ParseRuleSetPicks(routing[name].ClashRuleSets), ClashExtraRules: routing[name].ClashExtraRules,
+		})
 	}
 	sort.Slice(out, func(i, j int) bool {
 		return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
@@ -179,6 +187,12 @@ func (s *ClientService) ResetGroupTraffic(name string) error {
 // SetGroupClashRules stores the group's Clash/Mihomo routing source (an HTTPS URL or inline rules);
 // a label-only group gets its client_groups row created on the way.
 func (s *ClientService) SetGroupClashRules(name, rules string) error {
+	return s.SetGroupRouting(name, rules, nil)
+}
+
+// SetGroupRouting stores the group's template and, when choice is set, its rule-library picks and
+// hand-written rules; a nil choice leaves those untouched.
+func (s *ClientService) SetGroupRouting(name, rules string, choice *RoutingChoice) error {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return common.NewError("group name is required")
@@ -191,15 +205,25 @@ func (s *ClientService) SetGroupClashRules(name, rules string) error {
 	if remote {
 		rules = canonical
 	}
+	updates := map[string]any{"clash_rules": rules}
+	if choice != nil {
+		picks, extra, err := NormalizeChoice(*choice)
+		if err != nil {
+			return err
+		}
+		updates["clash_rule_sets"], updates["clash_extra_rules"] = picks, extra
+	}
 	db := database.GetDB()
 	var count int64
 	if err := db.Model(&model.ClientGroup{}).Where("name = ?", name).Count(&count).Error; err != nil {
 		return err
 	}
 	if count == 0 {
-		return db.Create(&model.ClientGroup{Name: name, ClashRules: rules}).Error
+		if err := db.Create(&model.ClientGroup{Name: name}).Error; err != nil {
+			return err
+		}
 	}
-	return db.Model(&model.ClientGroup{}).Where("name = ?", name).Update("clash_rules", rules).Error
+	return db.Model(&model.ClientGroup{}).Where("name = ?", name).Updates(updates).Error
 }
 
 // GroupClashRoutingSources lists the distinct non-empty per-group routing sources, for cache warm-up.

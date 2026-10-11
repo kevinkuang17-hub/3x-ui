@@ -18,6 +18,16 @@ export const keys = {
     root: () => ['plans'] as const,
     list: () => ['plans', 'list'] as const,
   },
+  ruleSets: {
+    root: () => ['rule-sets'] as const,
+    list: () => ['rule-sets', 'list'] as const,
+    routing: () => ['rule-sets', 'routing'] as const,
+  },
+  protect: {
+    root: () => ['protect'] as const,
+    status: () => ['protect', 'status'] as const,
+    nodes: () => ['protect', 'nodes'] as const,
+  },
   subBalancers: {
     root: () => ['sub-balancers'] as const,
     list: () => ['sub-balancers', 'list'] as const,

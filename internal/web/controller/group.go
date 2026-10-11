@@ -175,6 +175,9 @@ func (a *GroupController) bulkRemove(c *gin.Context) {
 type groupClashRulesBody struct {
 	Name       string `json:"name"`
 	ClashRules string `json:"clashRules"`
+	// With both omitted the stored picks and custom rules stay (older clients send only clashRules).
+	RuleSets   *[]service.RuleSetPick `json:"ruleSets"`
+	ExtraRules *string                `json:"extraRules"`
 }
 
 func (a *GroupController) setClashRules(c *gin.Context) {
@@ -183,7 +186,17 @@ func (a *GroupController) setClashRules(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if err := a.clientService.SetGroupClashRules(body.Name, body.ClashRules); err != nil {
+	var choice *service.RoutingChoice
+	if body.RuleSets != nil || body.ExtraRules != nil {
+		choice = &service.RoutingChoice{}
+		if body.RuleSets != nil {
+			choice.RuleSets = *body.RuleSets
+		}
+		if body.ExtraRules != nil {
+			choice.ExtraRules = *body.ExtraRules
+		}
+	}
+	if err := a.clientService.SetGroupRouting(body.Name, body.ClashRules, choice); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}

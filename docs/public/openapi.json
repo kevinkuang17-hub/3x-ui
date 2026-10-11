@@ -4961,6 +4961,14 @@
       "description": "Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named xui-app-<key>, and a geosite rule after all existing rules, so routing is unchanged (refused unless routing.domainStrategy is AsIs or when the default outbound is WireGuard); outbound statistics are switched on."
     },
     {
+      "name": "Routing rule library",
+      "description": "Named lists of domains/IPs (banks, logistics, shipping lines, …) that subscription routing picks with a destination. The global choice applies to clients whose group has no routing of its own; picked sets and custom rules are placed before the base template rules in Clash/Mihomo, Surge and Loon subscriptions and take effect on the next refresh. Built-in sets stay editable; an edited one is kept as is on upgrade."
+    },
+    {
+      "name": "Protect & speed",
+      "description": "Anti-detection and tuning for this server: a decoy website on every path outside the secret panel/subscription paths, a panel IP allowlist, Cloudflare proxying of the panel or subscription domain, and BBR network tuning. On a master the nodes endpoints run the same actions on node servers."
+    },
+    {
       "name": "Xray config history",
       "description": "The last 50 versions of the Xray template config, captured automatically whatever saved them. good marks versions Xray ran with for 90 s. With xrayAutoRollback on (conservative mode), a change that keeps Xray down for about a minute is rolled back to the last good version."
     },
@@ -10302,7 +10310,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "Set the Clash/Mihomo routing source used by the group's members, overriding the global subscription routing. Accepts an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules; an empty value makes the group follow the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+        "summary": "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
         "operationId": "post_panel_api_clients_groups_clashRules",
         "requestBody": {
           "required": true,
@@ -10313,7 +10321,14 @@
               },
               "example": {
                 "name": "customer-a",
-                "clashRules": "https://example.com/rules/standard.yaml"
+                "clashRules": "https://example.com/rules/standard.yaml",
+                "ruleSets": [
+                  {
+                    "id": 5,
+                    "policy": "PROXY"
+                  }
+                ],
+                "extraRules": "bank.example,DIRECT"
               }
             }
           }
@@ -15813,6 +15828,36 @@
         }
       }
     },
+    "/passkey/login/available": {
+      "post": {
+        "tags": [
+          "Passkeys"
+        ],
+        "summary": "Public (CSRF token required): whether any panel user has registered a passkey (the login page shows its button only then).",
+        "operationId": "post_passkey_login_available",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/passkey/login/begin": {
       "post": {
         "tags": [
@@ -15926,6 +15971,787 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/list": {
+      "get": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "All rule sets, built-in ones first (missing built-ins are added on the way).",
+        "operationId": "get_panel_api_ruleSets_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/save": {
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Create (id 0) or update a rule set. rules holds one match per line: a domain, an IP/CIDR or TYPE,value without a policy.",
+        "operationId": "post_panel_api_ruleSets_save",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "id": 0,
+                "name": "Freight forwarders",
+                "category": "Logistics",
+                "defaultPolicy": "PROXY",
+                "rules": "example-forwarder.com\nDOMAIN-KEYWORD,cargo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/del/{id}": {
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Delete an admin-made rule set (built-in sets can only be restored).",
+        "operationId": "post_panel_api_ruleSets_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Rule set id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/reset/{id}": {
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Restore a built-in rule set to the shipped list.",
+        "operationId": "post_panel_api_ruleSets_reset_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Rule set id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/routing": {
+      "get": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "The global picks and custom rules.",
+        "operationId": "get_panel_api_ruleSets_routing",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Save the global picks (in match order) and custom rules.",
+        "operationId": "post_panel_api_ruleSets_routing",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ruleSets": [
+                  {
+                    "id": 1,
+                    "policy": "DIRECT"
+                  },
+                  {
+                    "id": 5,
+                    "policy": "PROXY"
+                  }
+                ],
+                "extraRules": "example.com\nbank.example,DIRECT"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/preview": {
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "The Clash rules a choice would add in front of the template, without saving it.",
+        "operationId": "post_panel_api_ruleSets_preview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ruleSets": [
+                  {
+                    "id": 5,
+                    "policy": "PROXY"
+                  }
+                ],
+                "extraRules": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/speedup": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Kernel, congestion control and whether the tuning is applied.",
+        "operationId": "get_panel_api_protect_speedup",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/speedup/apply": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Switch to BBR + fq with larger buffers and TCP Fast Open; persisted in /etc/sysctl.d.",
+        "operationId": "post_panel_api_protect_speedup_apply",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/speedup/revert": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Restore the values the tuning replaced and remove its files.",
+        "operationId": "post_panel_api_protect_speedup_revert",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/access": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "The panel allowlist and the caller address.",
+        "operationId": "get_panel_api_protect_access",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Save the allowlist (IPs/CIDRs; empty allows everyone). It must include the caller. Node join, ISP probe and SSO routes stay open.",
+        "operationId": "post_panel_api_protect_access",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "allowIps": "203.0.113.10,198.51.100.0/24"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/access/lockToCaller": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Allow only the caller (a master locking its node) and loopback.",
+        "operationId": "post_panel_api_protect_access_lockToCaller",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/decoy": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Decoy website mode, title and whether a custom site is uploaded.",
+        "operationId": "get_panel_api_protect_decoy",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Set the decoy: off, nginx, company, blog, maintenance or custom.",
+        "operationId": "post_panel_api_protect_decoy",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "mode": "company",
+                "title": "Horizon Supply Co."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/decoy/upload": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Upload a custom site as a .zip with index.html (multipart field file).",
+        "operationId": "post_panel_api_protect_decoy_upload",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/cf": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Panel and subscription domains/ports and whether a Cloudflare token is set.",
+        "operationId": "get_panel_api_protect_cf",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/cf/status": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "A domain’s Cloudflare A record, proxy state, SSL mode and whether its port can be proxied.",
+        "operationId": "post_panel_api_protect_cf_status",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "domain": "panel.example.com",
+                "port": 2053
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/cf/proxied": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Turn Cloudflare proxying on or off for the domain (refused on ports Cloudflare does not proxy or SSL mode off/flexible).",
+        "operationId": "post_panel_api_protect_cf_proxied",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "domain": "panel.example.com",
+                "port": 2053,
+                "on": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/nodes": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Each node’s tuning and allowlist, asked in parallel.",
+        "operationId": "get_panel_api_protect_nodes",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/nodes/{id}/{action}": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Run speedupApply, speedupRevert, lock (allow only this master) or unlock on a node.",
+        "operationId": "post_panel_api_protect_nodes_id_action",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Node id.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "description": "speedupApply, speedupRevert, lock or unlock.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",

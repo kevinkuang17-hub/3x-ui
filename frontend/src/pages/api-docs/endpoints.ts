@@ -1516,8 +1516,8 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/clients/groups/clashRules',
         summary:
-          "Set the Clash/Mihomo routing source used by the group's members, overriding the global subscription routing. Accepts an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules; an empty value makes the group follow the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
-        body: '{\n  "name": "customer-a",\n  "clashRules": "https://example.com/rules/standard.yaml"\n}',
+          "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+        body: '{\n  "name": "customer-a",\n  "clashRules": "https://example.com/rules/standard.yaml",\n  "ruleSets": [{ "id": 5, "policy": "PROXY" }],\n  "extraRules": "bank.example,DIRECT"\n}',
         response: '{\n  "success": true,\n  "obj": {\n    "name": "customer-a"\n  }\n}',
       },
       {
@@ -2761,6 +2761,12 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/passkey/login/available',
+        summary:
+          'Public (CSRF token required): whether any panel user has registered a passkey (the login page shows its button only then).',
+      },
+      {
+        method: 'POST',
         path: '/passkey/login/begin',
         summary:
           'Public (CSRF token required): start a username-less sign-in; returns { flow, options }.',
@@ -2790,6 +2796,153 @@ export const sections: readonly Section[] = [
         path: '/panel/api/apps/set',
         summary: 'Track exactly these apps (an empty list removes the feature) and restart Xray.',
         body: '{\n  "apps": ["netflix", "youtube"]\n}',
+      },
+    ],
+  },
+
+  {
+    id: 'rule-sets',
+    title: 'Routing rule library',
+    description:
+      'Named lists of domains/IPs (banks, logistics, shipping lines, …) that subscription routing picks with a destination. The global choice applies to clients whose group has no routing of its own; picked sets and custom rules are placed before the base template rules in Clash/Mihomo, Surge and Loon subscriptions and take effect on the next refresh. Built-in sets stay editable; an edited one is kept as is on upgrade.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/ruleSets/list',
+        summary: 'All rule sets, built-in ones first (missing built-ins are added on the way).',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/save',
+        summary:
+          'Create (id 0) or update a rule set. rules holds one match per line: a domain, an IP/CIDR or TYPE,value without a policy.',
+        body: '{\n  "id": 0,\n  "name": "Freight forwarders",\n  "category": "Logistics",\n  "defaultPolicy": "PROXY",\n  "rules": "example-forwarder.com\\nDOMAIN-KEYWORD,cargo"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/del/:id',
+        summary: 'Delete an admin-made rule set (built-in sets can only be restored).',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Rule set id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/reset/:id',
+        summary: 'Restore a built-in rule set to the shipped list.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Rule set id.' }],
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/ruleSets/routing',
+        summary: 'The global picks and custom rules.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/routing',
+        summary: 'Save the global picks (in match order) and custom rules.',
+        body: '{\n  "ruleSets": [{ "id": 1, "policy": "DIRECT" }, { "id": 5, "policy": "PROXY" }],\n  "extraRules": "example.com\\nbank.example,DIRECT"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/preview',
+        summary: 'The Clash rules a choice would add in front of the template, without saving it.',
+        body: '{\n  "ruleSets": [{ "id": 5, "policy": "PROXY" }],\n  "extraRules": ""\n}',
+      },
+    ],
+  },
+
+  {
+    id: 'protect',
+    title: 'Protect & speed',
+    description:
+      'Anti-detection and tuning for this server: a decoy website on every path outside the secret panel/subscription paths, a panel IP allowlist, Cloudflare proxying of the panel or subscription domain, and BBR network tuning. On a master the nodes endpoints run the same actions on node servers.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/protect/speedup',
+        summary: 'Kernel, congestion control and whether the tuning is applied.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/speedup/apply',
+        summary:
+          'Switch to BBR + fq with larger buffers and TCP Fast Open; persisted in /etc/sysctl.d.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/speedup/revert',
+        summary: 'Restore the values the tuning replaced and remove its files.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/access',
+        summary: 'The panel allowlist and the caller address.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/access',
+        summary:
+          'Save the allowlist (IPs/CIDRs; empty allows everyone). It must include the caller. Node join, ISP probe and SSO routes stay open.',
+        body: '{\n  "allowIps": "203.0.113.10,198.51.100.0/24"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/access/lockToCaller',
+        summary: 'Allow only the caller (a master locking its node) and loopback.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/decoy',
+        summary: 'Decoy website mode, title and whether a custom site is uploaded.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/decoy',
+        summary: 'Set the decoy: off, nginx, company, blog, maintenance or custom.',
+        body: '{\n  "mode": "company",\n  "title": "Horizon Supply Co."\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/decoy/upload',
+        summary: 'Upload a custom site as a .zip with index.html (multipart field file).',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/cf',
+        summary: 'Panel and subscription domains/ports and whether a Cloudflare token is set.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/cf/status',
+        summary:
+          'A domain’s Cloudflare A record, proxy state, SSL mode and whether its port can be proxied.',
+        body: '{\n  "domain": "panel.example.com",\n  "port": 2053\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/cf/proxied',
+        summary:
+          'Turn Cloudflare proxying on or off for the domain (refused on ports Cloudflare does not proxy or SSL mode off/flexible).',
+        body: '{\n  "domain": "panel.example.com",\n  "port": 2053,\n  "on": true\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/nodes',
+        summary: 'Each node’s tuning and allowlist, asked in parallel.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/nodes/:id/:action',
+        summary:
+          'Run speedupApply, speedupRevert, lock (allow only this master) or unlock on a node.',
+        params: [
+          { name: 'id', in: 'path', type: 'number', desc: 'Node id.' },
+          {
+            name: 'action',
+            in: 'path',
+            type: 'string',
+            desc: 'speedupApply, speedupRevert, lock or unlock.',
+          },
+        ],
       },
     ],
   },

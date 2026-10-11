@@ -26,6 +26,7 @@ import {
   MessageOutlined,
   MoonFilled,
   MoonOutlined,
+  PartitionOutlined,
   PushpinFilled,
   PushpinOutlined,
   ReadOutlined,
@@ -63,7 +64,16 @@ const SIDEBAR_PINNED_KEY = 'sidebar-pinned';
 let hoveredAcrossRemounts = false;
 
 // Admin-only areas an operator account cannot use; the API refuses them anyway.
-const OPERATOR_HIDDEN = ['/settings', '/xray', '/outbound', '/routing', '/hosts', '/api-docs'];
+const OPERATOR_HIDDEN = [
+  '/settings',
+  '/xray',
+  '/outbound',
+  '/routing',
+  '/rule-sets',
+  '/protect',
+  '/hosts',
+  '/api-docs',
+];
 
 type IconName =
   | 'dashboard'
@@ -79,7 +89,9 @@ type IconName =
   | 'sponsors'
   | 'apidocs'
   | 'outbound'
-  | 'routing';
+  | 'routing'
+  | 'ruleSets'
+  | 'protect';
 
 const iconByName: Record<IconName, ComponentType> = {
   dashboard: DashboardOutlined,
@@ -96,6 +108,8 @@ const iconByName: Record<IconName, ComponentType> = {
   apidocs: ApiOutlined,
   outbound: ExportOutlined,
   routing: SwapOutlined,
+  ruleSets: PartitionOutlined,
+  protect: SafetyOutlined,
 };
 
 function DonateButton({ ariaLabel }: { ariaLabel: string }) {
@@ -241,6 +255,8 @@ export default function AppSidebar() {
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
       { key: '/outbound', icon: 'outbound', title: t('menu.outbounds') },
       { key: '/routing', icon: 'routing', title: t('menu.routing') },
+      { key: '/rule-sets', icon: 'ruleSets', title: t('menu.ruleSets') },
+      { key: '/protect', icon: 'protect', title: t('menu.protect') },
       { key: '/settings', icon: 'setting', title: t('menu.settings') },
       { key: '/xray', icon: 'tool', title: t('menu.xray') },
       { key: '/api-docs', icon: 'apidocs', title: t('menu.apiDocs') },
