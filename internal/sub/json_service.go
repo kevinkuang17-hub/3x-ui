@@ -241,6 +241,8 @@ func (s *SubJsonService) GetJson(subId string, host string, alwaysReturnArray bo
 	if len(configArray) == 0 {
 		return "", header, nil
 	}
+	libRules, libDNS := libraryRulesForSub(subId)
+	configArray = applyLibraryToXrayConfigs(configArray, libRules, libDNS)
 
 	var finalJson []byte
 	if len(configArray) == 1 && !alwaysReturnArray {

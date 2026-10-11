@@ -45,12 +45,17 @@ export interface SubAppSource {
   subUrl: string;
   sId: string;
   subTitle: string;
+  // sing-box profile and Shadowrocket rules config; empty when the panel does not serve them.
+  singboxUrl?: string;
+  shadowrocketUrl?: string;
 }
 
 export function buildSubApps({
   subUrl,
   sId,
   subTitle,
+  singboxUrl,
+  shadowrocketUrl,
 }: SubAppSource): Record<AppPlatform, SubApp[]> {
   const encSub = encodeURIComponent(subUrl);
   const profileName = encodeURIComponent(subTitle || sId);
@@ -61,7 +66,7 @@ export function buildSubApps({
   };
   const singBox = {
     name: 'Sing-box',
-    url: `sing-box://import-remote-profile?url=${encSub}#${profileName}`,
+    url: `sing-box://import-remote-profile?url=${encodeURIComponent(singboxUrl || subUrl)}#${profileName}`,
   };
   const v2raytun = { name: 'V2RayTun', url: `v2raytun://import/${subUrl}` };
   const happ = { name: 'Happ', url: `happ://add/${subUrl}` };
@@ -83,6 +88,9 @@ export function buildSubApps({
         name: 'Shadowrocket',
         url: `shadowrocket://add/sub://${btoa(rocketSource)}?remark=${rocketRemark}`,
       },
+      ...(shadowrocketUrl
+        ? [{ name: 'Shadowrocket Rules', url: `shadowrocket://config/add/${shadowrocketUrl}` }]
+        : []),
       v2box,
       { name: 'Streisand', url: `streisand://import/${encSub}` },
       v2raytun,

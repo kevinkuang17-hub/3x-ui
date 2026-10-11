@@ -17,6 +17,8 @@ interface SubPageData {
   subSurgeUrl?: string;
   subLoonUrl?: string;
   subQxUrl?: string;
+  subShadowrocketUrl?: string;
+  subSingboxUrl?: string;
   subTitle?: string;
   subSupportUrl?: string;
   subUpdates?: number;

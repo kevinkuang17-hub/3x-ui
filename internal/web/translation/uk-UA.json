@@ -2608,7 +2608,7 @@
       "previewEmpty": "No rules selected.",
       "globalTab": "Global routing",
       "libraryTab": "Rule library",
-      "globalDesc": "Applies to every client whose group has no routing of its own. Changes reach users on their next subscription refresh.",
+      "globalDesc": "Applies to every client whose group has no routing of its own, in every subscription format: Clash/Mihomo in full; sing-box, Surge, Loon, Shadowrocket, Xray JSON (v2rayN, v2rayNG, Streisand) and Happ/INCY get the rule sets, custom rules and DNS with template groups folded into one proxy. Changes reach users on their next subscription refresh.",
       "add": "Add rule set",
       "edit": "Edit rule set",
       "deleteConfirm": "Delete rule set \"{name}\"?",

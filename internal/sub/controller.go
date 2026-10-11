@@ -975,6 +975,15 @@ func (a *SUBController) ApplyCommonHeaders(
 		// header; unlike the documents, it keeps the profile's own DNS servers.
 		rules, remote, routingErr = jsonRoutingHeaderSource(a.subJsonRoutingRules), false, nil
 	}
+	// With no Happ/JSON routing of its own, Happ and INCY get the rule library as their profile.
+	if strings.TrimSpace(rules) == "" && c.Request != nil && c.Param("subid") != "" {
+		if lib, dns := libraryRulesForSub(c.Param("subid")); len(lib) > 0 || dns.Enable {
+			if link := happRoutingFromLibrary(lib, dns); link != "" {
+				rules, remote, routingErr = link, false, nil
+				profileEnableRouting = true
+			}
+		}
+	}
 	// The off values undo a previously pushed setting, so they ride the same
 	// opt-in as every other Happ header rather than reaching every Happ client.
 	happManaged := a.happConfig.AutoDetect && c.Request != nil && IsHappClient(c.GetHeader("User-Agent"))

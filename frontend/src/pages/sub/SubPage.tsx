@@ -31,6 +31,8 @@ const appleUrls = {
   surge: subData.subSurgeUrl || '',
   loon: subData.subLoonUrl || '',
   qx: subData.subQxUrl || '',
+  shadowrocket: subData.subShadowrocketUrl || '',
+  singbox: subData.subSingboxUrl || '',
 };
 const subTitle = subData.subTitle || '';
 const subSupportUrl = subData.subSupportUrl || '';
@@ -61,7 +63,13 @@ const heroData = {
   datepicker: subData.datepicker || 'gregorian',
 };
 
-const apps = buildSubApps({ subUrl, sId, subTitle });
+const apps = buildSubApps({
+  subUrl,
+  sId,
+  subTitle,
+  singboxUrl: appleUrls.singbox,
+  shadowrocketUrl: appleUrls.shadowrocket,
+});
 const initialPlatform = detectPlatform(navigator.userAgent);
 const RTL_LANGUAGES = new Set(['fa-IR', 'ar-EG']);
 
