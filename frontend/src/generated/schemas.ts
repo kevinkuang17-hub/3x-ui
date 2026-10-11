@@ -2,6 +2,18 @@
 export const SCHEMAS: Record<string, unknown> = {
   "AllSetting": {
     "properties": {
+      "crmWebhookEnable": {
+        "type": "boolean"
+      },
+      "crmWebhookEvents": {
+        "type": "string"
+      },
+      "crmWebhookSecret": {
+        "type": "string"
+      },
+      "crmWebhookUrl": {
+        "type": "string"
+      },
       "datepicker": {
         "type": "string"
       },
@@ -449,6 +461,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subKeyFile": {
         "type": "string"
       },
+      "subLineHealth": {
+        "type": "boolean"
+      },
       "subListen": {
         "type": "string"
       },
@@ -572,6 +587,10 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "crmWebhookEnable",
+      "crmWebhookEvents",
+      "crmWebhookSecret",
+      "crmWebhookUrl",
       "datepicker",
       "discordAdminIds",
       "discordBotBackup",
@@ -713,6 +732,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonURI",
       "subJsonUserAgentRegex",
       "subKeyFile",
+      "subLineHealth",
       "subListen",
       "subPath",
       "subPort",
@@ -754,6 +774,18 @@ export const SCHEMAS: Record<string, unknown> = {
   },
   "AllSettingView": {
     "properties": {
+      "crmWebhookEnable": {
+        "type": "boolean"
+      },
+      "crmWebhookEvents": {
+        "type": "string"
+      },
+      "crmWebhookSecret": {
+        "type": "string"
+      },
+      "crmWebhookUrl": {
+        "type": "string"
+      },
       "datepicker": {
         "type": "string"
       },
@@ -1225,6 +1257,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subKeyFile": {
         "type": "string"
       },
+      "subLineHealth": {
+        "type": "boolean"
+      },
       "subListen": {
         "type": "string"
       },
@@ -1348,6 +1383,10 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "crmWebhookEnable",
+      "crmWebhookEvents",
+      "crmWebhookSecret",
+      "crmWebhookUrl",
       "datepicker",
       "discordAdminIds",
       "discordBotBackup",
@@ -1497,6 +1536,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonURI",
       "subJsonUserAgentRegex",
       "subKeyFile",
+      "subLineHealth",
       "subListen",
       "subPath",
       "subPort",

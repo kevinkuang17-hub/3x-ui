@@ -74,6 +74,11 @@ export class AllSetting {
   subClashURI = '';
   subClashEnableRouting = false;
   subClashRules = '';
+  subLineHealth = true;
+  crmWebhookEnable = false;
+  crmWebhookUrl = '';
+  crmWebhookSecret = '';
+  crmWebhookEvents = '';
   subJsonMux = '';
   subJsonRules = '';
   subJsonRoutingRules = '';

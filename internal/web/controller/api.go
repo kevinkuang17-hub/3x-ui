@@ -211,6 +211,9 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// Subscription balancers — client-side balancers for the JSON sub output
 	NewSubBalancerController(api)
 
+	// CRM integration — SSO login links and webhook test
+	NewCrmController(api.Group("/crm"))
+
 	// Extra routes
 	api.POST("/backuptotgbot", a.BackuptoTgbot)
 }

@@ -186,6 +186,11 @@ var defaultValueMap = map[string]string{
 	"subClashURI":                 "",
 	"subClashEnableRouting":       "false",
 	"subClashRules":               "",
+	"subLineHealth":               "true",
+	"crmWebhookEnable":            "false",
+	"crmWebhookUrl":               "",
+	"crmWebhookSecret":            "",
+	"crmWebhookEvents":            "",
 	"subJsonMux":                  "",
 	"subJsonRules":                "",
 	"subJsonRoutingRules":         "",
@@ -1235,6 +1240,26 @@ func (s *SettingService) GetSubClashURI() (string, error) {
 
 func (s *SettingService) GetSubClashEnableRouting() (bool, error) {
 	return s.getBool("subClashEnableRouting")
+}
+
+func (s *SettingService) GetSubLineHealth() (bool, error) {
+	return s.getBool("subLineHealth")
+}
+
+func (s *SettingService) GetCrmWebhookEnable() (bool, error) {
+	return s.getBool("crmWebhookEnable")
+}
+
+func (s *SettingService) GetCrmWebhookUrl() (string, error) {
+	return s.getString("crmWebhookUrl")
+}
+
+func (s *SettingService) GetCrmWebhookSecret() (string, error) {
+	return s.getString("crmWebhookSecret")
+}
+
+func (s *SettingService) GetCrmWebhookEvents() (string, error) {
+	return s.getString("crmWebhookEvents")
 }
 
 func (s *SettingService) GetSubClashRules() (string, error) {

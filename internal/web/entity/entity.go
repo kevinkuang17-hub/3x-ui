@@ -121,6 +121,11 @@ type AllSetting struct {
 	SubClashURI                 string `json:"subClashURI" form:"subClashURI"`
 	SubClashEnableRouting       bool   `json:"subClashEnableRouting" form:"subClashEnableRouting"`
 	SubClashRules               string `json:"subClashRules" form:"subClashRules"`
+	SubLineHealth               bool   `json:"subLineHealth" form:"subLineHealth"`
+	CrmWebhookEnable            bool   `json:"crmWebhookEnable" form:"crmWebhookEnable"`
+	CrmWebhookUrl               string `json:"crmWebhookUrl" form:"crmWebhookUrl"`
+	CrmWebhookSecret            string `json:"crmWebhookSecret" form:"crmWebhookSecret"`
+	CrmWebhookEvents            string `json:"crmWebhookEvents" form:"crmWebhookEvents"`
 	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`
 	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
 	SubJsonRoutingRules         string `json:"subJsonRoutingRules" form:"subJsonRoutingRules"`

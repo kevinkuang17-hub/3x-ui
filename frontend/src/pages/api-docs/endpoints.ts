@@ -2620,6 +2620,59 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'crm',
+    title: 'CRM integration',
+    description:
+      'Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = "sha256=" + hex(HMAC-SHA256(secret, timestamp + "." + body)). Undelivered events are retried with backoff. These endpoints require an admin-scope API token.',
+    endpoints: [
+      {
+        method: 'POST',
+        path: '/panel/api/crm/sso',
+        summary:
+          'Mint a single-use login link valid for 2 minutes. Opening it signs the browser into the panel without a password and redirects to the optional panel-relative path. Username defaults to the first panel user.',
+        params: [
+          {
+            name: 'username',
+            in: 'body',
+            type: 'string',
+            desc: 'Panel user to sign in as.',
+            optional: true,
+          },
+          {
+            name: 'redirect',
+            in: 'body',
+            type: 'string',
+            desc: 'Panel-relative path to open after login, e.g. /panel/clients.',
+            optional: true,
+          },
+        ],
+        body: '{\n  "redirect": "/panel/clients"\n}',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "path": "/sso/3f9c…",\n    "url": "https://panel.example.com:2053/sso/3f9c…",\n    "expiresAt": 1735689720\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/crm/webhook/test',
+        summary:
+          'Send a crm.ping event straight to the configured webhook URL (bypassing the retry queue) and report whether the CRM answered 2xx.',
+        response: '{\n  "success": true,\n  "msg": "Webhook delivered"\n}',
+      },
+      {
+        method: 'GET',
+        path: '/sso/:token',
+        summary:
+          'Public. Redeem a link minted by /panel/api/crm/sso: sets the session cookie and redirects into the panel. Used, expired or unknown tokens redirect to the login page.',
+        params: [{ name: 'token', in: 'path', type: 'string', desc: 'Single-use SSO token.' }],
+        responses: {
+          '302': {
+            description: 'Redirect into the panel, or to the login page when the link is invalid.',
+          },
+        },
+      },
+    ],
+  },
+
+  {
     id: 'sub-balancers',
     title: 'Subscription Balancers',
     description:

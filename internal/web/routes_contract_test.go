@@ -24,7 +24,7 @@ constructs the real router and diffs it against the registry both ways.
 
 Scope: everything under /panel/api/ plus the session-auth surface the
 registry also documents (/login, /logout, /csrf-token, /sponsors,
-/getTwoFactorEnable, /ws). SPA page routes are UI, not API, and stay out;
+/getTwoFactorEnable, /ws, /sso/:token). SPA page routes are UI, not API, and stay out;
 registry paths that start with "/{" describe the standalone subscription
 server, which this engine does not serve.
 */
@@ -36,6 +36,7 @@ var contractExtraRoutes = map[string]bool{
 	"GET /sponsors":            true,
 	"POST /getTwoFactorEnable": true,
 	"GET /ws":                  true,
+	"GET /sso/:token":          true,
 }
 
 func inContractScope(method, path string) bool {

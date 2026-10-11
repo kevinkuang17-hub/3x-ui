@@ -25,6 +25,10 @@ export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
 export const AllSettingSchema = z.object({
+  crmWebhookEnable: z.boolean(),
+  crmWebhookEvents: z.string(),
+  crmWebhookSecret: z.string(),
+  crmWebhookUrl: z.string(),
   datepicker: z.string(),
   discordAdminIds: z.string(),
   discordBotBackup: z.boolean(),
@@ -166,6 +170,7 @@ export const AllSettingSchema = z.object({
   subJsonURI: z.string(),
   subJsonUserAgentRegex: z.string(),
   subKeyFile: z.string(),
+  subLineHealth: z.boolean(),
   subListen: z.string(),
   subPath: z.string(),
   subPort: z.number().int().min(1).max(65535),
@@ -206,6 +211,10 @@ export const AllSettingSchema = z.object({
 export type AllSetting = z.infer<typeof AllSettingSchema>;
 
 export const AllSettingViewSchema = z.object({
+  crmWebhookEnable: z.boolean(),
+  crmWebhookEvents: z.string(),
+  crmWebhookSecret: z.string(),
+  crmWebhookUrl: z.string(),
   datepicker: z.string(),
   discordAdminIds: z.string(),
   discordBotBackup: z.boolean(),
@@ -355,6 +364,7 @@ export const AllSettingViewSchema = z.object({
   subJsonURI: z.string(),
   subJsonUserAgentRegex: z.string(),
   subKeyFile: z.string(),
+  subLineHealth: z.boolean(),
   subListen: z.string(),
   subPath: z.string(),
   subPort: z.number().int().min(1).max(65535),

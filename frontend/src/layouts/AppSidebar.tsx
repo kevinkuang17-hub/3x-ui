@@ -269,6 +269,11 @@ export default function AppSidebar() {
         label: t('pages.settings.discordSettings'),
       },
       {
+        key: '/settings#crm',
+        icon: <ApiOutlined />,
+        label: t('pages.settings.crmSettings'),
+      },
+      {
         key: '/settings#subscription',
         icon: <CloudServerOutlined />,
         label: t('pages.settings.subSettings'),

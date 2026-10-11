@@ -169,6 +169,16 @@ export default function SubscriptionGeneralTab({
               </SettingListItem>
               <SettingListItem
                 paddings="small"
+                title={t('pages.settings.subLineHealth')}
+                description={t('pages.settings.subLineHealthDesc')}
+              >
+                <Switch
+                  checked={allSetting.subLineHealth}
+                  onChange={(v) => updateSetting({ subLineHealth: v })}
+                />
+              </SettingListItem>
+              <SettingListItem
+                paddings="small"
                 title={t('pages.settings.remarkTemplate')}
                 description={t('pages.settings.remarkTemplateDesc')}
               >

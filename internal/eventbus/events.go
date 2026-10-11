@@ -17,6 +17,16 @@ const (
 	EventNodeDown EventType = "node.down"
 	EventNodeUp   EventType = "node.up"
 
+	// Line health (node-hosted inbound reachability, drives subscription hiding)
+	EventLineDown EventType = "line.down"
+	EventLineUp   EventType = "line.up"
+
+	// Client lifecycle (CRM webhook)
+	EventClientTraffic80 EventType = "client.traffic80"
+	EventClientDepleted  EventType = "client.depleted"
+	EventClientExpiring  EventType = "client.expiring"
+	EventClientExpired   EventType = "client.expired"
+
 	// System health
 	EventCPUHigh    EventType = "cpu.high"
 	EventMemoryHigh EventType = "memory.high"
@@ -62,4 +72,23 @@ type LoginEventData struct {
 type SystemMetricData struct {
 	Percent   float64 // current usage percentage
 	Threshold int     // configured threshold
+}
+
+// LineHealthData identifies the inbound behind a line.down / line.up event.
+type LineHealthData struct {
+	InboundId int    `json:"inboundId"`
+	NodeId    int    `json:"nodeId"`
+	Tag       string `json:"tag"`
+	Port      int    `json:"port"`
+}
+
+// ClientLifecycleData carries the client snapshot behind a client.* event.
+type ClientLifecycleData struct {
+	Email      string `json:"email"`
+	SubID      string `json:"subId"`
+	Group      string `json:"group"`
+	Up         int64  `json:"up"`
+	Down       int64  `json:"down"`
+	Total      int64  `json:"total"`
+	ExpiryTime int64  `json:"expiryTime"`
 }

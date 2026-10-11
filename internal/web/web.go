@@ -32,6 +32,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service/crm"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/discord"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/email"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
@@ -256,6 +257,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g.GET("/service-worker.js", controller.ServePWAServiceWorker)
 	g.GET("/icons/:name", controller.ServePWAIcon)
 
+	g.GET("/sso/:token", controller.SsoLogin)
 	s.index = controller.NewIndexController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)
@@ -306,6 +308,8 @@ const (
 	cadenceOutboundSub   = "@every 5m"
 	cadenceReapOrphans   = "@every 5m"
 	cadenceRemoteRouting = "@every 5m"
+	cadenceLineHealth    = "@every 1m"
+	cadenceCrm           = "@every 30s"
 	cadenceXrayLogPrune  = "@every 10m"
 	cadenceCheckHash     = "@every 2m"
 	// cpu.Percent samples over a full minute (blocking), so a finer cadence just
@@ -361,6 +365,12 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 	_, _ = s.cron.AddJob(cadenceOutboundSub, job.NewOutboundSubscriptionJob())
 
 	_, _ = s.cron.AddJob(cadenceReapOrphans, job.NewReapSyncOrphansJob())
+
+	// Hide node-hosted lines that stop answering from subscriptions until they recover.
+	_, _ = s.cron.AddJob(cadenceLineHealth, job.NewLineHealthJob())
+
+	// CRM lifecycle events + webhook outbox; idle unless the CRM webhook is enabled.
+	_, _ = s.cron.AddJob(cadenceCrm, job.NewCrmJob(crm.NewService()))
 
 	// Warm permanent routing URLs immediately and refresh them outside the
 	// latency-sensitive subscription request path.
@@ -688,6 +698,9 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 	s.discordService = discord.NewDiscordService(s.settingService)
 	discordSub := discord.NewSubscriber(s.settingService, s.discordService)
 	s.bus.Subscribe("discord-notifier", discordSub.HandleEvent)
+
+	// CRM webhook subscriber only queues; CrmJob delivers with retries.
+	s.bus.Subscribe("crm-webhook", crm.NewService().HandleEvent)
 
 	// Wire discord service to controller for test endpoint
 	controller.SetDiscordService(s.discordService)

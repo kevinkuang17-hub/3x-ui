@@ -28,6 +28,18 @@
     "schemas": {
       "AllSetting": {
         "properties": {
+          "crmWebhookEnable": {
+            "type": "boolean"
+          },
+          "crmWebhookEvents": {
+            "type": "string"
+          },
+          "crmWebhookSecret": {
+            "type": "string"
+          },
+          "crmWebhookUrl": {
+            "type": "string"
+          },
           "datepicker": {
             "type": "string"
           },
@@ -475,6 +487,9 @@
           "subKeyFile": {
             "type": "string"
           },
+          "subLineHealth": {
+            "type": "boolean"
+          },
           "subListen": {
             "type": "string"
           },
@@ -598,6 +613,10 @@
           }
         },
         "required": [
+          "crmWebhookEnable",
+          "crmWebhookEvents",
+          "crmWebhookSecret",
+          "crmWebhookUrl",
           "datepicker",
           "discordAdminIds",
           "discordBotBackup",
@@ -739,6 +758,7 @@
           "subJsonURI",
           "subJsonUserAgentRegex",
           "subKeyFile",
+          "subLineHealth",
           "subListen",
           "subPath",
           "subPort",
@@ -780,6 +800,18 @@
       },
       "AllSettingView": {
         "properties": {
+          "crmWebhookEnable": {
+            "type": "boolean"
+          },
+          "crmWebhookEvents": {
+            "type": "string"
+          },
+          "crmWebhookSecret": {
+            "type": "string"
+          },
+          "crmWebhookUrl": {
+            "type": "string"
+          },
           "datepicker": {
             "type": "string"
           },
@@ -1251,6 +1283,9 @@
           "subKeyFile": {
             "type": "string"
           },
+          "subLineHealth": {
+            "type": "boolean"
+          },
           "subListen": {
             "type": "string"
           },
@@ -1374,6 +1409,10 @@
           }
         },
         "required": [
+          "crmWebhookEnable",
+          "crmWebhookEvents",
+          "crmWebhookSecret",
+          "crmWebhookUrl",
           "datepicker",
           "discordAdminIds",
           "discordBotBackup",
@@ -1523,6 +1562,7 @@
           "subJsonURI",
           "subJsonUserAgentRegex",
           "subKeyFile",
+          "subLineHealth",
           "subListen",
           "subPath",
           "subPort",
@@ -4859,6 +4899,10 @@
     {
       "name": "Xray Settings",
       "description": "Xray configuration template, outbound management, Warp/Nord/PIA integration, and config testing. All endpoints under /panel/api/xray."
+    },
+    {
+      "name": "CRM integration",
+      "description": "Connect an external CRM or billing system. Lifecycle webhooks are configured under Settings → CRM: the panel POSTs JSON events (client.traffic80, client.depleted, client.expiring, client.expired, line.down, line.up, node.down, node.up) with headers X-3xui-Event, X-3xui-Timestamp and X-3xui-Signature = \"sha256=\" + hex(HMAC-SHA256(secret, timestamp + \".\" + body)). Undelivered events are retried with backoff. These endpoints require an admin-scope API token."
     },
     {
       "name": "Subscription Balancers",
@@ -14946,6 +14990,126 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/panel/api/crm/sso": {
+      "post": {
+        "tags": [
+          "CRM integration"
+        ],
+        "summary": "Mint a single-use login link valid for 2 minutes. Opening it signs the browser into the panel without a password and redirects to the optional panel-relative path. Username defaults to the first panel user.",
+        "operationId": "post_panel_api_crm_sso",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Panel user to sign in as."
+                  },
+                  "redirect": {
+                    "type": "string",
+                    "description": "Panel-relative path to open after login, e.g. /panel/clients."
+                  }
+                }
+              },
+              "example": {
+                "redirect": "/panel/clients"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "path": "/sso/3f9c…",
+                    "url": "https://panel.example.com:2053/sso/3f9c…",
+                    "expiresAt": 1735689720
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/crm/webhook/test": {
+      "post": {
+        "tags": [
+          "CRM integration"
+        ],
+        "summary": "Send a crm.ping event straight to the configured webhook URL (bypassing the retry queue) and report whether the CRM answered 2xx.",
+        "operationId": "post_panel_api_crm_webhook_test",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "msg": "Webhook delivered"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sso/{token}": {
+      "get": {
+        "tags": [
+          "CRM integration"
+        ],
+        "summary": "Public. Redeem a link minted by /panel/api/crm/sso: sets the session cookie and redirects into the panel. Used, expired or unknown tokens redirect to the login page.",
+        "operationId": "get_sso_token",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Single-use SSO token.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect into the panel, or to the login page when the link is invalid."
           }
         }
       }

@@ -481,6 +481,13 @@ export default function CommandPalette() {
         icon: <DiscordOutlined />,
       },
       {
+        path: '/settings#crm',
+        title: `${t('menu.settings')} · ${t('pages.settings.crmSettings')}`,
+        subtitle: t('pages.settings.crmSettings'),
+        keywords: ['crm', 'webhook', 'sso', 'billing', 'integration'],
+        icon: <ApiOutlined />,
+      },
+      {
         path: '/settings#subscription',
         title: `${t('menu.settings')} · ${t('pages.settings.subSettings')}`,
         subtitle: t('pages.settings.subSettings'),

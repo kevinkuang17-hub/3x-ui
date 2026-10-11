@@ -9,6 +9,10 @@ export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
 export interface AllSetting {
+  crmWebhookEnable: boolean;
+  crmWebhookEvents: string;
+  crmWebhookSecret: string;
+  crmWebhookUrl: string;
   datepicker: string;
   discordAdminIds: string;
   discordBotBackup: boolean;
@@ -150,6 +154,7 @@ export interface AllSetting {
   subJsonURI: string;
   subJsonUserAgentRegex: string;
   subKeyFile: string;
+  subLineHealth: boolean;
   subListen: string;
   subPath: string;
   subPort: number;
@@ -189,6 +194,10 @@ export interface AllSetting {
 }
 
 export interface AllSettingView {
+  crmWebhookEnable: boolean;
+  crmWebhookEvents: string;
+  crmWebhookSecret: string;
+  crmWebhookUrl: string;
   datepicker: string;
   discordAdminIds: string;
   discordBotBackup: boolean;
@@ -338,6 +347,7 @@ export interface AllSettingView {
   subJsonURI: string;
   subJsonUserAgentRegex: string;
   subKeyFile: string;
+  subLineHealth: boolean;
   subListen: string;
   subPath: string;
   subPort: number;
