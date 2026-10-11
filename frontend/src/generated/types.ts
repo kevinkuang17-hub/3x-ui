@@ -9,6 +9,9 @@ export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
 export interface AllSetting {
+  cfApiToken: string;
+  cfAutoDns: boolean;
+  cfZone: string;
   crmWebhookEnable: boolean;
   crmWebhookEvents: string;
   crmWebhookSecret: string;
@@ -194,6 +197,9 @@ export interface AllSetting {
 }
 
 export interface AllSettingView {
+  cfApiToken: string;
+  cfAutoDns: boolean;
+  cfZone: string;
   crmWebhookEnable: boolean;
   crmWebhookEvents: string;
   crmWebhookSecret: string;
@@ -215,6 +221,8 @@ export interface AllSettingView {
   externalTrafficInformURI: string;
   happLinkEnable: boolean;
   hasApiToken: boolean;
+  hasCfApiToken: boolean;
+  hasCrmWebhookSecret: boolean;
   hasDiscordBotToken: boolean;
   hasLdapPassword: boolean;
   hasNordSecret: boolean;

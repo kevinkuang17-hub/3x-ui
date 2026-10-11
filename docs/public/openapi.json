@@ -28,6 +28,15 @@
     "schemas": {
       "AllSetting": {
         "properties": {
+          "cfApiToken": {
+            "type": "string"
+          },
+          "cfAutoDns": {
+            "type": "boolean"
+          },
+          "cfZone": {
+            "type": "string"
+          },
           "crmWebhookEnable": {
             "type": "boolean"
           },
@@ -613,6 +622,9 @@
           }
         },
         "required": [
+          "cfApiToken",
+          "cfAutoDns",
+          "cfZone",
           "crmWebhookEnable",
           "crmWebhookEvents",
           "crmWebhookSecret",
@@ -800,6 +812,15 @@
       },
       "AllSettingView": {
         "properties": {
+          "cfApiToken": {
+            "type": "string"
+          },
+          "cfAutoDns": {
+            "type": "boolean"
+          },
+          "cfZone": {
+            "type": "string"
+          },
           "crmWebhookEnable": {
             "type": "boolean"
           },
@@ -866,6 +887,12 @@
             "type": "boolean"
           },
           "hasApiToken": {
+            "type": "boolean"
+          },
+          "hasCfApiToken": {
+            "type": "boolean"
+          },
+          "hasCrmWebhookSecret": {
             "type": "boolean"
           },
           "hasDiscordBotToken": {
@@ -1409,6 +1436,9 @@
           }
         },
         "required": [
+          "cfApiToken",
+          "cfAutoDns",
+          "cfZone",
           "crmWebhookEnable",
           "crmWebhookEvents",
           "crmWebhookSecret",
@@ -1430,6 +1460,8 @@
           "externalTrafficInformURI",
           "happLinkEnable",
           "hasApiToken",
+          "hasCfApiToken",
+          "hasCrmWebhookSecret",
           "hasDiscordBotToken",
           "hasLdapPassword",
           "hasNordSecret",
@@ -4899,6 +4931,14 @@
     {
       "name": "Xray Settings",
       "description": "Xray configuration template, outbound management, Warp/Nord/PIA integration, and config testing. All endpoints under /panel/api/xray."
+    },
+    {
+      "name": "Node domains & one-click join",
+      "description": "Cloudflare DNS for nodes (needs cfApiToken and cfZone in settings) and the one-command node installer. A node with a domain can change IP without users updating anything: update the record by hand, or turn on cfAutoDns to follow the IP each node reports in its heartbeat."
+    },
+    {
+      "name": "Plans",
+      "description": "Sellable packages: traffic (bytes, 0 = unlimited), duration in days (0 = never expires), device/IP limit and an optional client group. Applying a plan sets those limits on each client, re-enables it, optionally zeroes its traffic and moves it into the group. delayStart makes the days count from the first connection."
     },
     {
       "name": "CRM integration",
@@ -14986,6 +15026,646 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/dns/list": {
+      "get": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Whether Cloudflare is configured, and every node-to-domain link with the last published IP, the IP the node currently reports, and the last error.",
+        "operationId": "get_panel_api_nodes_dns_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/dns/set": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Link a node to a domain (a short label is completed with the zone), publish its IP as a DNS-only A record, and optionally make the domain the node address. ip defaults to the IP the node reports.",
+        "operationId": "post_panel_api_nodes_dns_set",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "nodeId": 3,
+                "name": "hk-a",
+                "ip": "",
+                "useAsAddress": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/dns/sync/{id}": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Re-publish the node record, optionally with a new IP (\"change IP\").",
+        "operationId": "post_panel_api_nodes_dns_sync_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Node id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ip": "203.0.113.20"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/dns/unlink/{id}": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Forget the node-to-domain link. The Cloudflare record itself is left in place.",
+        "operationId": "post_panel_api_nodes_dns_unlink_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Node id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/join/ticket": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Mint a single-use join link valid for 24 hours. Run the returned script on a new server with the full link (origin + path) as its argument.",
+        "operationId": "post_panel_api_nodes_join_ticket",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "token": "…",
+                    "expiresAt": 1735776000,
+                    "path": "/node-join/…",
+                    "script": "https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main/join-node.sh"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node-join/{token}/prepare": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Public, called by join-node.sh. Reserves the node name from the region code (HK A, HK B, …) and, with Cloudflare configured, creates its A record. Re-running returns the same reservation.",
+        "operationId": "post_node_join_token_prepare",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Join ticket.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ip": "203.0.113.9",
+                "country": "HK"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "name": "HK A",
+                    "domain": "hk-a.example.com"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node-join/{token}/finish": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Public, called by join-node.sh after installing. The master probes the new panel (domain with certificate checks first, then IP, then pinning the certificate it presents) and adds it as a node; the ticket is used up only on success. Plain http needs allowHttp. reportPath is where the node reports its IP afterwards.",
+        "operationId": "post_node_join_token_finish",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Join ticket.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "scheme": "https",
+                "port": 40123,
+                "basePath": "/abc/",
+                "apiToken": "…",
+                "allowHttp": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "id": 7,
+                    "name": "HK A",
+                    "address": "hk-a.example.com",
+                    "reportPath": "/node-ip/…"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node-ip/{key}": {
+      "post": {
+        "tags": [
+          "Node domains & one-click join"
+        ],
+        "summary": "Public, called every 5 minutes by the reporter join-node.sh installs on a node with a domain. The reported IPv4 must equal the address the request comes from; when it changed, the Cloudflare record is updated.",
+        "operationId": "post_node_ip_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "Node report key.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ip": "203.0.113.20"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "ip": "203.0.113.20",
+                    "changed": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/list": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "List all plans ordered by sortOrder.",
+        "operationId": "get_panel_api_plans_list",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/add": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Create a plan. Names are unique.",
+        "operationId": "post_panel_api_plans_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Monthly 100G",
+                "totalGB": 107374182400,
+                "days": 30,
+                "limitIp": 3,
+                "group": "vip",
+                "delayStart": false,
+                "resetTraffic": true,
+                "price": "¥30",
+                "remark": "",
+                "sortOrder": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/update/{id}": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Replace every field of a plan.",
+        "operationId": "post_panel_api_plans_update_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Plan id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Monthly 100G",
+                "totalGB": 107374182400,
+                "days": 30,
+                "limitIp": 3,
+                "group": "vip",
+                "delayStart": false,
+                "resetTraffic": true,
+                "price": "¥30",
+                "remark": "",
+                "sortOrder": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/del/{id}": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Delete a plan. Clients already on it keep their limits.",
+        "operationId": "post_panel_api_plans_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Plan id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/plans/apply": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Apply a plan (by planId or planName) to clients. mode \"renew\" (default) extends from the later of now and the current expiry; \"reset\" restarts the duration from now. Returns how many clients were updated and the reason for each failure.",
+        "operationId": "post_panel_api_plans_apply",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "planName": "Monthly 100G",
+                "emails": [
+                  "user1",
+                  "user2"
+                ],
+                "mode": "renew"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "applied": 2
                   }
                 }
               }

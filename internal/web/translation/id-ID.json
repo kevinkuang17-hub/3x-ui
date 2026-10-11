@@ -126,7 +126,8 @@
     "openMenu": "Buka menu",
     "pinSidebar": "Sematkan bilah sisi",
     "unpinSidebar": "Lepas sematan bilah sisi",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "plans": "Paket"
   },
   "pages": {
     "login": {
@@ -1131,7 +1132,32 @@
       "pinnedCertPlaceholder": "SHA-256 base64 atau hex",
       "fetchPin": "Ambil",
       "pinFetched": "Berhasil mengambil sertifikat node saat ini",
-      "pinFetchFailed": "Tidak dapat mengambil sertifikat"
+      "pinFetchFailed": "Tidak dapat mengambil sertifikat",
+      "dns": {
+        "title": "Domain (DNS)",
+        "modalTitle": "Domain untuk {name}",
+        "intro": "Arahkan domain Cloudflare ke node ini. Saat IP server berubah, perbarui record di sini (atau aktifkan pembaruan otomatis di Pengaturan → Cloudflare) dan semua pengguna tetap terhubung tanpa konfigurasi baru.",
+        "current": "Saat ini: {name} → {ip} (dilaporkan node: {observed})",
+        "name": "Domain",
+        "nameDesc": "Nama pendek seperti hk-a akan dilengkapi dengan zone Anda.",
+        "ip": "Alamat IP",
+        "ipDesc": "Kosongkan untuk memakai IP yang dilaporkan node. Isi untuk mengganti IP secara manual.",
+        "useAsAddress": "Gunakan domain ini sebagai alamat node (langganan dan master mengikutinya)",
+        "changeIp": "Ganti IP",
+        "unlink": "Lepaskan",
+        "notConfigured": "Atur token API dan zone Cloudflare terlebih dahulu di Pengaturan → Cloudflare.",
+        "saved": "Record DNS diperbarui",
+        "failed": "Gagal memperbarui DNS",
+        "unlinked": "Domain dilepas dari node",
+        "reporter": "Agar domain mengikuti perubahan IP meski master tak bisa menjangkau node, jalankan ini sekali di node (node yang ditambah sekali klik sudah memilikinya):"
+      },
+      "join": {
+        "button": "Tambah sekali klik",
+        "title": "Tambah node dengan satu perintah",
+        "intro": "Jalankan perintah ini sebagai root di server baru. Perintah ini memasang panel, menamai node berdasarkan wilayah (mis. HK A), membuat domainnya jika Cloudflare sudah diatur, dan mendaftarkannya ke sini secara otomatis.",
+        "expires": "Sekali pakai, berlaku hingga {time}",
+        "notes": "Server baru perlu membuka port 80 (sertifikat) dan port panel untuk master ini. Setelah selesai, muat ulang halaman ini."
+      }
     },
     "settings": {
       "defaultTag": "Bawaan",
@@ -1775,7 +1801,16 @@
       "crmSsoDesc": "CRM dapat memanggil POST /panel/api/crm/sso dengan token API admin untuk mendapat tautan sekali pakai yang masuk tanpa kata sandi (berlaku 2 menit). Buat satu di sini untuk mencoba.",
       "crmSsoGenerate": "Buat tautan login",
       "subLineHealth": "Sembunyikan jalur mati otomatis",
-      "subLineHealthDesc": "Setiap menit panel memeriksa jalur di node; jalur yang gagal 3 kali berturut-turut dikeluarkan dari langganan hingga pulih. Jika sebagian besar gagal bersamaan, tidak ada yang disembunyikan (kemungkinan jaringan panel sendiri)."
+      "subLineHealthDesc": "Setiap menit panel memeriksa jalur di node; jalur yang gagal 3 kali berturut-turut dikeluarkan dari langganan hingga pulih. Jika sebagian besar gagal bersamaan, tidak ada yang disembunyikan (kemungkinan jaringan panel sendiri).",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "Memungkinkan panel membuat dan memperbarui record A untuk node Anda (Node → Domain, dan tambah sekali klik).",
+      "cfApiToken": "Token API",
+      "cfApiTokenDesc": "Buat di dash.cloudflare.com → My Profile → API Tokens dengan izin \"Zone · DNS · Edit\" untuk zone Anda.",
+      "cfZone": "Zone (domain utama)",
+      "cfZoneDesc": "Domain yang dikelola di Cloudflare, mis. example.com. Record node menjadi hk-a.example.com.",
+      "cfAutoDns": "Ikuti perubahan IP secara otomatis",
+      "cfAutoDnsDesc": "Saat node melaporkan IP publik baru, segera perbarui record DNS-nya.",
+      "secretConfigured": "Sudah diatur — masukkan nilai baru untuk mengganti"
     },
     "xray": {
       "save": "Simpan",
@@ -2422,6 +2457,42 @@
       "available": "Tersedia",
       "takenUntil": "Terisi hingga {date}",
       "activeCount": "{count} aktif"
+    },
+    "plans": {
+      "add": "Tambah paket",
+      "edit": "Ubah paket",
+      "empty": "Belum ada paket — buat satu untuk memperpanjang klien sekali klik.",
+      "name": "Nama",
+      "nameRequired": "Nama paket wajib diisi",
+      "traffic": "Trafik",
+      "days": "Hari",
+      "limitIp": "Batas perangkat / IP",
+      "group": "Grup",
+      "groupDesc": "Klien di paket ini masuk ke grup ini (dan memakai aturan routing-nya).",
+      "price": "Harga",
+      "remark": "Catatan",
+      "sortOrder": "Urutan",
+      "unlimited": "Tanpa batas",
+      "never": "Tidak pernah",
+      "zeroUnlimited": "0 = tanpa batas",
+      "zeroNever": "0 = tidak kedaluwarsa",
+      "delayStart": "Mulai saat pertama dipakai",
+      "delayStartShort": "sejak pertama dipakai",
+      "delayStartDesc": "Hari dihitung sejak klien pertama terhubung, bukan saat paket diterapkan.",
+      "resetTraffic": "Reset trafik terpakai",
+      "resetTrafficDesc": "Nolkan trafik terpakai klien saat paket diterapkan.",
+      "apply": "Terapkan",
+      "applyTitle": "Terapkan paket {name}",
+      "clients": "Klien",
+      "pickGroup": "Tambah satu grup",
+      "pickGroupPlaceholder": "Pilih grup untuk menambahkan semua anggotanya",
+      "mode": "Jika klien masih punya sisa waktu",
+      "modeRenew": "Tambahkan hari di atasnya (perpanjang)",
+      "modeReset": "Mulai ulang dari hari ini",
+      "applied": "Paket diterapkan ke {count} klien",
+      "appliedMixed": "{ok} berhasil, {failed} gagal",
+      "deleteConfirm": "Hapus paket {name}?",
+      "deleted": "Paket dihapus"
     }
   },
   "tgbot": {

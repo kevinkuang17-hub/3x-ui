@@ -191,6 +191,9 @@ var defaultValueMap = map[string]string{
 	"crmWebhookUrl":               "",
 	"crmWebhookSecret":            "",
 	"crmWebhookEvents":            "",
+	"cfApiToken":                  "",
+	"cfZone":                      "",
+	"cfAutoDns":                   "false",
 	"subJsonMux":                  "",
 	"subJsonRules":                "",
 	"subJsonRoutingRules":         "",
@@ -363,6 +366,8 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 	view.HasNordSecret = secretConfigured(mustString(s.GetNord()))
 	view.HasSmtpPassword = secretConfigured(allSetting.SmtpPassword)
 	view.HasDiscordBotToken = secretConfigured(allSetting.DiscordBotToken)
+	view.HasCfApiToken = secretConfigured(allSetting.CfApiToken)
+	view.HasCrmWebhookSecret = secretConfigured(allSetting.CrmWebhookSecret)
 	var apiTokenCount int64
 	if err := database.GetDB().Model(model.ApiToken{}).Where("enabled = ?", true).Count(&apiTokenCount).Error; err == nil {
 		view.HasApiToken = apiTokenCount > 0
@@ -372,6 +377,8 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 	view.LdapPassword = ""
 	view.SmtpPassword = ""
 	view.DiscordBotToken = ""
+	view.CfApiToken = ""
+	view.CrmWebhookSecret = ""
 	return view, nil
 }
 
@@ -1246,6 +1253,18 @@ func (s *SettingService) GetSubLineHealth() (bool, error) {
 	return s.getBool("subLineHealth")
 }
 
+func (s *SettingService) GetCfApiToken() (string, error) {
+	return s.getString("cfApiToken")
+}
+
+func (s *SettingService) GetCfZone() (string, error) {
+	return s.getString("cfZone")
+}
+
+func (s *SettingService) GetCfAutoDns() (bool, error) {
+	return s.getBool("cfAutoDns")
+}
+
 func (s *SettingService) GetCrmWebhookEnable() (bool, error) {
 	return s.getBool("crmWebhookEnable")
 }
@@ -1665,10 +1684,12 @@ func (s *SettingService) SetOutboundDownThreshold(value int) error {
 // flag, a blank submitted secret means "unchanged" (the field is always served
 // blank to the browser) and the stored value is preserved.
 type SecretClears struct {
-	TgBotToken      bool
-	LdapPassword    bool
-	SmtpPassword    bool
-	DiscordBotToken bool
+	TgBotToken       bool
+	LdapPassword     bool
+	SmtpPassword     bool
+	DiscordBotToken  bool
+	CfApiToken       bool
+	CrmWebhookSecret bool
 }
 
 func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears SecretClears) error {
@@ -1807,6 +1828,20 @@ func (s *SettingService) preserveRedactedSecrets(allSetting *entity.AllSetting, 
 			return err
 		}
 		allSetting.DiscordBotToken = value
+	}
+	if !clears.CfApiToken && strings.TrimSpace(allSetting.CfApiToken) == "" {
+		value, err := s.GetCfApiToken()
+		if err != nil {
+			return err
+		}
+		allSetting.CfApiToken = value
+	}
+	if !clears.CrmWebhookSecret && strings.TrimSpace(allSetting.CrmWebhookSecret) == "" {
+		value, err := s.GetCrmWebhookSecret()
+		if err != nil {
+			return err
+		}
+		allSetting.CrmWebhookSecret = value
 	}
 	return nil
 }
@@ -2019,11 +2054,13 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 }
 
 var factoryDefaultSecretKeys = map[string]bool{
-	"tgBotToken":      true,
-	"twoFactorToken":  true,
-	"ldapPassword":    true,
-	"smtpPassword":    true,
-	"discordBotToken": true,
+	"tgBotToken":       true,
+	"twoFactorToken":   true,
+	"ldapPassword":     true,
+	"smtpPassword":     true,
+	"discordBotToken":  true,
+	"cfApiToken":       true,
+	"crmWebhookSecret": true,
 }
 
 /*

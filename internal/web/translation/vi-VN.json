@@ -126,7 +126,8 @@
     "openMenu": "Mở menu",
     "pinSidebar": "Ghim thanh bên",
     "unpinSidebar": "Bỏ ghim thanh bên",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "plans": "Gói"
   },
   "pages": {
     "login": {
@@ -1131,7 +1132,32 @@
       "pinnedCertPlaceholder": "SHA-256 base64 hoặc hex",
       "fetchPin": "Lấy",
       "pinFetched": "Đã lấy chứng chỉ hiện tại của node",
-      "pinFetchFailed": "Không thể lấy chứng chỉ"
+      "pinFetchFailed": "Không thể lấy chứng chỉ",
+      "dns": {
+        "title": "Tên miền (DNS)",
+        "modalTitle": "Tên miền cho {name}",
+        "intro": "Trỏ một tên miền Cloudflare tới node này. Khi IP máy chủ thay đổi, hãy cập nhật bản ghi tại đây (hoặc bật cập nhật tự động trong Cài đặt → Cloudflare) và mọi người dùng vẫn hoạt động mà không cần cấu hình mới.",
+        "current": "Hiện tại: {name} → {ip} (node báo cáo {observed})",
+        "name": "Tên miền",
+        "nameDesc": "Tên ngắn như hk-a sẽ được tự động ghép với zone của bạn.",
+        "ip": "Địa chỉ IP",
+        "ipDesc": "Để trống để dùng IP do node báo cáo. Điền vào để đổi IP thủ công.",
+        "useAsAddress": "Dùng tên miền này làm địa chỉ của node (gói đăng ký và máy chủ chính sẽ theo nó)",
+        "changeIp": "Đổi IP",
+        "unlink": "Hủy liên kết",
+        "notConfigured": "Hãy thiết lập API token và zone Cloudflare trong Cài đặt → Cloudflare trước.",
+        "saved": "Đã cập nhật bản ghi DNS",
+        "failed": "Cập nhật DNS thất bại",
+        "unlinked": "Đã hủy liên kết tên miền khỏi node",
+        "reporter": "Để tên miền theo kịp khi đổi IP ngay cả lúc máy chủ chính không kết nối được tới nút, hãy chạy lệnh này một lần trên nút (nút thêm bằng một cú nhấp đã có sẵn):"
+      },
+      "join": {
+        "button": "Thêm bằng một cú nhấp",
+        "title": "Thêm node bằng một lệnh",
+        "intro": "Chạy lệnh này với quyền root trên máy chủ mới. Lệnh sẽ cài đặt panel, đặt tên node theo khu vực (ví dụ HK A), tạo tên miền nếu đã thiết lập Cloudflare và tự động đăng ký node tại đây.",
+        "expires": "Dùng một lần, hiệu lực đến {time}",
+        "notes": "Máy chủ mới cần mở cổng 80 (chứng chỉ) và mở cổng panel cho máy chủ chính này. Khi hoàn tất, hãy tải lại trang này."
+      }
     },
     "settings": {
       "defaultTag": "Mặc định",
@@ -1775,7 +1801,16 @@
       "crmSsoDesc": "CRM có thể gọi POST /panel/api/crm/sso bằng API token quản trị để lấy liên kết dùng một lần, đăng nhập không cần mật khẩu (hiệu lực 2 phút). Có thể tạo thử tại đây.",
       "crmSsoGenerate": "Tạo liên kết đăng nhập",
       "subLineHealth": "Tự ẩn tuyến không hoạt động",
-      "subLineHealthDesc": "Mỗi phút bảng điều khiển kiểm tra các tuyến trên nút; tuyến lỗi 3 lần liên tiếp sẽ bị bỏ khỏi gói đăng ký cho tới khi hoạt động lại. Nếu phần lớn tuyến lỗi cùng lúc thì không ẩn gì (khả năng do mạng của chính bảng điều khiển)."
+      "subLineHealthDesc": "Mỗi phút bảng điều khiển kiểm tra các tuyến trên nút; tuyến lỗi 3 lần liên tiếp sẽ bị bỏ khỏi gói đăng ký cho tới khi hoạt động lại. Nếu phần lớn tuyến lỗi cùng lúc thì không ẩn gì (khả năng do mạng của chính bảng điều khiển).",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "Cho phép panel tạo và cập nhật bản ghi A cho các node (Node → Tên miền, và thêm bằng một cú nhấp).",
+      "cfApiToken": "API token",
+      "cfApiTokenDesc": "Tạo tại dash.cloudflare.com → My Profile → API Tokens với quyền \"Zone · DNS · Edit\" cho zone của bạn.",
+      "cfZone": "Zone (tên miền gốc)",
+      "cfZoneDesc": "Tên miền được quản lý trên Cloudflare, ví dụ example.com. Bản ghi của node sẽ là hk-a.example.com.",
+      "cfAutoDns": "Tự động theo dõi thay đổi IP",
+      "cfAutoDnsDesc": "Khi node báo cáo IP công khai mới, cập nhật bản ghi DNS của nó ngay lập tức.",
+      "secretConfigured": "Đã thiết lập — nhập giá trị mới để thay thế"
     },
     "xray": {
       "importRules": "Nhập quy tắc",
@@ -2422,6 +2457,42 @@
       "available": "Còn trống",
       "takenUntil": "Đã đặt đến {date}",
       "activeCount": "{count} đang hoạt động"
+    },
+    "plans": {
+      "add": "Thêm gói",
+      "edit": "Sửa gói",
+      "empty": "Chưa có gói nào — thêm một gói để gia hạn khách chỉ bằng một cú nhấp.",
+      "name": "Tên",
+      "nameRequired": "Cần nhập tên gói",
+      "traffic": "Lưu lượng",
+      "days": "Số ngày",
+      "limitIp": "Giới hạn thiết bị / IP",
+      "group": "Nhóm",
+      "groupDesc": "Khách dùng gói này sẽ vào nhóm này (và nhận quy tắc định tuyến của nhóm).",
+      "price": "Giá",
+      "remark": "Ghi chú",
+      "sortOrder": "Thứ tự",
+      "unlimited": "Không giới hạn",
+      "never": "Không hết hạn",
+      "zeroUnlimited": "0 = không giới hạn",
+      "zeroNever": "0 = không hết hạn",
+      "delayStart": "Bắt đầu khi dùng lần đầu",
+      "delayStartShort": "từ lần dùng đầu",
+      "delayStartDesc": "Số ngày tính từ lần kết nối đầu tiên của khách, không phải lúc áp dụng gói.",
+      "resetTraffic": "Đặt lại lưu lượng đã dùng",
+      "resetTrafficDesc": "Đưa lưu lượng đã dùng của khách về 0 khi áp dụng gói.",
+      "apply": "Áp dụng",
+      "applyTitle": "Áp dụng gói {name}",
+      "clients": "Khách",
+      "pickGroup": "Thêm cả nhóm",
+      "pickGroupPlaceholder": "Chọn một nhóm để thêm tất cả thành viên",
+      "mode": "Khi khách vẫn còn thời hạn",
+      "modeRenew": "Cộng thêm ngày (gia hạn)",
+      "modeReset": "Tính lại từ hôm nay",
+      "applied": "Đã áp dụng gói cho {count} khách",
+      "appliedMixed": "{ok} thành công, {failed} thất bại",
+      "deleteConfirm": "Xóa gói {name}?",
+      "deleted": "Đã xóa gói"
     }
   },
   "tgbot": {

@@ -51,6 +51,8 @@ type HeartbeatPatch struct {
 	// Xray core health on the node.
 	XrayState string
 	XrayError string
+	// PublicIPv4 is the node's own view of its public address, used to follow IP changes in DNS.
+	PublicIPv4 string
 }
 
 type NodeService struct{}
@@ -1320,6 +1322,9 @@ func (s *NodeService) probe(ctx context.Context, n *model.Node, proxyURL string)
 				Up   uint64 `json:"up"`
 				Down uint64 `json:"down"`
 			} `json:"netIO"`
+			PublicIP struct {
+				IPv4 string `json:"ipv4"`
+			} `json:"publicIP"`
 		} `json:"obj"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, maxProbeBodyBytes)).Decode(&envelope); err != nil {
@@ -1349,6 +1354,7 @@ func (s *NodeService) probe(ctx context.Context, n *model.Node, proxyURL string)
 	patch.UptimeSecs = o.Uptime
 	patch.NetUp = o.NetIO.Up
 	patch.NetDown = o.NetIO.Down
+	patch.PublicIPv4 = o.PublicIP.IPv4
 	return patch, nil
 }
 

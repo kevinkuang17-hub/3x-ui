@@ -91,6 +91,9 @@ func allModels() []any {
 		&model.CrmEventMark{},
 		&model.CrmWebhookOutbox{},
 		&model.SsoTicket{},
+		&model.Plan{},
+		&model.NodeDns{},
+		&model.NodeJoinTicket{},
 	}
 }
 

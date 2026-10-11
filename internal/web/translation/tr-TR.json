@@ -126,7 +126,8 @@
     "openMenu": "Menüyü aç",
     "pinSidebar": "Kenar çubuğunu sabitle",
     "unpinSidebar": "Kenar çubuğu sabitlemesini kaldır",
-    "subFormats": "Abonelik Formatları"
+    "subFormats": "Abonelik Formatları",
+    "plans": "Paketler"
   },
   "pages": {
     "login": {
@@ -1131,7 +1132,32 @@
       "pinnedCertPlaceholder": "base64 veya hex SHA-256",
       "fetchPin": "Getir",
       "pinFetched": "Düğümün geçerli sertifikası alındı",
-      "pinFetchFailed": "Sertifika alınamadı"
+      "pinFetchFailed": "Sertifika alınamadı",
+      "dns": {
+        "title": "Alan adı (DNS)",
+        "modalTitle": "{name} için alan adı",
+        "intro": "Bir Cloudflare alan adını bu düğüme yönlendirin. Sunucunun IP'si değiştiğinde kaydı buradan güncelleyin (veya Ayarlar → Cloudflare'de otomatik güncellemeyi açın); tüm kullanıcılar yeni yapılandırma olmadan çalışmaya devam eder.",
+        "current": "Şu an: {name} → {ip} (düğümün bildirdiği {observed})",
+        "name": "Alan adı",
+        "nameDesc": "hk-a gibi kısa bir ad, bölgenizle (zone) tamamlanır.",
+        "ip": "IP adresi",
+        "ipDesc": "Düğümün bildirdiği IP'yi kullanmak için boş bırakın. IP'yi elle değiştirmek için doldurun.",
+        "useAsAddress": "Bu alan adını düğümün adresi olarak kullan (abonelikler ve ana sunucu bunu takip eder)",
+        "changeIp": "IP değiştir",
+        "unlink": "Bağlantıyı kaldır",
+        "notConfigured": "Önce Ayarlar → Cloudflare'de API token ve zone bilgisini girin.",
+        "saved": "DNS kaydı güncellendi",
+        "failed": "DNS güncellemesi başarısız",
+        "unlinked": "Alan adının düğümle bağlantısı kaldırıldı",
+        "reporter": "Ana panel düğüme artık ulaşamasa bile alan adının IP değişikliğini izlemesi için bunu düğümde bir kez çalıştırın (tek tıkla eklenen düğümlerde zaten var):"
+      },
+      "join": {
+        "button": "Tek tıkla ekle",
+        "title": "Tek komutla düğüm ekle",
+        "intro": "Bu komutu yeni sunucuda root olarak çalıştırın. Paneli kurar, düğümü bölgeye göre adlandırır (örn. HK A), Cloudflare ayarlıysa alan adını oluşturur ve buraya otomatik olarak kaydeder.",
+        "expires": "Tek kullanımlık, {time} tarihine kadar geçerli",
+        "notes": "Yeni sunucuda 80 numaralı port (sertifika) ve bu ana sunucuya açık panel portu gerekir. İşlem bitince bu sayfayı yenileyin."
+      }
     },
     "settings": {
       "defaultTag": "Varsayılan",
@@ -1775,7 +1801,16 @@
       "crmSsoDesc": "CRM, yönetici API anahtarıyla POST /panel/api/crm/sso çağırarak şifresiz giriş yapan tek kullanımlık bir bağlantı (2 dakika geçerli) alabilir. Denemek için burada oluşturabilirsiniz.",
       "crmSsoGenerate": "Giriş bağlantısı oluştur",
       "subLineHealth": "Çalışmayan hatları otomatik gizle",
-      "subLineHealthDesc": "Panel her dakika düğümlerdeki hatları kontrol eder; art arda 3 kez yanıt vermeyen hat düzelene kadar aboneliklerden çıkarılır. Hatların çoğu aynı anda düşerse hiçbir şey gizlenmez (büyük olasılıkla panelin kendi ağı)."
+      "subLineHealthDesc": "Panel her dakika düğümlerdeki hatları kontrol eder; art arda 3 kez yanıt vermeyen hat düzelene kadar aboneliklerden çıkarılır. Hatların çoğu aynı anda düşerse hiçbir şey gizlenmez (büyük olasılıkla panelin kendi ağı).",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "Panelin düğümleriniz için A kayıtları oluşturup güncellemesini sağlar (Düğümler → Alan adı ve tek tıkla ekleme).",
+      "cfApiToken": "API token",
+      "cfApiTokenDesc": "dash.cloudflare.com → My Profile → API Tokens bölümünde, zone'unuz için \"Zone · DNS · Edit\" yetkisiyle oluşturun.",
+      "cfZone": "Zone (kök alan adı)",
+      "cfZoneDesc": "Cloudflare'de yönetilen alan adı, örn. example.com. Düğüm kayıtları hk-a.example.com olur.",
+      "cfAutoDns": "IP değişikliklerini otomatik takip et",
+      "cfAutoDnsDesc": "Bir düğüm yeni bir genel IP bildirdiğinde DNS kaydını hemen güncelle.",
+      "secretConfigured": "Ayarlandı — değiştirmek için yeni değer girin"
     },
     "xray": {
       "save": "Kaydet",
@@ -2422,6 +2457,42 @@
       "available": "Müsait",
       "takenUntil": "{date} tarihine kadar dolu",
       "activeCount": "{count} aktif"
+    },
+    "plans": {
+      "add": "Paket ekle",
+      "edit": "Paketi düzenle",
+      "empty": "Henüz paket yok — istemcileri tek tıkla yenilemek için bir tane ekleyin.",
+      "name": "Ad",
+      "nameRequired": "Paket adı gerekli",
+      "traffic": "Trafik",
+      "days": "Gün",
+      "limitIp": "Cihaz / IP sınırı",
+      "group": "Grup",
+      "groupDesc": "Bu paketteki istemciler bu gruba katılır (ve grubun yönlendirme kurallarını alır).",
+      "price": "Fiyat",
+      "remark": "Not",
+      "sortOrder": "Sıra",
+      "unlimited": "Sınırsız",
+      "never": "Süresiz",
+      "zeroUnlimited": "0 = sınırsız",
+      "zeroNever": "0 = süresiz",
+      "delayStart": "İlk kullanımda başlat",
+      "delayStartShort": "ilk kullanımdan",
+      "delayStartDesc": "Günler, paketin uygulandığı andan değil istemcinin ilk bağlantısından itibaren sayılır.",
+      "resetTraffic": "Kullanılan trafiği sıfırla",
+      "resetTrafficDesc": "Paket uygulanırken istemcinin kullandığı trafiği sıfırlar.",
+      "apply": "Uygula",
+      "applyTitle": "{name} paketini uygula",
+      "clients": "İstemciler",
+      "pickGroup": "Tüm grubu ekle",
+      "pickGroupPlaceholder": "Tüm üyelerini eklemek için bir grup seçin",
+      "mode": "İstemcinin kalan süresi varsa",
+      "modeRenew": "Günleri üstüne ekle (yenile)",
+      "modeReset": "Bugünden yeniden başlat",
+      "applied": "Paket {count} istemciye uygulandı",
+      "appliedMixed": "{ok} uygulandı, {failed} başarısız",
+      "deleteConfirm": "{name} paketi silinsin mi?",
+      "deleted": "Paket silindi"
     }
   },
   "tgbot": {

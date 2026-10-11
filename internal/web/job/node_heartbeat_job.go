@@ -3,6 +3,7 @@ package job
 import (
 	"context"
 	"fmt"
+	"net"
 	"sort"
 	"strconv"
 	"strings"
@@ -98,6 +99,11 @@ func (j *NodeHeartbeatJob) probeOne(n *model.Node) *eventbus.Event {
 	}
 	if updErr := j.nodeService.UpdateHeartbeat(n.Id, patch); updErr != nil {
 		logger.Warning("node heartbeat: update node", n.Id, "failed:", updErr)
+	}
+	// Let a linked Cloudflare record follow the IP the node reports (cfAutoDns).
+	if patch.Status == "online" && net.ParseIP(patch.PublicIPv4) != nil && service.ShouldObserveIP(n.Id, patch.PublicIPv4) {
+		nodeID, ip := n.Id, patch.PublicIPv4
+		common.GoRecover("node-dns-observe", func() { (&service.NodeDnsService{}).ObserveIP(nodeID, ip) })
 	}
 	// Learn the nodes this node manages so the panel can surface them as
 	// transitive sub-nodes (#4983). Fresh context — the probe budget above may

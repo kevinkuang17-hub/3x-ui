@@ -5,6 +5,7 @@ import { CopyOutlined, KeyOutlined, SendOutlined } from '@ant-design/icons';
 import { ClipboardManager, HttpUtil } from '@/utils';
 import type { AllSetting } from '@/models/setting';
 import { SettingListItem } from '@/components/ui';
+import SecretInput from './SecretInput';
 
 interface CrmTabProps {
   allSetting: AllSetting;
@@ -88,10 +89,13 @@ export default function CrmTab({ allSetting, updateSetting }: CrmTabProps) {
         title={t('pages.settings.crmWebhookSecret')}
         description={t('pages.settings.crmWebhookSecretDesc')}
       >
-        <Input.Password
+        <SecretInput
           value={allSetting.crmWebhookSecret}
-          autoComplete="new-password"
-          onChange={(e) => updateSetting({ crmWebhookSecret: e.target.value })}
+          configured={allSetting.hasCrmWebhookSecret}
+          clearArmed={allSetting.clearCrmWebhookSecret}
+          placeholder={t('pages.settings.secretConfigured')}
+          onChange={(v) => updateSetting({ crmWebhookSecret: v })}
+          onClearArmedChange={(armed) => updateSetting({ clearCrmWebhookSecret: armed })}
         />
       </SettingListItem>
 

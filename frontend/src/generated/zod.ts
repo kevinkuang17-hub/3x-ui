@@ -25,6 +25,9 @@ export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
 export const AllSettingSchema = z.object({
+  cfApiToken: z.string(),
+  cfAutoDns: z.boolean(),
+  cfZone: z.string(),
   crmWebhookEnable: z.boolean(),
   crmWebhookEvents: z.string(),
   crmWebhookSecret: z.string(),
@@ -211,6 +214,9 @@ export const AllSettingSchema = z.object({
 export type AllSetting = z.infer<typeof AllSettingSchema>;
 
 export const AllSettingViewSchema = z.object({
+  cfApiToken: z.string(),
+  cfAutoDns: z.boolean(),
+  cfZone: z.string(),
   crmWebhookEnable: z.boolean(),
   crmWebhookEvents: z.string(),
   crmWebhookSecret: z.string(),
@@ -232,6 +238,8 @@ export const AllSettingViewSchema = z.object({
   externalTrafficInformURI: z.string(),
   happLinkEnable: z.boolean(),
   hasApiToken: z.boolean(),
+  hasCfApiToken: z.boolean(),
+  hasCrmWebhookSecret: z.boolean(),
   hasDiscordBotToken: z.boolean(),
   hasLdapPassword: z.boolean(),
   hasNordSecret: z.boolean(),

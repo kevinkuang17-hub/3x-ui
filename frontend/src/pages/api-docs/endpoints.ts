@@ -2620,6 +2620,120 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'node-dns',
+    title: 'Node domains & one-click join',
+    description:
+      'Cloudflare DNS for nodes (needs cfApiToken and cfZone in settings) and the one-command node installer. A node with a domain can change IP without users updating anything: update the record by hand, or turn on cfAutoDns to follow the IP each node reports in its heartbeat.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/nodes/dns/list',
+        summary:
+          'Whether Cloudflare is configured, and every node-to-domain link with the last published IP, the IP the node currently reports, and the last error.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/dns/set',
+        summary:
+          'Link a node to a domain (a short label is completed with the zone), publish its IP as a DNS-only A record, and optionally make the domain the node address. ip defaults to the IP the node reports.',
+        body: '{\n  "nodeId": 3,\n  "name": "hk-a",\n  "ip": "",\n  "useAsAddress": true\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/dns/sync/:id',
+        summary: 'Re-publish the node record, optionally with a new IP ("change IP").',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node id.' }],
+        body: '{\n  "ip": "203.0.113.20"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/dns/unlink/:id',
+        summary: 'Forget the node-to-domain link. The Cloudflare record itself is left in place.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Node id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/join/ticket',
+        summary:
+          'Mint a single-use join link valid for 24 hours. Run the returned script on a new server with the full link (origin + path) as its argument.',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "token": "…",\n    "expiresAt": 1735776000,\n    "path": "/node-join/…",\n    "script": "https://raw.githubusercontent.com/kevinkuang17-hub/3x-ui/main/join-node.sh"\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/node-join/:token/prepare',
+        summary:
+          'Public, called by join-node.sh. Reserves the node name from the region code (HK A, HK B, …) and, with Cloudflare configured, creates its A record. Re-running returns the same reservation.',
+        params: [{ name: 'token', in: 'path', type: 'string', desc: 'Join ticket.' }],
+        body: '{\n  "ip": "203.0.113.9",\n  "country": "HK"\n}',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "name": "HK A",\n    "domain": "hk-a.example.com"\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/node-join/:token/finish',
+        summary:
+          'Public, called by join-node.sh after installing. The master probes the new panel (domain with certificate checks first, then IP, then pinning the certificate it presents) and adds it as a node; the ticket is used up only on success. Plain http needs allowHttp. reportPath is where the node reports its IP afterwards.',
+        params: [{ name: 'token', in: 'path', type: 'string', desc: 'Join ticket.' }],
+        body: '{\n  "scheme": "https",\n  "port": 40123,\n  "basePath": "/abc/",\n  "apiToken": "…",\n  "allowHttp": false\n}',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "id": 7,\n    "name": "HK A",\n    "address": "hk-a.example.com",\n    "reportPath": "/node-ip/…"\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/node-ip/:key',
+        summary:
+          'Public, called every 5 minutes by the reporter join-node.sh installs on a node with a domain. The reported IPv4 must equal the address the request comes from; when it changed, the Cloudflare record is updated.',
+        params: [{ name: 'key', in: 'path', type: 'string', desc: 'Node report key.' }],
+        body: '{\n  "ip": "203.0.113.20"\n}',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "ip": "203.0.113.20",\n    "changed": true\n  }\n}',
+      },
+    ],
+  },
+
+  {
+    id: 'plans',
+    title: 'Plans',
+    description:
+      'Sellable packages: traffic (bytes, 0 = unlimited), duration in days (0 = never expires), device/IP limit and an optional client group. Applying a plan sets those limits on each client, re-enables it, optionally zeroes its traffic and moves it into the group. delayStart makes the days count from the first connection.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/plans/list',
+        summary: 'List all plans ordered by sortOrder.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/add',
+        summary: 'Create a plan. Names are unique.',
+        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "days": 30,\n  "limitIp": 3,\n  "group": "vip",\n  "delayStart": false,\n  "resetTraffic": true,\n  "price": "¥30",\n  "remark": "",\n  "sortOrder": 0\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/update/:id',
+        summary: 'Replace every field of a plan.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Plan id.' }],
+        body: '{\n  "name": "Monthly 100G",\n  "totalGB": 107374182400,\n  "days": 30,\n  "limitIp": 3,\n  "group": "vip",\n  "delayStart": false,\n  "resetTraffic": true,\n  "price": "¥30",\n  "remark": "",\n  "sortOrder": 0\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/del/:id',
+        summary: 'Delete a plan. Clients already on it keep their limits.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Plan id.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/plans/apply',
+        summary:
+          'Apply a plan (by planId or planName) to clients. mode "renew" (default) extends from the later of now and the current expiry; "reset" restarts the duration from now. Returns how many clients were updated and the reason for each failure.',
+        body: '{\n  "planName": "Monthly 100G",\n  "emails": ["user1", "user2"],\n  "mode": "renew"\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "applied": 2\n  }\n}',
+      },
+    ],
+  },
+
+  {
     id: 'crm',
     title: 'CRM integration',
     description:

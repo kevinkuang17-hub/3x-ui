@@ -29,6 +29,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
+import NodeJoinModal from './NodeJoinModal';
+import NodeDnsModal from './NodeDnsModal';
 import { useNodeMutations } from '@/api/queries/useNodeMutations';
 import AppSidebar from '@/layouts/AppSidebar';
 import NodeList from './NodeList';
@@ -78,6 +80,8 @@ export default function NodesPage() {
   }, [messageApi]);
 
   const { nodes, loading, fetched, fetchError, refetch, totals } = useNodesQuery();
+  const [joinOpen, setJoinOpen] = useState(false);
+  const [dnsNode, setDnsNode] = useState<NodeRecord | null>(null);
   const {
     create,
     update,
@@ -355,6 +359,8 @@ export default function NodesPage() {
                       onSelectionChange={setSelectedIds}
                       onAdd={onAdd}
                       onMtls={() => setMtlsOpen(true)}
+                      onJoin={() => setJoinOpen(true)}
+                      onDns={setDnsNode}
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onProbe={onProbe}
@@ -368,6 +374,25 @@ export default function NodesPage() {
             </Spin>
           </Layout.Content>
         </Layout>
+
+        {joinOpen && (
+          <NodeJoinModal
+            open={joinOpen}
+            onClose={() => {
+              setJoinOpen(false);
+              refetch();
+            }}
+            onCopied={() => messageApi.success(t('copied'))}
+          />
+        )}
+        {dnsNode && (
+          <NodeDnsModal
+            key={dnsNode.id}
+            node={dnsNode}
+            onClose={() => setDnsNode(null)}
+            onChanged={() => refetch()}
+          />
+        )}
 
         <NodeFormModal
           open={formOpen}

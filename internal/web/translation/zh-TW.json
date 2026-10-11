@@ -126,7 +126,8 @@
     "openMenu": "開啟選單",
     "pinSidebar": "固定側邊欄",
     "unpinSidebar": "取消固定側邊欄",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "plans": "方案"
   },
   "pages": {
     "login": {
@@ -1131,7 +1132,32 @@
       "pinnedCertPlaceholder": "base64 或 hex 的 SHA-256",
       "fetchPin": "取得",
       "pinFetched": "已取得節點目前憑證",
-      "pinFetchFailed": "無法取得憑證"
+      "pinFetchFailed": "無法取得憑證",
+      "dns": {
+        "title": "網域 (DNS)",
+        "modalTitle": "{name} 的網域",
+        "intro": "把 Cloudflare 網域指向這個節點。伺服器換 IP 後，在這裡更新一下（或在 設定 → Cloudflare 開啟自動更新），用戶不用換設定也能繼續用。",
+        "current": "目前：{name} → {ip}（節點回報 IP：{observed}）",
+        "name": "網域",
+        "nameDesc": "可以只填 hk-a 這樣的短名，會自動補上你的主網域。",
+        "ip": "IP 位址",
+        "ipDesc": "留空則使用節點自己回報的 IP；手動換 IP 時在這裡填新 IP。",
+        "useAsAddress": "把這個網域作為節點位址（訂閱和主控都跟著它走）",
+        "changeIp": "更換 IP",
+        "unlink": "解除綁定",
+        "notConfigured": "請先在 設定 → Cloudflare 填寫 API 權杖和主網域。",
+        "saved": "DNS 記錄已更新",
+        "failed": "DNS 更新失敗",
+        "unlinked": "已解除節點的網域綁定",
+        "reporter": "為了在主控連不上節點時網域也能跟著換 IP，請在節點上執行一次這條指令（一鍵新增的節點已自動裝好）："
+      },
+      "join": {
+        "button": "一鍵新增",
+        "title": "一條指令新增節點",
+        "intro": "在新伺服器上用 root 執行這條指令：自動安裝面板、依地區命名（如 HK A）、設定好 Cloudflare 時自動建立網域，並自動接入到這裡。",
+        "expires": "只能用一次，有效期到 {time}",
+        "notes": "新伺服器需要開放 80 埠（申請憑證）和面板埠（讓主控能連上）。執行完成後重新整理本頁即可。"
+      }
     },
     "settings": {
       "defaultTag": "預設",
@@ -1775,7 +1801,16 @@
       "crmSsoDesc": "CRM 用管理員 API 權杖呼叫 POST /panel/api/crm/sso，即可取得一次性連結，開啟即免密登入面板（2 分鐘內有效）。可以在這裡產生一個試試。",
       "crmSsoGenerate": "產生登入連結",
       "subLineHealth": "自動隱藏不通的線路",
-      "subLineHealthDesc": "面板每分鐘檢測一次節點上的線路，連續 3 次不通就先從訂閱移除，恢復後自動加回，用戶不會拿到壞線路。如果大部分線路同時不通（多半是面板自身網路問題），則不做任何隱藏。"
+      "subLineHealthDesc": "面板每分鐘檢測一次節點上的線路，連續 3 次不通就先從訂閱移除，恢復後自動加回，用戶不會拿到壞線路。如果大部分線路同時不通（多半是面板自身網路問題），則不做任何隱藏。",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "讓面板為節點自動建立和更新 A 記錄（節點 → 網域，以及一鍵新增節點）。",
+      "cfApiToken": "API 權杖",
+      "cfApiTokenDesc": "在 dash.cloudflare.com → 我的設定檔 → API 權杖 建立，權限選「區域 · DNS · 編輯」，範圍選你的網域。",
+      "cfZone": "主網域 (Zone)",
+      "cfZoneDesc": "Cloudflare 託管的網域，如 example.com，節點記錄會是 hk-a.example.com。",
+      "cfAutoDns": "自動跟隨 IP 變化",
+      "cfAutoDnsDesc": "節點回報的公網 IP 變了，就馬上更新它的 DNS 記錄。",
+      "secretConfigured": "已設定——輸入新值以取代"
     },
     "xray": {
       "save": "儲存",
@@ -2422,6 +2457,42 @@
       "available": "可預訂",
       "takenUntil": "已預訂至 {date}",
       "activeCount": "{count} 個進行中"
+    },
+    "plans": {
+      "add": "新增方案",
+      "edit": "編輯方案",
+      "empty": "還沒有方案，新增一個就能一鍵續費用戶。",
+      "name": "名稱",
+      "nameRequired": "請填寫方案名稱",
+      "traffic": "流量",
+      "days": "天數",
+      "limitIp": "裝置 / IP 數",
+      "group": "分組",
+      "groupDesc": "套用此方案的用戶會加入這個分組（並使用該組的分流規則）。",
+      "price": "價格",
+      "remark": "備註",
+      "sortOrder": "排序",
+      "unlimited": "不限",
+      "never": "永不過期",
+      "zeroUnlimited": "0 = 不限",
+      "zeroNever": "0 = 永不過期",
+      "delayStart": "首次使用開始計時",
+      "delayStartShort": "首次使用起算",
+      "delayStartDesc": "從用戶第一次連線時開始計算天數，而不是套用方案的時候。",
+      "resetTraffic": "重置已用流量",
+      "resetTrafficDesc": "套用方案時把用戶已用流量歸零。",
+      "apply": "套用",
+      "applyTitle": "套用方案 {name}",
+      "clients": "用戶",
+      "pickGroup": "整組新增",
+      "pickGroupPlaceholder": "選一個分組，把組內所有用戶加進來",
+      "mode": "用戶還有剩餘天數時",
+      "modeRenew": "在剩餘天數上累加（續費）",
+      "modeReset": "從今天重新計算",
+      "applied": "已為 {count} 個用戶套用方案",
+      "appliedMixed": "成功 {ok} 個，失敗 {failed} 個",
+      "deleteConfirm": "刪除方案 {name}？",
+      "deleted": "方案已刪除"
     }
   },
   "tgbot": {

@@ -259,6 +259,9 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 
 	g.GET("/sso/:token", controller.SsoLanding)
 	g.POST("/sso/:token", controller.SsoLogin)
+	g.POST("/node-join/:token/prepare", controller.NodeJoinPrepare)
+	g.POST("/node-join/:token/finish", controller.NodeJoinFinish)
+	g.POST("/node-ip/:key", controller.NodeReportIP)
 	s.index = controller.NewIndexController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)

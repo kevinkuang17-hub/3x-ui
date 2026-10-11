@@ -126,7 +126,8 @@
     "openMenu": "Open menu",
     "pinSidebar": "Pin sidebar",
     "unpinSidebar": "Unpin sidebar",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "plans": "Plans"
   },
   "pages": {
     "login": {
@@ -1249,7 +1250,32 @@
       "pinnedCertPlaceholder": "base64 or hex SHA-256",
       "fetchPin": "Fetch",
       "pinFetched": "Fetched the node's current certificate",
-      "pinFetchFailed": "Could not fetch the certificate"
+      "pinFetchFailed": "Could not fetch the certificate",
+      "dns": {
+        "title": "Domain (DNS)",
+        "modalTitle": "Domain for {name}",
+        "intro": "Point a Cloudflare domain at this node. When the server's IP changes, update the record here (or turn on automatic updates in Settings → Cloudflare) and every user keeps working without new configs.",
+        "current": "Current: {name} → {ip} (node reports {observed})",
+        "name": "Domain",
+        "nameDesc": "A short label like hk-a is completed with your zone.",
+        "ip": "IP address",
+        "ipDesc": "Leave empty to use the IP the node reports. Fill it in to change the IP by hand.",
+        "useAsAddress": "Use this domain as the node's address (subscriptions and the master follow it)",
+        "changeIp": "Change IP",
+        "unlink": "Unlink",
+        "notConfigured": "Set the Cloudflare API token and zone in Settings → Cloudflare first.",
+        "saved": "DNS record updated",
+        "failed": "DNS update failed",
+        "unlinked": "Domain unlinked from the node",
+        "reporter": "So the domain follows an IP change even when the master can no longer reach the node, run this once on the node (one-click added nodes already have it):"
+      },
+      "join": {
+        "button": "One-click add",
+        "title": "Add a node with one command",
+        "intro": "Run this command as root on the new server. It installs the panel, names the node by region (e.g. HK A), creates its domain when Cloudflare is set up, and registers it here automatically.",
+        "expires": "Valid once, until {time}",
+        "notes": "The new server needs port 80 open (certificate) and the panel port open to this master. When it finishes, refresh this page."
+      }
     },
     "settings": {
       "defaultTag": "Default",
@@ -1893,7 +1919,16 @@
       "crmSsoDesc": "A CRM can call POST /panel/api/crm/sso with an admin API token to get a single-use link that signs into the panel without a password (valid 2 minutes). Generate one here to try it.",
       "crmSsoGenerate": "Generate login link",
       "subLineHealth": "Auto-hide dead lines",
-      "subLineHealthDesc": "Every minute the panel checks lines hosted on nodes; one that fails 3 checks in a row is left out of subscriptions until it answers again, so users are never handed a dead line. If most lines fail at once nothing is hidden (likely the panel's own network)."
+      "subLineHealthDesc": "Every minute the panel checks lines hosted on nodes; one that fails 3 checks in a row is left out of subscriptions until it answers again, so users are never handed a dead line. If most lines fail at once nothing is hidden (likely the panel's own network).",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "Lets the panel create and update A records for your nodes (Nodes → Domain, and one-click add).",
+      "cfApiToken": "API token",
+      "cfApiTokenDesc": "Create one at dash.cloudflare.com → My Profile → API Tokens with \"Zone · DNS · Edit\" for your zone.",
+      "cfZone": "Zone (root domain)",
+      "cfZoneDesc": "The domain managed in Cloudflare, e.g. example.com. Node records become hk-a.example.com.",
+      "cfAutoDns": "Follow IP changes automatically",
+      "cfAutoDnsDesc": "When a node reports a new public IP, update its DNS record right away.",
+      "secretConfigured": "Configured - enter a new value to replace"
     },
     "xray": {
       "save": "Save",
@@ -2422,6 +2457,42 @@
       "available": "Available",
       "takenUntil": "Taken until {date}",
       "activeCount": "{count} active"
+    },
+    "plans": {
+      "add": "Add plan",
+      "edit": "Edit plan",
+      "empty": "No plans yet — add one to renew clients in one click.",
+      "name": "Name",
+      "nameRequired": "Plan name is required",
+      "traffic": "Traffic",
+      "days": "Days",
+      "limitIp": "Device / IP limit",
+      "group": "Group",
+      "groupDesc": "Clients put on this plan join this group (and get its routing rules).",
+      "price": "Price",
+      "remark": "Remark",
+      "sortOrder": "Sort order",
+      "unlimited": "Unlimited",
+      "never": "Never",
+      "zeroUnlimited": "0 = unlimited",
+      "zeroNever": "0 = never expires",
+      "delayStart": "Start on first use",
+      "delayStartShort": "first use",
+      "delayStartDesc": "Days start counting when the client first connects, not when the plan is applied.",
+      "resetTraffic": "Reset used traffic",
+      "resetTrafficDesc": "Zero the client's used traffic when the plan is applied.",
+      "apply": "Apply",
+      "applyTitle": "Apply plan {name}",
+      "clients": "Clients",
+      "pickGroup": "Add a whole group",
+      "pickGroupPlaceholder": "Pick a group to add all its members",
+      "mode": "When the client still has time left",
+      "modeRenew": "Add the days on top (renew)",
+      "modeReset": "Start over from today",
+      "applied": "Plan applied to {count} client(s)",
+      "appliedMixed": "{ok} applied, {failed} failed",
+      "deleteConfirm": "Delete plan {name}?",
+      "deleted": "Plan deleted"
     }
   },
   "tgbot": {

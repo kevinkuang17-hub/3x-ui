@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ConfigProvider, Tag, Tooltip, message } from 'antd';
 import {
   ApiOutlined,
+  ShoppingOutlined,
   ApartmentOutlined,
   CheckCircleFilled,
   ClockCircleOutlined,
@@ -379,6 +380,12 @@ export default function CommandPalette() {
         icon: <TagsOutlined />,
       },
       {
+        path: '/plans',
+        title: t('menu.plans'),
+        keywords: ['plans', 'packages', 'pricing', 'renew'],
+        icon: <ShoppingOutlined />,
+      },
+      {
         path: '/nodes',
         title: t('menu.nodes'),
         keywords: ['nodes', 'servers', 'cluster', 'remote nodes'],
@@ -486,6 +493,13 @@ export default function CommandPalette() {
         subtitle: t('pages.settings.crmSettings'),
         keywords: ['crm', 'webhook', 'sso', 'billing', 'integration'],
         icon: <ApiOutlined />,
+      },
+      {
+        path: '/settings#cloudflare',
+        title: `${t('menu.settings')} · ${t('pages.settings.cfSettings')}`,
+        subtitle: t('pages.settings.cfSettings'),
+        keywords: ['cloudflare', 'dns', 'domain', 'ip'],
+        icon: <GlobalOutlined />,
       },
       {
         path: '/settings#subscription',

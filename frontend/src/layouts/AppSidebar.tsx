@@ -32,6 +32,7 @@ import {
   SafetyOutlined,
   SearchOutlined,
   SettingOutlined,
+  ShoppingOutlined,
   SunOutlined,
   SwapOutlined,
   TagsOutlined,
@@ -65,6 +66,7 @@ type IconName =
   | 'inbound'
   | 'team'
   | 'groups'
+  | 'plans'
   | 'setting'
   | 'tool'
   | 'cluster'
@@ -80,6 +82,7 @@ const iconByName: Record<IconName, ComponentType> = {
   inbound: ImportOutlined,
   team: TeamOutlined,
   groups: TagsOutlined,
+  plans: ShoppingOutlined,
   setting: SettingOutlined,
   tool: ToolOutlined,
   cluster: ClusterOutlined,
@@ -229,6 +232,7 @@ export default function AppSidebar() {
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/groups', icon: 'groups', title: t('menu.groups') },
+      { key: '/plans', icon: 'plans', title: t('menu.plans') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
       { key: '/outbound', icon: 'outbound', title: t('menu.outbounds') },
@@ -272,6 +276,11 @@ export default function AppSidebar() {
         key: '/settings#crm',
         icon: <ApiOutlined />,
         label: t('pages.settings.crmSettings'),
+      },
+      {
+        key: '/settings#cloudflare',
+        icon: <GlobalOutlined />,
+        label: t('pages.settings.cfSettings'),
       },
       {
         key: '/settings#subscription',

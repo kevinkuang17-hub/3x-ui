@@ -257,3 +257,40 @@ func TestGetSecret_FallbacksOnEmptyDatabaseSetting(t *testing.T) {
 		t.Fatalf("persisted secret = %q, want %q", persisted, secret)
 	}
 }
+
+func TestIntegrationSecretsAreRedactedPreservedAndClearable(t *testing.T) {
+	setupSettingTestDB(t)
+	s := &SettingService{}
+	if err := s.saveSetting("cfApiToken", "cf-secret"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.saveSetting("crmWebhookSecret", "crm-secret"); err != nil {
+		t.Fatal(err)
+	}
+	view, err := s.GetAllSettingView()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if view.CfApiToken != "" || view.CrmWebhookSecret != "" || !view.HasCfApiToken || !view.HasCrmWebhookSecret {
+		t.Fatalf("view must hide the values and flag them: %#v", view)
+	}
+	if err := s.UpdateAllSetting(&view.AllSetting, SecretClears{}); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := s.GetCfApiToken(); got != "cf-secret" {
+		t.Fatalf("cf token = %q, want preserved", got)
+	}
+	if got, _ := s.GetCrmWebhookSecret(); got != "crm-secret" {
+		t.Fatalf("crm secret = %q, want preserved", got)
+	}
+	view, _ = s.GetAllSettingView()
+	if err := s.UpdateAllSetting(&view.AllSetting, SecretClears{CfApiToken: true, CrmWebhookSecret: true}); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := s.GetCfApiToken(); got != "" {
+		t.Fatalf("cf token = %q, want cleared", got)
+	}
+	if got, _ := s.GetCrmWebhookSecret(); got != "" {
+		t.Fatalf("crm secret = %q, want cleared", got)
+	}
+}

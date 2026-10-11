@@ -14,6 +14,10 @@ export const keys = {
     byInbound: (inboundId: number) => ['hosts', 'byInbound', inboundId] as const,
     tags: () => ['hosts', 'tags'] as const,
   },
+  plans: {
+    root: () => ['plans'] as const,
+    list: () => ['plans', 'list'] as const,
+  },
   subBalancers: {
     root: () => ['sub-balancers'] as const,
     list: () => ['sub-balancers', 'list'] as const,

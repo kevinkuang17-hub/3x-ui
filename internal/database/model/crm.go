@@ -34,3 +34,28 @@ type SsoTicket struct {
 }
 
 func (SsoTicket) TableName() string { return "sso_tickets" }
+
+// NodeDns links a node to a Cloudflare A record the panel keeps pointed at the node's IP.
+type NodeDns struct {
+	NodeId    int    `json:"nodeId" gorm:"primaryKey;autoIncrement:false"`
+	Name      string `json:"name" gorm:"not null"`
+	LastIp    string `json:"lastIp"`
+	SyncedAt  int64  `json:"syncedAt"`
+	LastError string `json:"lastError"`
+	// ReportKey authorises the node's own cron job to report its public IP (POST /node-ip/:key).
+	ReportKey string `json:"-" gorm:"index"`
+}
+
+func (NodeDns) TableName() string { return "node_dns" }
+
+// NodeJoinTicket is a single-use invitation for a fresh server to register itself as a node.
+type NodeJoinTicket struct {
+	Token     string `gorm:"primaryKey"`
+	ExpiresAt int64  `gorm:"index"`
+	// Reserved by the first (prepare) call so a re-run of the script keeps the same name.
+	Name   string
+	Domain string
+	Ip     string
+}
+
+func (NodeJoinTicket) TableName() string { return "node_join_tickets" }

@@ -79,6 +79,9 @@ export class AllSetting {
   crmWebhookUrl = '';
   crmWebhookSecret = '';
   crmWebhookEvents = '';
+  cfApiToken = '';
+  cfZone = '';
+  cfAutoDns = false;
   subJsonMux = '';
   subJsonRules = '';
   subJsonRoutingRules = '';
@@ -188,6 +191,10 @@ export class AllSetting {
   clearTgBotToken = false;
   clearLdapPassword = false;
   clearSmtpPassword = false;
+  hasCfApiToken = false;
+  hasCrmWebhookSecret = false;
+  clearCfApiToken = false;
+  clearCrmWebhookSecret = false;
   discordBotEnable = false;
   discordBotToken = '';
   discordChannelId = '';

@@ -126,7 +126,8 @@
     "openMenu": "Abrir menu",
     "pinSidebar": "Fixar barra lateral",
     "unpinSidebar": "Desafixar barra lateral",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "plans": "Planos"
   },
   "pages": {
     "login": {
@@ -1131,7 +1132,32 @@
       "pinnedCertPlaceholder": "SHA-256 em base64 ou hex",
       "fetchPin": "Obter",
       "pinFetched": "Certificado atual do nó obtido",
-      "pinFetchFailed": "Não foi possível obter o certificado"
+      "pinFetchFailed": "Não foi possível obter o certificado",
+      "dns": {
+        "title": "Domínio (DNS)",
+        "modalTitle": "Domínio de {name}",
+        "intro": "Aponte um domínio do Cloudflare para este nó. Quando o IP do servidor mudar, atualize o registro aqui (ou ative as atualizações automáticas em Configurações → Cloudflare) e todos os usuários continuam funcionando sem novas configurações.",
+        "current": "Atual: {name} → {ip} (o nó informa {observed})",
+        "name": "Domínio",
+        "nameDesc": "Um nome curto como hk-a é completado com a sua zona.",
+        "ip": "Endereço IP",
+        "ipDesc": "Deixe em branco para usar o IP informado pelo nó. Preencha para alterar o IP manualmente.",
+        "useAsAddress": "Usar este domínio como endereço do nó (as assinaturas e o mestre o seguem)",
+        "changeIp": "Alterar IP",
+        "unlink": "Desvincular",
+        "notConfigured": "Configure primeiro o token de API e a zona do Cloudflare em Configurações → Cloudflare.",
+        "saved": "Registro DNS atualizado",
+        "failed": "Falha ao atualizar o DNS",
+        "unlinked": "Domínio desvinculado do nó",
+        "reporter": "Para o domínio acompanhar uma troca de IP mesmo quando o mestre não alcança mais o nó, execute isto uma vez no nó (nós adicionados com um clique já têm):"
+      },
+      "join": {
+        "button": "Adicionar com um clique",
+        "title": "Adicionar um nó com um comando",
+        "intro": "Execute este comando como root no novo servidor. Ele instala o painel, nomeia o nó pela região (ex.: HK A), cria o domínio se o Cloudflare estiver configurado e o registra aqui automaticamente.",
+        "expires": "Uso único, válido até {time}",
+        "notes": "O novo servidor precisa da porta 80 aberta (certificado) e da porta do painel aberta para este mestre. Ao terminar, atualize esta página."
+      }
     },
     "settings": {
       "defaultTag": "Padrão",
@@ -1775,7 +1801,16 @@
       "crmSsoDesc": "Um CRM pode chamar POST /panel/api/crm/sso com um token de API de administrador e obter um link de uso único para entrar sem senha (válido por 2 minutos). Gere um aqui para testar.",
       "crmSsoGenerate": "Gerar link de acesso",
       "subLineHealth": "Ocultar linhas fora do ar",
-      "subLineHealthDesc": "A cada minuto o painel verifica as linhas hospedadas em nós; a que falhar 3 vezes seguidas sai das assinaturas até voltar. Se a maioria falhar ao mesmo tempo nada é ocultado (provavelmente é a rede do próprio painel)."
+      "subLineHealthDesc": "A cada minuto o painel verifica as linhas hospedadas em nós; a que falhar 3 vezes seguidas sai das assinaturas até voltar. Se a maioria falhar ao mesmo tempo nada é ocultado (provavelmente é a rede do próprio painel).",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "Permite que o painel crie e atualize registros A para seus nós (Nós → Domínio e adicionar com um clique).",
+      "cfApiToken": "Token de API",
+      "cfApiTokenDesc": "Crie um em dash.cloudflare.com → My Profile → API Tokens com a permissão \"Zone · DNS · Edit\" para a sua zona.",
+      "cfZone": "Zona (domínio raiz)",
+      "cfZoneDesc": "O domínio gerenciado no Cloudflare, ex.: example.com. Os registros dos nós ficam como hk-a.example.com.",
+      "cfAutoDns": "Acompanhar mudanças de IP automaticamente",
+      "cfAutoDnsDesc": "Quando um nó informar um novo IP público, atualizar seu registro DNS imediatamente.",
+      "secretConfigured": "Configurado — digite um novo valor para substituir"
     },
     "xray": {
       "importRules": "Importar regras",
@@ -2422,6 +2457,42 @@
       "available": "Disponível",
       "takenUntil": "Ocupado até {date}",
       "activeCount": "{count} ativos"
+    },
+    "plans": {
+      "add": "Adicionar plano",
+      "edit": "Editar plano",
+      "empty": "Ainda não há planos — crie um para renovar clientes com um clique.",
+      "name": "Nome",
+      "nameRequired": "O nome do plano é obrigatório",
+      "traffic": "Tráfego",
+      "days": "Dias",
+      "limitIp": "Limite de dispositivos / IP",
+      "group": "Grupo",
+      "groupDesc": "Clientes neste plano entram neste grupo (e recebem suas regras de roteamento).",
+      "price": "Preço",
+      "remark": "Observação",
+      "sortOrder": "Ordem",
+      "unlimited": "Ilimitado",
+      "never": "Nunca",
+      "zeroUnlimited": "0 = ilimitado",
+      "zeroNever": "0 = não expira",
+      "delayStart": "Começar no primeiro uso",
+      "delayStartShort": "a partir do 1º uso",
+      "delayStartDesc": "Os dias contam a partir da primeira conexão do cliente, não de quando o plano é aplicado.",
+      "resetTraffic": "Zerar tráfego usado",
+      "resetTrafficDesc": "Zera o tráfego usado do cliente ao aplicar o plano.",
+      "apply": "Aplicar",
+      "applyTitle": "Aplicar plano {name}",
+      "clients": "Clientes",
+      "pickGroup": "Adicionar um grupo inteiro",
+      "pickGroupPlaceholder": "Escolha um grupo para adicionar todos os membros",
+      "mode": "Quando o cliente ainda tem tempo",
+      "modeRenew": "Somar os dias (renovar)",
+      "modeReset": "Recomeçar a partir de hoje",
+      "applied": "Plano aplicado a {count} cliente(s)",
+      "appliedMixed": "{ok} aplicados, {failed} com falha",
+      "deleteConfirm": "Excluir o plano {name}?",
+      "deleted": "Plano excluído"
     }
   },
   "tgbot": {

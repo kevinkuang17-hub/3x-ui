@@ -12,10 +12,12 @@ import {
   ExclamationCircleOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
+  GlobalOutlined,
   InfoCircleOutlined,
   MoreOutlined,
   PlusOutlined,
   RightOutlined,
+  RocketOutlined,
   SafetyCertificateOutlined,
   TeamOutlined,
   ThunderboltOutlined,
@@ -36,6 +38,8 @@ interface NodeListProps {
   onSelectionChange: (ids: number[]) => void;
   onAdd: () => void;
   onMtls: () => void;
+  onJoin: () => void;
+  onDns: (node: NodeRecord) => void;
   onEdit: (node: NodeRecord) => void;
   onDelete: (node: NodeRecord) => void;
   onProbe: (node: NodeRecord) => void;
@@ -172,6 +176,8 @@ export default function NodeList({
   onSelectionChange,
   onAdd,
   onMtls,
+  onJoin,
+  onDns,
   onEdit,
   onDelete,
   onProbe,
@@ -280,6 +286,16 @@ export default function NodeList({
                   />
                 </Tooltip>
               )}
+              <Tooltip title={t('pages.nodes.dns.title')}>
+                <Button
+                  type="text"
+                  size="small"
+                  style={{ fontSize: 16 }}
+                  icon={<GlobalOutlined />}
+                  aria-label={t('pages.nodes.dns.title')}
+                  onClick={() => onDns(record)}
+                />
+              </Tooltip>
               <Tooltip title={t('edit')}>
                 <Button
                   type="text"
@@ -529,6 +545,7 @@ export default function NodeList({
       onToggleEnable,
       onProbe,
       onEdit,
+      onDns,
       onDelete,
       onUpdateNode,
       nameByGuid,
@@ -581,6 +598,9 @@ export default function NodeList({
       <div className="toolbar">
         <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
           {t('pages.nodes.addNode')}
+        </Button>
+        <Button icon={<RocketOutlined />} onClick={onJoin}>
+          {t('pages.nodes.join.button')}
         </Button>
         <Button icon={<SafetyCertificateOutlined />} onClick={onMtls}>
           {t('pages.nodes.mtls.title')}
@@ -682,6 +702,15 @@ export default function NodeList({
                                     },
                                   ]
                                 : []),
+                              {
+                                key: 'dns',
+                                label: (
+                                  <>
+                                    <GlobalOutlined /> {t('pages.nodes.dns.title')}
+                                  </>
+                                ),
+                                onClick: () => onDns(record),
+                              },
                               {
                                 key: 'edit',
                                 label: (

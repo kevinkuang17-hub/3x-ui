@@ -29,6 +29,7 @@ import TelegramTab from './TelegramTab';
 import EmailTab from './EmailTab';
 import DiscordTab from './DiscordTab';
 import CrmTab from './CrmTab';
+import CloudflareTab from './CloudflareTab';
 import SubscriptionGeneralTab from './SubscriptionGeneralTab';
 import SubscriptionFormatsTab from './SubscriptionFormatsTab';
 import SubscriptionBalancersTab from './SubscriptionBalancersTab';
@@ -45,6 +46,7 @@ const tabSlugs = [
   'email',
   'discord',
   'crm',
+  'cloudflare',
   'subscription',
   'subscription-formats',
   'subscription-balancers',
@@ -225,6 +227,8 @@ export default function SettingsPage() {
         return <DiscordTab allSetting={allSetting} updateSetting={updateSetting} />;
       case 'crm':
         return <CrmTab allSetting={allSetting} updateSetting={updateSetting} />;
+      case 'cloudflare':
+        return <CloudflareTab allSetting={allSetting} updateSetting={updateSetting} />;
       case 'subscription':
         return <SubscriptionGeneralTab allSetting={allSetting} updateSetting={updateSetting} />;
       case 'subscription-formats':

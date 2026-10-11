@@ -126,6 +126,9 @@ type AllSetting struct {
 	CrmWebhookUrl               string `json:"crmWebhookUrl" form:"crmWebhookUrl"`
 	CrmWebhookSecret            string `json:"crmWebhookSecret" form:"crmWebhookSecret"`
 	CrmWebhookEvents            string `json:"crmWebhookEvents" form:"crmWebhookEvents"`
+	CfApiToken                  string `json:"cfApiToken" form:"cfApiToken"`
+	CfZone                      string `json:"cfZone" form:"cfZone"`
+	CfAutoDns                   bool   `json:"cfAutoDns" form:"cfAutoDns"`
 	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`
 	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
 	SubJsonRoutingRules         string `json:"subJsonRoutingRules" form:"subJsonRoutingRules"`
@@ -220,14 +223,16 @@ type AllSetting struct {
 type AllSettingView struct {
 	AllSetting
 
-	HasTgBotToken      bool `json:"hasTgBotToken"`
-	HasTwoFactorToken  bool `json:"hasTwoFactorToken"`
-	HasLdapPassword    bool `json:"hasLdapPassword"`
-	HasApiToken        bool `json:"hasApiToken"`
-	HasWarpSecret      bool `json:"hasWarpSecret"`
-	HasNordSecret      bool `json:"hasNordSecret"`
-	HasSmtpPassword    bool `json:"hasSmtpPassword"`
-	HasDiscordBotToken bool `json:"hasDiscordBotToken"`
+	HasTgBotToken       bool `json:"hasTgBotToken"`
+	HasTwoFactorToken   bool `json:"hasTwoFactorToken"`
+	HasLdapPassword     bool `json:"hasLdapPassword"`
+	HasApiToken         bool `json:"hasApiToken"`
+	HasWarpSecret       bool `json:"hasWarpSecret"`
+	HasNordSecret       bool `json:"hasNordSecret"`
+	HasSmtpPassword     bool `json:"hasSmtpPassword"`
+	HasDiscordBotToken  bool `json:"hasDiscordBotToken"`
+	HasCfApiToken       bool `json:"hasCfApiToken"`
+	HasCrmWebhookSecret bool `json:"hasCrmWebhookSecret"`
 }
 
 func pathHasForbiddenChar(s string) bool {

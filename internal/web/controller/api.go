@@ -197,6 +197,8 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// Nodes API — multi-panel management
 	nodes := api.Group("/nodes")
 	a.nodeController = NewNodeController(nodes)
+	NewNodeDnsController(nodes.Group("/dns"))
+	NewNodeJoinController(nodes.Group("/join"))
 
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")
@@ -213,6 +215,9 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 
 	// CRM integration — SSO login links and webhook test
 	NewCrmController(api.Group("/crm"))
+
+	// Plans — sellable packages applied to clients in one call
+	NewPlanController(api.Group("/plans"))
 
 	// Extra routes
 	api.POST("/backuptotgbot", a.BackuptoTgbot)

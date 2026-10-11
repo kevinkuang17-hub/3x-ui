@@ -126,7 +126,8 @@
     "openMenu": "メニューを開く",
     "pinSidebar": "サイドバーを固定",
     "unpinSidebar": "サイドバーの固定を解除",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "plans": "プラン"
   },
   "pages": {
     "login": {
@@ -1131,7 +1132,32 @@
       "pinnedCertPlaceholder": "base64 または hex の SHA-256",
       "fetchPin": "取得",
       "pinFetched": "ノードの現在の証明書を取得しました",
-      "pinFetchFailed": "証明書を取得できませんでした"
+      "pinFetchFailed": "証明書を取得できませんでした",
+      "dns": {
+        "title": "ドメイン (DNS)",
+        "modalTitle": "{name} のドメイン",
+        "intro": "Cloudflare のドメインをこのノードに向けます。サーバーの IP が変わったらここでレコードを更新するか（または 設定 → Cloudflare で自動更新をオン）、ユーザーは設定を変えずにそのまま使い続けられます。",
+        "current": "現在：{name} → {ip}（ノード報告 IP：{observed}）",
+        "name": "ドメイン",
+        "nameDesc": "hk-a のような短い名前だけでも、ゾーンが自動で補完されます。",
+        "ip": "IP アドレス",
+        "ipDesc": "空欄の場合はノードが報告する IP を使用します。手動で IP を変更する場合は入力してください。",
+        "useAsAddress": "このドメインをノードのアドレスとして使用（サブスクリプションとマスターがこれに従います）",
+        "changeIp": "IP を変更",
+        "unlink": "解除",
+        "notConfigured": "先に 設定 → Cloudflare で API トークンとゾーンを設定してください。",
+        "saved": "DNS レコードを更新しました",
+        "failed": "DNS の更新に失敗しました",
+        "unlinked": "ノードからドメインを解除しました",
+        "reporter": "マスターからノードに届かなくなっても IP 変更にドメインが追従するよう、ノードでこのコマンドを一度実行してください（ワンクリック追加したノードは設定済み）："
+      },
+      "join": {
+        "button": "ワンクリック追加",
+        "title": "コマンド一つでノードを追加",
+        "intro": "新しいサーバーで root としてこのコマンドを実行します。パネルをインストールし、地域ごとにノード名を付け（例：HK A）、Cloudflare が設定済みならドメインを作成し、ここへ自動登録します。",
+        "expires": "1 回のみ有効、{time} まで",
+        "notes": "新しいサーバーではポート 80（証明書用）と、このマスターからパネルポートへの接続を開放してください。完了したらこのページを更新してください。"
+      }
     },
     "settings": {
       "defaultTag": "デフォルト",
@@ -1775,7 +1801,16 @@
       "crmSsoDesc": "CRM は管理者 API トークンで POST /panel/api/crm/sso を呼ぶと、パスワード不要でパネルに入れる使い捨てリンク（有効 2 分）を取得できます。ここで試しに生成できます。",
       "crmSsoGenerate": "ログインリンクを生成",
       "subLineHealth": "停止した回線を自動で隠す",
-      "subLineHealthDesc": "パネルは毎分ノード上の回線を確認し、3 回連続で応答しない回線を復旧まで購読から外します。大半の回線が同時に落ちた場合は何も隠しません（パネル自身のネットワーク障害の可能性が高いため）。"
+      "subLineHealthDesc": "パネルは毎分ノード上の回線を確認し、3 回連続で応答しない回線を復旧まで購読から外します。大半の回線が同時に落ちた場合は何も隠しません（パネル自身のネットワーク障害の可能性が高いため）。",
+      "cfSettings": "Cloudflare",
+      "cfIntro": "パネルがノードの A レコードを作成・更新できるようにします（ノード → ドメイン、およびワンクリック追加）。",
+      "cfApiToken": "API トークン",
+      "cfApiTokenDesc": "dash.cloudflare.com → マイプロフィール → API トークン で、対象ゾーンに「ゾーン · DNS · 編集」権限を付けて作成します。",
+      "cfZone": "ゾーン（ルートドメイン）",
+      "cfZoneDesc": "Cloudflare で管理しているドメイン（例：example.com）。ノードのレコードは hk-a.example.com のようになります。",
+      "cfAutoDns": "IP の変化に自動追従",
+      "cfAutoDnsDesc": "ノードが新しいパブリック IP を報告したら、すぐに DNS レコードを更新します。",
+      "secretConfigured": "設定済み — 置き換えるには新しい値を入力"
     },
     "xray": {
       "importRules": "ルールをインポート",
@@ -2422,6 +2457,42 @@
       "available": "空きあり",
       "takenUntil": "{date} まで予約済み",
       "activeCount": "{count} 件掲載中"
+    },
+    "plans": {
+      "add": "プランを追加",
+      "edit": "プランを編集",
+      "empty": "プランはまだありません。追加するとワンクリックで更新できます。",
+      "name": "名前",
+      "nameRequired": "プラン名を入力してください",
+      "traffic": "通信量",
+      "days": "日数",
+      "limitIp": "端末 / IP 上限",
+      "group": "グループ",
+      "groupDesc": "このプランのクライアントはこのグループに入ります（グループのルーティングルールも適用）。",
+      "price": "価格",
+      "remark": "備考",
+      "sortOrder": "並び順",
+      "unlimited": "無制限",
+      "never": "無期限",
+      "zeroUnlimited": "0 = 無制限",
+      "zeroNever": "0 = 無期限",
+      "delayStart": "初回利用から開始",
+      "delayStartShort": "初回利用から",
+      "delayStartDesc": "日数はプラン適用時ではなく、クライアントの初回接続から数えます。",
+      "resetTraffic": "使用済み通信量をリセット",
+      "resetTrafficDesc": "プラン適用時に使用済み通信量を 0 にします。",
+      "apply": "適用",
+      "applyTitle": "プラン {name} を適用",
+      "clients": "クライアント",
+      "pickGroup": "グループごと追加",
+      "pickGroupPlaceholder": "グループを選ぶとメンバー全員を追加します",
+      "mode": "残り日数がある場合",
+      "modeRenew": "残りに日数を加算（更新）",
+      "modeReset": "今日から数え直す",
+      "applied": "{count} 件のクライアントに適用しました",
+      "appliedMixed": "{ok} 件成功、{failed} 件失敗",
+      "deleteConfirm": "プラン {name} を削除しますか？",
+      "deleted": "プランを削除しました"
     }
   },
   "tgbot": {

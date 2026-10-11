@@ -2,6 +2,15 @@
 export const SCHEMAS: Record<string, unknown> = {
   "AllSetting": {
     "properties": {
+      "cfApiToken": {
+        "type": "string"
+      },
+      "cfAutoDns": {
+        "type": "boolean"
+      },
+      "cfZone": {
+        "type": "string"
+      },
       "crmWebhookEnable": {
         "type": "boolean"
       },
@@ -587,6 +596,9 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "cfApiToken",
+      "cfAutoDns",
+      "cfZone",
       "crmWebhookEnable",
       "crmWebhookEvents",
       "crmWebhookSecret",
@@ -774,6 +786,15 @@ export const SCHEMAS: Record<string, unknown> = {
   },
   "AllSettingView": {
     "properties": {
+      "cfApiToken": {
+        "type": "string"
+      },
+      "cfAutoDns": {
+        "type": "boolean"
+      },
+      "cfZone": {
+        "type": "string"
+      },
       "crmWebhookEnable": {
         "type": "boolean"
       },
@@ -840,6 +861,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "boolean"
       },
       "hasApiToken": {
+        "type": "boolean"
+      },
+      "hasCfApiToken": {
+        "type": "boolean"
+      },
+      "hasCrmWebhookSecret": {
         "type": "boolean"
       },
       "hasDiscordBotToken": {
@@ -1383,6 +1410,9 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
+      "cfApiToken",
+      "cfAutoDns",
+      "cfZone",
       "crmWebhookEnable",
       "crmWebhookEvents",
       "crmWebhookSecret",
@@ -1404,6 +1434,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "externalTrafficInformURI",
       "happLinkEnable",
       "hasApiToken",
+      "hasCfApiToken",
+      "hasCrmWebhookSecret",
       "hasDiscordBotToken",
       "hasLdapPassword",
       "hasNordSecret",
