@@ -137,7 +137,7 @@ func TestRenderSingbox(t *testing.T) {
 	proxies := []map[string]any{
 		{"name": "HK A", "type": "vless", "server": "hk.example.com", "port": uint64(443), "uuid": "u1", "flow": "xtls-rprx-vision",
 			"network": "tcp", "tls": true, "servername": "www.apple.com", "client-fingerprint": "chrome",
-			"reality-opts": map[string]any{"public-key": "pk", "short-id": "ab"}},
+			"reality-opts": map[string]any{"public-key": "Z84J2IelR9ch3k8VtlVhhs5ycBUlXA7wHBWcBrjqnAw", "short-id": "ab"}},
 		{"name": "US A", "type": "vmess", "server": "us.example.com", "port": 8443, "uuid": "u2", "cipher": "auto",
 			"network": "ws", "tls": true, "servername": "us.example.com", "ws-opts": map[string]any{"path": "/ws", "headers": map[string]any{"Host": "cdn.example.com"}}},
 		{"name": "JP A", "type": "trojan", "server": "jp.example.com", "port": 443, "password": "pw", "network": "grpc", "tls": true,
@@ -183,7 +183,7 @@ func TestRenderSingbox(t *testing.T) {
 	}
 	hk := tags["HK A"]
 	tls, _ := hk["tls"].(map[string]any)
-	if hk["server_port"] != float64(443) || tls["reality"].(map[string]any)["public_key"] != "pk" || tls["utls"] == nil {
+	if hk["server_port"] != float64(443) || tls["reality"].(map[string]any)["public_key"] != "Z84J2IelR9ch3k8VtlVhhs5ycBUlXA7wHBWcBrjqnAw" || tls["utls"] == nil {
 		t.Fatalf("REALITY node = %+v", hk)
 	}
 	if tags["US A"]["transport"].(map[string]any)["path"] != "/ws" || tags["KR A"]["server_ports"].([]any)[0] != "20000:30000" {
