@@ -81,6 +81,11 @@ func (a *PasskeyController) del(c *gin.Context) {
 	jsonMsg(c, I18nWeb(c, "pages.settings.passkeys.deleted"), a.passkeys.Delete(sessionUserID(c), id))
 }
 
+// PasskeyLoginAvailable is public: the login page shows the passkey button only when one exists.
+func PasskeyLoginAvailable(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"success": true, "obj": (&service.PasskeyService{}).AnyRegistered()})
+}
+
 // PasskeyLoginBegin is public: it starts a username-less passkey sign-in.
 func PasskeyLoginBegin(c *gin.Context) {
 	if _, ok := defaultLoginLimiter.allow(getRemoteIp(c), "passkey"); !ok {

@@ -205,6 +205,13 @@ func (s *PasskeyService) FinishRegistration(w *webauthn.WebAuthn, rpID, flowID s
 	return row, nil
 }
 
+// AnyRegistered reports whether some panel user has a passkey, so the login page offers the button.
+func (s *PasskeyService) AnyRegistered() bool {
+	var n int64
+	database.GetDB().Model(&model.PasskeyCredential{}).Limit(1).Count(&n)
+	return n > 0
+}
+
 func (s *PasskeyService) BeginLogin(w *webauthn.WebAuthn, rpID string) (string, *protocol.CredentialAssertion, error) {
 	assertion, session, err := w.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
 	if err != nil {
