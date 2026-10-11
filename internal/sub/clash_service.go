@@ -195,6 +195,7 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 
 	if !legacy {
 		prependLibraryRules(config, choice)
+		applyClashDNS(config, service.DnsForSub(subId))
 	}
 
 	finalYAML, err := marshalClashYAML(config)
@@ -214,6 +215,25 @@ func liveClashTemplate(rules string, enabled bool) (string, bool) {
 		enabled = v
 	}
 	return rules, enabled
+}
+
+// applyClashDNS adds the profile's DNS section; company domains also go DIRECT ahead of every rule
+// so they resolve and connect inside the company network.
+func applyClashDNS(config map[string]any, cfg service.DnsConfig) {
+	dns, direct := service.BuildClashDNS(cfg, primaryProxyGroup(config))
+	if dns == nil {
+		return
+	}
+	config["dns"] = dns
+	if len(direct) == 0 {
+		return
+	}
+	existing, _ := asAnySlice(config["rules"])
+	merged := make([]any, 0, len(direct)+len(existing))
+	for _, r := range direct {
+		merged = append(merged, r)
+	}
+	config["rules"] = append(merged, existing...)
 }
 
 // libraryChoice is the group's own rule-library choice, or the global one when the group follows it.

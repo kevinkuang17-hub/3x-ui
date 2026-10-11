@@ -302,6 +302,7 @@ export const GroupSummarySchema = z.object({
     .optional()
     .transform((v) => v ?? []),
   clashExtraRules: z.string().optional().default(''),
+  clashDns: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 export const GroupSummaryListSchema = z

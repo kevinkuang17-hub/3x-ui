@@ -967,8 +967,10 @@ type ClientGroup struct {
 	// ClashRuleSets is the JSON list of picked rule sets ({id, policy}); ClashExtraRules are hand-written lines.
 	ClashRuleSets   string `json:"clashRuleSets" gorm:"column:clash_rule_sets;type:text;default:''"`
 	ClashExtraRules string `json:"clashExtraRules" gorm:"column:clash_extra_rules;type:text;default:''"`
-	CreatedAt       int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
-	UpdatedAt       int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+	// ClashDns is the group's own DNS (JSON); empty follows the global DNS.
+	ClashDns  string `json:"clashDns" gorm:"column:clash_dns;type:text;default:''"`
+	CreatedAt int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
 }
 
 func (ClientGroup) TableName() string { return "client_groups" }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,6 +26,9 @@ func NewRuleSetController(g *gin.RouterGroup) *RuleSetController {
 	g.POST("/routing", a.saveRouting)
 	g.POST("/preview", a.preview)
 	g.POST("/groups", a.groups)
+	g.GET("/dns", a.dns)
+	g.POST("/dns", a.saveDns)
+	g.POST("/import", a.importConfig)
 	return a
 }
 
@@ -127,4 +131,41 @@ func (a *RuleSetController) preview(c *gin.Context) {
 	}
 	rules, err := a.ruleSets.BuildRules(body)
 	jsonObj(c, gin.H{"rules": rules}, err)
+}
+
+func (a *RuleSetController) dns(c *gin.Context) {
+	jsonObj(c, a.ruleSets.GlobalDns(), nil)
+}
+
+func (a *RuleSetController) saveDns(c *gin.Context) {
+	var body service.DnsConfig
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.ruleSets.saved"), a.ruleSets.SaveGlobalDns(body))
+}
+
+// importConfig turns a Clash config (an https address or pasted YAML) into rule sets.
+func (a *RuleSetController) importConfig(c *gin.Context) {
+	var body struct {
+		URL       string `json:"url"`
+		Content   string `json:"content"`
+		ImportDns bool   `json:"importDns"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	content, label := []byte(body.Content), I18nWeb(c, "pages.ruleSets.importPasted")
+	if strings.TrimSpace(body.URL) != "" {
+		fetched, host, err := sub.FetchClashConfig(body.URL)
+		if err != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+			return
+		}
+		content, label = fetched, host
+	}
+	res, err := a.ruleSets.ImportClashConfig(content, label, body.ImportDns)
+	jsonMsgObj(c, I18nWeb(c, "pages.ruleSets.imported"), res, err)
 }

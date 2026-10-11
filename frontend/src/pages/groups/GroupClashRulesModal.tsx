@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Form, Modal, Radio } from 'antd';
+import { Alert, Divider, Form, Modal, Radio } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 
 import RoutingChoiceEditor from '@/pages/rule-sets/RoutingChoiceEditor';
 import TemplatePicker, { useTemplateGroups } from '@/pages/rule-sets/TemplatePicker';
+import DnsEditor, { type DnsConfig, EMPTY_DNS } from '@/pages/rule-sets/DnsEditor';
 import { EMPTY_CHOICE, type RoutingChoice, fetchRuleSets } from '@/pages/rule-sets/ruleSetApi';
 import { keys } from '@/api/queryKeys';
 
@@ -13,9 +14,11 @@ interface Props {
   groupName: string | null;
   initialRules: string;
   initialChoice: RoutingChoice;
+  // The group's own DNS; null follows the global DNS.
+  initialDns: DnsConfig | null;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (rules: string, choice: RoutingChoice) => Promise<boolean>;
+  onSubmit: (rules: string, choice: RoutingChoice, dns: DnsConfig | null) => Promise<boolean>;
 }
 
 export default function GroupClashRulesModal({
@@ -23,6 +26,7 @@ export default function GroupClashRulesModal({
   groupName,
   initialRules,
   initialChoice,
+  initialDns,
   saving,
   onClose,
   onSubmit,
@@ -33,6 +37,17 @@ export default function GroupClashRulesModal({
   const [own, setOwn] = useState(!followsGlobal);
   const [template, setTemplate] = useState(initialRules);
   const [choice, setChoice] = useState<RoutingChoice>(initialChoice);
+  const [ownDns, setOwnDns] = useState(initialDns !== null);
+  const [dns, setDns] = useState<DnsConfig>(() =>
+    initialDns
+      ? {
+          ...EMPTY_DNS,
+          ...initialDns,
+          domestic: initialDns.domestic ?? [],
+          foreign: initialDns.foreign ?? [],
+        }
+      : EMPTY_DNS,
+  );
   const setsQuery = useQuery({
     queryKey: keys.ruleSets.list(),
     queryFn: fetchRuleSets,
@@ -41,11 +56,12 @@ export default function GroupClashRulesModal({
   const groupsQuery = useTemplateGroups(own ? template : '');
 
   async function confirm() {
+    const groupDns = ownDns ? dns : null;
     if (!own) {
-      if (await onSubmit('', EMPTY_CHOICE)) onClose();
+      if (await onSubmit('', EMPTY_CHOICE, groupDns)) onClose();
       return;
     }
-    if (await onSubmit(template.trim(), choice)) onClose();
+    if (await onSubmit(template.trim(), choice, groupDns)) onClose();
   }
 
   return (
@@ -57,7 +73,7 @@ export default function GroupClashRulesModal({
       confirmLoading={saving}
       onCancel={onClose}
       onOk={confirm}
-      width={own ? 800 : 520}
+      width={800}
       destroyOnHidden
     >
       <Alert
@@ -105,6 +121,17 @@ export default function GroupClashRulesModal({
           />
         </>
       )}
+      <Divider titlePlacement="start">{t('pages.ruleSets.dnsTitle')}</Divider>
+      <Radio.Group
+        style={{ marginBottom: 12 }}
+        value={ownDns ? 'own' : 'global'}
+        onChange={(e) => setOwnDns(e.target.value === 'own')}
+        options={[
+          { value: 'global', label: t('pages.groups.dnsFollowGlobal') },
+          { value: 'own', label: t('pages.groups.dnsOwn') },
+        ]}
+      />
+      {ownDns && <DnsEditor value={dns} onChange={setDns} />}
     </Modal>
   );
 }

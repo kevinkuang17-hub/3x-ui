@@ -697,3 +697,37 @@ func ClashTemplateGroups(raw string) ([]string, error) {
 	}
 	return names, nil
 }
+
+// FetchClashConfig downloads a Clash/Mihomo config or subscription for the rule-library import,
+// through the same SSRF-guarded HTTPS client as remote routing.
+func FetchClashConfig(raw string) ([]byte, string, error) {
+	source, remote, err := common.ParseRemoteRoutingURL(strings.TrimSpace(raw))
+	if err != nil {
+		return nil, "", err
+	}
+	if !remote {
+		return nil, "", errors.New("enter an https:// address")
+	}
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, source, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	// Subscription services return Clash YAML only to a Clash-like client.
+	req.Header.Set("User-Agent", "clash.meta")
+	resp, err := newRemoteRoutingHTTPClient().Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, "", fmt.Errorf("the address returned HTTP %d", resp.StatusCode)
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, remoteRoutingClashMaxBody*4+1))
+	if err != nil {
+		return nil, "", err
+	}
+	if len(body) > remoteRoutingClashMaxBody*4 {
+		return nil, "", errors.New("the config is larger than 8 MB")
+	}
+	return body, remoteRoutingHost(source), nil
+}

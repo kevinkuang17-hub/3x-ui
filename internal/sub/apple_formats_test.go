@@ -23,7 +23,7 @@ func appleSampleProxies() []map[string]any {
 }
 
 func TestRenderSurgeProfile(t *testing.T) {
-	out := renderAppleProfile(formatSurge, appleSampleProxies(), "https://sub.example.com/surge/abc", 12, nil)
+	out := renderAppleProfile(formatSurge, appleSampleProxies(), "https://sub.example.com/surge/abc", 12, nil, appleDNS{})
 	for _, want := range []string{
 		"#!MANAGED-CONFIG https://sub.example.com/surge/abc interval=43200",
 		`HK A = vmess, hk.example.com, 443, username=u-1, vmess-aead=true, ws=true, ws-path=/ws, ws-headers=Host:"cdn.example.com", tls=true, sni=hk.example.com, skip-cert-verify=false`,
@@ -44,7 +44,7 @@ func TestRenderSurgeProfile(t *testing.T) {
 }
 
 func TestRenderLoonProfile(t *testing.T) {
-	out := renderAppleProfile(formatLoon, appleSampleProxies(), "", 0, nil)
+	out := renderAppleProfile(formatLoon, appleSampleProxies(), "", 0, nil, appleDNS{})
 	for _, want := range []string{
 		`HK A = vmess,hk.example.com,443,auto,"u-1",transport=ws,path=/ws,host=cdn.example.com,over-tls=true,tls-name=hk.example.com,skip-cert-verify=false`,
 		`JP A = VLESS,jp.example.com,443,"u-2",transport=tcp,over-tls=true,tls-name=www.apple.com,skip-cert-verify=false,flow=xtls-rprx-vision,public-key=PBK,short-id=ab12`,
@@ -60,7 +60,7 @@ func TestRenderLoonProfile(t *testing.T) {
 }
 
 func TestRenderQuantumultXList(t *testing.T) {
-	out := renderAppleProfile(formatQX, appleSampleProxies(), "", 12, nil)
+	out := renderAppleProfile(formatQX, appleSampleProxies(), "", 12, nil, appleDNS{})
 	for _, want := range []string{
 		"vmess=hk.example.com:443, method=chacha20-poly1305, password=u-1, obfs=wss, obfs-uri=/ws, obfs-host=hk.example.com, tls-verification=true, tag=HK A",
 		"trojan=us.example.com:443, password=pw, over-tls=true, tls-host=us.example.com, tls-verification=true, tag=US A",
@@ -89,15 +89,15 @@ func TestAppleFormatsSkipWhatTheyCannotExpress(t *testing.T) {
 		{"name": "PIN", "type": "trojan", "server": "pin.example.com", "port": 443, "password": "p", "fingerprint": "abcd"},
 		{"name": "V6", "type": "trojan", "server": "2001:db8::1", "port": 443, "password": "p"},
 	}
-	surge := renderAppleProfile(formatSurge, proxies, "", 12, nil)
+	surge := renderAppleProfile(formatSurge, proxies, "", 12, nil, appleDNS{})
 	if strings.Contains(surge, "HY =") || !strings.Contains(surge, "server-cert-fingerprint-sha256=abcd") {
 		t.Fatalf("surge: obfuscated hysteria2 must be skipped and pins kept\n%s", surge)
 	}
-	loon := renderAppleProfile(formatLoon, proxies, "", 12, nil)
+	loon := renderAppleProfile(formatLoon, proxies, "", 12, nil, appleDNS{})
 	if strings.Contains(loon, "PQ =") || strings.Contains(loon, "PIN =") || !strings.Contains(loon, "salamander-password=s") {
 		t.Fatalf("loon output wrong\n%s", loon)
 	}
-	qx := renderAppleProfile(formatQX, proxies, "", 12, nil)
+	qx := renderAppleProfile(formatQX, proxies, "", 12, nil, appleDNS{})
 	if strings.Contains(qx, "tag=PQ") || !strings.Contains(qx, "trojan=[2001:db8::1]:443") {
 		t.Fatalf("qx output wrong\n%s", qx)
 	}

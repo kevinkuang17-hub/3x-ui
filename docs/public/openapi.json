@@ -10310,7 +10310,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+        "summary": "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. dns sets the group's own DNS (null follows the global DNS; omitted keeps it). With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
         "operationId": "post_panel_api_clients_groups_clashRules",
         "requestBody": {
           "required": true,
@@ -16278,6 +16278,131 @@
         }
       }
     },
+    "/panel/api/ruleSets/dns": {
+      "get": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "The global DNS written into Clash/Mihomo, Surge and Loon subscriptions.",
+        "operationId": "get_panel_api_ruleSets_dns",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Save the global DNS: domestic and foreign resolvers, and company lines \"domains = servers\" whose domains resolve through company DNS (and optionally connect directly).",
+        "operationId": "post_panel_api_ruleSets_dns",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "enable": true,
+                "mode": "fake-ip",
+                "domestic": [
+                  "https://223.5.5.5/dns-query"
+                ],
+                "foreign": [
+                  "https://1.1.1.1/dns-query"
+                ],
+                "foreignViaProxy": true,
+                "company": "corp.com = 10.0.0.53",
+                "companyDirect": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/ruleSets/import": {
+      "post": {
+        "tags": [
+          "Routing rule library"
+        ],
+        "summary": "Import a Clash/Mihomo config (https url, fetched as a Clash client, or pasted content): rules become rule sets per destination; importDns also takes over its DNS.",
+        "operationId": "post_panel_api_ruleSets_import",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "url": "https://example.com/config.yaml",
+                "importDns": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/ruleSets/preview": {
       "post": {
         "tags": [
@@ -16565,6 +16690,78 @@
                 "title": "Evergreen Trading Ltd.",
                 "tagline": "",
                 "email": "info@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/front": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Whether the panel is also served on port 443 (decoy without a port), whether its own port is closed, and what happened at the last start.",
+        "operationId": "get_panel_api_protect_front",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Switch the port-443 site and closing the panel port; the panel restarts. Closing is refused until 443 is running.",
+        "operationId": "post_panel_api_protect_front",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "enabled": true,
+                "frontOnly": false
               }
             }
           }

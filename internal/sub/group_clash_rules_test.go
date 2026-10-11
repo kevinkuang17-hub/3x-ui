@@ -153,3 +153,38 @@ func TestGetClash_LibraryProxyFollowsTemplateMainGroup(t *testing.T) {
 		t.Fatalf("ClashTemplateGroups = %v, %v", groups, err)
 	}
 }
+
+func TestGetClash_CompanyDNS(t *testing.T) {
+	seedSubDB(t)
+	seedSubInbound(t, "sub-dns", "dns-in", 20008, 0, groupClashTCP)
+	seedSubInbound(t, "sub-corp", "corp-in", 20009, 0, groupClashTCP)
+	if err := database.GetDB().Model(&model.ClientRecord{}).Where("sub_id = ?", "sub-corp").Update("group_name", "corp").Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := (&service.RuleSetService{}).SaveGlobalDns(service.DnsConfig{Enable: true}); err != nil {
+		t.Fatal(err)
+	}
+	if err := (&service.ClientService{}).SetGroupDns("corp", &service.DnsConfig{
+		Enable: true, Company: "kstar.com = 192.168.8.10", CompanyDirect: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	clash := NewSubClashService(false, "", NewSubService(""))
+	plain, _, err := clash.GetClash("sub-dns", "sub.example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(plain, "nameserver-policy") || strings.Contains(plain, "kstar.com") {
+		t.Fatalf("the global DNS applies and carries no company rules:\n%s", plain)
+	}
+	corp, _, err := clash.GetClash("sub-corp", "sub.example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(corp, "192.168.8.10") || !strings.Contains(corp, "DOMAIN-SUFFIX,kstar.com,DIRECT") {
+		t.Fatalf("the group's company DNS and its DIRECT rule must be in the profile:\n%s", corp)
+	}
+	if strings.Index(corp, "DOMAIN-SUFFIX,kstar.com,DIRECT") > strings.Index(corp, "MATCH,PROXY") {
+		t.Fatalf("company domains must be matched before everything else:\n%s", corp)
+	}
+}

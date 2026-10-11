@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   ConfigProvider,
+  Divider,
   Form,
   Input,
   Layout,
@@ -21,6 +22,7 @@ import {
 import type { TableColumnsType } from 'antd';
 import {
   DeleteOutlined,
+  ImportOutlined,
   EditOutlined,
   PlusOutlined,
   RollbackOutlined,
@@ -36,6 +38,8 @@ import AppSidebar from '@/layouts/AppSidebar';
 import { keys } from '@/api/queryKeys';
 import RoutingChoiceEditor from './RoutingChoiceEditor';
 import TemplatePicker, { useTemplateGroups } from './TemplatePicker';
+import DnsEditor, { type DnsConfig, fetchGlobalDns } from './DnsEditor';
+import ImportModal from './ImportModal';
 import {
   JSON_HEADERS,
   ROUTING_POLICIES,
@@ -58,9 +62,18 @@ const EMPTY_SET: RuleSet = {
   sortOrder: 0,
 };
 
-function GlobalRoutingTab({ sets, initial }: { sets: RuleSet[]; initial: GlobalRouting }) {
+function GlobalRoutingTab({
+  sets,
+  initial,
+  initialDns,
+}: {
+  sets: RuleSet[];
+  initial: GlobalRouting;
+  initialDns: DnsConfig;
+}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [dns, setDns] = useState<DnsConfig>(initialDns);
   const [choice, setChoice] = useState<RoutingChoice>({
     ruleSets: initial.ruleSets,
     extraRules: initial.extraRules,
@@ -68,10 +81,16 @@ function GlobalRoutingTab({ sets, initial }: { sets: RuleSet[]; initial: GlobalR
   const [template, setTemplate] = useState(initial.templateOn ? initial.template : '');
   const groupsQuery = useTemplateGroups(template);
   const saveMut = useMutation({
-    mutationFn: (body: RoutingChoice & { template: string }) =>
-      HttpUtil.post('/panel/api/ruleSets/routing', body, JSON_HEADERS),
+    mutationFn: async (body: RoutingChoice & { template: string }) => {
+      const saved = await HttpUtil.post('/panel/api/ruleSets/dns', dns, {
+        ...JSON_HEADERS,
+        silentSuccess: true,
+      });
+      if (!saved?.success) return saved;
+      return HttpUtil.post('/panel/api/ruleSets/routing', body, JSON_HEADERS);
+    },
     onSuccess: (msg) => {
-      if (msg?.success) queryClient.invalidateQueries({ queryKey: keys.ruleSets.routing() });
+      if (msg?.success) queryClient.invalidateQueries({ queryKey: keys.ruleSets.root() });
     },
   });
   return (
@@ -106,6 +125,8 @@ function GlobalRoutingTab({ sets, initial }: { sets: RuleSet[]; initial: GlobalR
         onChange={setChoice}
         groups={groupsQuery.data ?? []}
       />
+      <Divider titlePlacement="start">{t('pages.ruleSets.dnsTitle')}</Divider>
+      <DnsEditor value={dns} onChange={setDns} />
       <div style={{ marginTop: 16 }}>
         <Button
           type="primary"
@@ -137,6 +158,12 @@ export default function RuleSetsPage() {
     queryFn: fetchGlobalRouting,
     refetchOnWindowFocus: false,
   });
+  const dnsQuery = useQuery({
+    queryKey: [...keys.ruleSets.root(), 'dns'],
+    queryFn: fetchGlobalDns,
+    refetchOnWindowFocus: false,
+  });
+  const [importing, setImporting] = useState(false);
   const sets = setsQuery.data ?? [];
   const [editing, setEditing] = useState<RuleSet | null>(null);
 
@@ -275,11 +302,12 @@ export default function RuleSetsPage() {
                     key: 'global',
                     label: t('pages.ruleSets.globalTab'),
                     children:
-                      routingQuery.data && setsQuery.data ? (
+                      routingQuery.data && setsQuery.data && dnsQuery.data ? (
                         <GlobalRoutingTab
-                          key={routingQuery.dataUpdatedAt}
+                          key={routingQuery.dataUpdatedAt + dnsQuery.dataUpdatedAt}
                           sets={sets}
                           initial={routingQuery.data}
+                          initialDns={dnsQuery.data}
                         />
                       ) : null,
                   },
@@ -295,6 +323,13 @@ export default function RuleSetsPage() {
                             onClick={() => setEditing({ ...EMPTY_SET })}
                           >
                             {t('pages.ruleSets.add')}
+                          </Button>
+                          <Button
+                            icon={<ImportOutlined />}
+                            style={{ marginInlineStart: 8 }}
+                            onClick={() => setImporting(true)}
+                          >
+                            {t('pages.ruleSets.import')}
                           </Button>
                         </div>
                         <Table<RuleSet>
@@ -315,6 +350,11 @@ export default function RuleSetsPage() {
           </Layout.Content>
         </Layout>
 
+        <ImportModal
+          open={importing}
+          onClose={() => setImporting(false)}
+          onImported={() => queryClient.invalidateQueries({ queryKey: keys.ruleSets.root() })}
+        />
         <Modal
           open={editing !== null}
           title={editing?.id ? t('pages.ruleSets.edit') : t('pages.ruleSets.add')}
