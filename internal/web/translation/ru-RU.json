@@ -1858,7 +1858,9 @@
         "primary": "Главный",
         "deleteConfirm": "Удалить пользователя {name}?",
         "saved": "Пользователь сохранён",
-        "deleted": "Пользователь удалён"
+        "deleted": "Пользователь удалён",
+        "clearPasskeys": "Отозвать ключи",
+        "clearPasskeysConfirm": "Отозвать все ключи доступа {name}?"
       },
       "passkeys": {
         "title": "Мои ключи доступа",

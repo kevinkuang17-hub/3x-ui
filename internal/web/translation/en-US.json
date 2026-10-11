@@ -1976,7 +1976,9 @@
         "primary": "Primary",
         "deleteConfirm": "Delete user {name}?",
         "saved": "User saved",
-        "deleted": "User deleted"
+        "deleted": "User deleted",
+        "clearPasskeys": "Revoke passkeys",
+        "clearPasskeysConfirm": "Revoke all passkeys of {name}?"
       },
       "passkeys": {
         "title": "My passkeys",

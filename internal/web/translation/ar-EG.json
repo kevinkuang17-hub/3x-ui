@@ -1858,7 +1858,9 @@
         "primary": "أساسي",
         "deleteConfirm": "حذف المستخدم {name}؟",
         "saved": "تم حفظ المستخدم",
-        "deleted": "تم حذف المستخدم"
+        "deleted": "تم حذف المستخدم",
+        "clearPasskeys": "إلغاء مفاتيح المرور",
+        "clearPasskeysConfirm": "إلغاء جميع مفاتيح المرور الخاصة بـ {name}؟"
       },
       "passkeys": {
         "title": "مفاتيح المرور الخاصة بي",

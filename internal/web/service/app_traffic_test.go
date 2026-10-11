@@ -28,7 +28,7 @@ func TestAddAndStripApps(t *testing.T) {
 		t.Fatalf("want 2 clones, outbounds=%v", outs)
 	}
 	clone := outs[2].(map[string]any)
-	if clone["tag"] != "app-netflix" || clone["protocol"] != "freedom" || clone["settings"].(map[string]any)["domainStrategy"] != "AsIs" {
+	if clone["tag"] != "xui-app-netflix" || clone["protocol"] != "freedom" || clone["settings"].(map[string]any)["domainStrategy"] != "AsIs" {
 		t.Fatalf("clone must copy the default outbound: %v", clone)
 	}
 	if outs[0].(map[string]any)["tag"] != "direct" {
@@ -45,9 +45,21 @@ func TestAddAndStripApps(t *testing.T) {
 	if err := addApps(cfg, []string{"nope"}); err == nil {
 		t.Fatal("unknown apps must be refused")
 	}
+	var ipFirst map[string]any
+	_ = json.Unmarshal([]byte(`{"outbounds":[{"protocol":"freedom","tag":"direct"}],"routing":{"domainStrategy":"IPIfNonMatch","rules":[]}}`), &ipFirst)
+	if err := addApps(ipFirst, []string{"netflix"}); err == nil {
+		t.Fatal("IPIfNonMatch routing would change behaviour and must be refused")
+	}
+	var wg map[string]any
+	_ = json.Unmarshal([]byte(`{"outbounds":[{"protocol":"wireguard","tag":"warp"}],"routing":{"rules":[]}}`), &wg)
+	if err := addApps(wg, []string{"netflix"}); err == nil {
+		t.Fatal("a WireGuard default outbound must not be cloned")
+	}
+	// A user's own outbound named like an app is left alone.
+	cfg["outbounds"] = append(cfg["outbounds"].([]any), map[string]any{"protocol": "freedom", "tag": "app-mine"})
 
 	stripApps(cfg)
-	if len(cfg["outbounds"].([]any)) != 2 || len(cfg["routing"].(map[string]any)["rules"].([]any)) != 1 {
+	if len(cfg["outbounds"].([]any)) != 3 || len(cfg["routing"].(map[string]any)["rules"].([]any)) != 1 {
 		t.Fatalf("strip must remove only app entries: %v", cfg)
 	}
 }
@@ -55,8 +67,8 @@ func TestAddAndStripApps(t *testing.T) {
 func TestAppTrafficReadsOutboundStats(t *testing.T) {
 	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
 	db := database.GetDB()
-	db.Create(&model.OutboundTraffics{Tag: "app-youtube", Up: 10, Down: 900})
-	db.Create(&model.OutboundTraffics{Tag: "app-netflix", Up: 5, Down: 5000})
+	db.Create(&model.OutboundTraffics{Tag: "xui-app-youtube", Up: 10, Down: 900})
+	db.Create(&model.OutboundTraffics{Tag: "xui-app-netflix", Up: 5, Down: 5000})
 	db.Create(&model.OutboundTraffics{Tag: "direct", Up: 1, Down: 1})
 	got, err := (&AppTrafficService{}).Traffic()
 	if err != nil || len(got) != 2 || got[0].App != "netflix" || got[1].Down != 900 {

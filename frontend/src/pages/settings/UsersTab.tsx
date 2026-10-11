@@ -14,7 +14,7 @@ import {
   Typography,
 } from 'antd';
 import type { TableColumnsType } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, KeyOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 
 import { HttpUtil } from '@/utils';
@@ -25,6 +25,7 @@ interface PanelUser {
   username: string;
   role: 'admin' | 'operator';
   primary: boolean;
+  passkeys: number;
 }
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
@@ -83,6 +84,7 @@ export default function UsersTab() {
             {t(`pages.settings.users.role_${role}`)}
           </Tag>
           {row.primary && <Tag>{t('pages.settings.users.primary')}</Tag>}
+          {row.passkeys > 0 && <Tag icon={<KeyOutlined />}>{row.passkeys}</Tag>}
         </Space>
       ),
     },
@@ -101,6 +103,23 @@ export default function UsersTab() {
                 setEditing({ id: row.id, username: row.username, password: '', role: row.role })
               }
             />
+            {row.passkeys > 0 && (
+              <Popconfirm
+                title={t('pages.settings.users.clearPasskeysConfirm', { name: row.username })}
+                onConfirm={async () => {
+                  const msg = await HttpUtil.post(`/panel/api/users/clearPasskeys/${row.id}`);
+                  if (msg?.success) void refetch();
+                }}
+              >
+                <Button
+                  size="small"
+                  type="text"
+                  icon={<KeyOutlined />}
+                  aria-label={t('pages.settings.users.clearPasskeys')}
+                  title={t('pages.settings.users.clearPasskeys')}
+                />
+              </Popconfirm>
+            )}
             <Popconfirm
               title={t('pages.settings.users.deleteConfirm', { name: row.username })}
               onConfirm={async () => {

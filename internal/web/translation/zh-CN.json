@@ -1858,7 +1858,9 @@
         "primary": "主管理员",
         "deleteConfirm": "删除账号 {name}？",
         "saved": "账号已保存",
-        "deleted": "账号已删除"
+        "deleted": "账号已删除",
+        "clearPasskeys": "吊销通行密钥",
+        "clearPasskeysConfirm": "吊销 {name} 的所有通行密钥？"
       },
       "passkeys": {
         "title": "我的通行密钥",

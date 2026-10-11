@@ -1858,7 +1858,9 @@
         "primary": "Utama",
         "deleteConfirm": "Hapus pengguna {name}?",
         "saved": "Pengguna disimpan",
-        "deleted": "Pengguna dihapus"
+        "deleted": "Pengguna dihapus",
+        "clearPasskeys": "Cabut passkey",
+        "clearPasskeysConfirm": "Cabut semua passkey milik {name}?"
       },
       "passkeys": {
         "title": "Passkey saya",

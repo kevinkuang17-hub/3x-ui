@@ -21,6 +21,16 @@ type PanelUser struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	Primary  bool   `json:"primary"`
+	Passkeys int64  `json:"passkeys"`
+}
+
+// PrimaryUser is the original panel user: always admin and the owner of the inbounds.
+func PrimaryUser() (*model.User, error) {
+	var u model.User
+	if err := database.GetDB().Order("id asc").First(&u).Error; err != nil {
+		return nil, err
+	}
+	return &u, nil
 }
 
 func firstUserID() int {
@@ -49,7 +59,9 @@ func (s *PanelUserService) List() ([]PanelUser, error) {
 	first := firstUserID()
 	out := make([]PanelUser, 0, len(users))
 	for _, u := range users {
-		out = append(out, PanelUser{Id: u.Id, Username: u.Username, Role: RoleOf(u.Id), Primary: u.Id == first})
+		var keys int64
+		database.GetDB().Model(&model.PasskeyCredential{}).Where("user_id = ?", u.Id).Count(&keys)
+		out = append(out, PanelUser{Id: u.Id, Username: u.Username, Role: RoleOf(u.Id), Primary: u.Id == first, Passkeys: keys})
 	}
 	return out, nil
 }
@@ -120,6 +132,12 @@ func (s *PanelUserService) Update(id int, password, role string) error {
 				return err
 			}
 		}
+		// A new password also revokes the user's passkeys, so a reset fully re-secures the account.
+		if password != "" {
+			if err := tx.Where("user_id = ?", id).Delete(&model.PasskeyCredential{}).Error; err != nil {
+				return err
+			}
+		}
 		return tx.Model(&model.User{}).Where("id = ?", id).Updates(updates).Error
 	})
 }
@@ -136,6 +154,14 @@ func (s *PanelUserService) Delete(id, actingUserID int) error {
 		if err := tx.Where("user_id = ?", id).Delete(&model.PanelRole{}).Error; err != nil {
 			return err
 		}
+		if err := tx.Where("user_id = ?", id).Delete(&model.PasskeyCredential{}).Error; err != nil {
+			return err
+		}
 		return tx.Delete(&model.User{}, id).Error
 	})
+}
+
+// ClearPasskeys revokes every passkey of a user (admin action, e.g. a lost device).
+func (s *PanelUserService) ClearPasskeys(id int) error {
+	return database.GetDB().Where("user_id = ?", id).Delete(&model.PasskeyCredential{}).Error
 }

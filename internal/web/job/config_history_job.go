@@ -34,6 +34,7 @@ type xrayHealth interface {
 	IsXrayRunning() bool
 	DidXrayCrash() bool
 	RestartXray(isForce bool) error
+	RunningConfigCurrent() bool
 }
 
 func NewConfigHistoryJob() *ConfigHistoryJob {
@@ -56,7 +57,8 @@ func (j *ConfigHistoryJob) Run() {
 		if j.runningHash != snap.Hash {
 			j.runningHash, j.runningSince = snap.Hash, now
 		}
-		if !snap.Good && now.Sub(j.runningSince) >= configGoodAfter {
+		// Only a version the core actually runs is good; a refused save leaves the old core up.
+		if !snap.Good && now.Sub(j.runningSince) >= configGoodAfter && j.xray.RunningConfigCurrent() {
 			_ = j.history.MarkGood(snap.Id)
 		}
 		return
@@ -79,7 +81,7 @@ func (j *ConfigHistoryJob) Run() {
 	}
 	j.downChecks = 0
 	logger.Warningf("conservative mode: Xray keeps failing with the latest config; restoring version %d", good.Id)
-	if _, err := j.history.Restore(good.Id, "auto-rollback"); err != nil {
+	if _, err := j.history.Restore(good.Id, "auto-rollback", false); err != nil {
 		logger.Error("conservative mode: rollback failed:", err)
 		return
 	}

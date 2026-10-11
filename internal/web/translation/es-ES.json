@@ -1858,7 +1858,9 @@
         "primary": "Principal",
         "deleteConfirm": "¿Eliminar el usuario {name}?",
         "saved": "Usuario guardado",
-        "deleted": "Usuario eliminado"
+        "deleted": "Usuario eliminado",
+        "clearPasskeys": "Revocar llaves",
+        "clearPasskeysConfirm": "¿Revocar todas las llaves de acceso de {name}?"
       },
       "passkeys": {
         "title": "Mis llaves de acceso",

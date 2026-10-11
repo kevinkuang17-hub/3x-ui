@@ -1858,7 +1858,9 @@
         "primary": "メイン",
         "deleteConfirm": "ユーザー {name} を削除しますか？",
         "saved": "ユーザーを保存しました",
-        "deleted": "ユーザーを削除しました"
+        "deleted": "ユーザーを削除しました",
+        "clearPasskeys": "パスキーを無効化",
+        "clearPasskeysConfirm": "{name} のパスキーをすべて無効にしますか？"
       },
       "passkeys": {
         "title": "自分のパスキー",

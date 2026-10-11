@@ -22,6 +22,10 @@ const (
 var applePaths = map[string]string{formatSurge: "/surge/", formatLoon: "/loon/", formatQX: "/qx/"}
 
 func (a *SUBController) initAppleFormats(g *gin.RouterGroup) {
+	// They serve the Clash proxy list, so they exist only while the Clash subscription is on.
+	if !a.clashEnabled {
+		return
+	}
 	for _, format := range []string{formatSurge, formatLoon, formatQX} {
 		path := applePaths[format]
 		if owner := a.configuredSubscriptionPathOwner(path); owner != "" {
@@ -38,7 +42,7 @@ func (a *SUBController) initAppleFormats(g *gin.RouterGroup) {
 // a custom reverse-proxy URI gives no safe way to build them, so they are left out.
 func (a *SUBController) appleURLs(subURL, subID string) map[string]string {
 	suffix := strings.TrimSuffix(a.subPath, "/") + "/" + subID
-	if subURL == "" || subID == "" || !strings.HasSuffix(subURL, suffix) {
+	if !a.clashEnabled || subURL == "" || subID == "" || !strings.HasSuffix(subURL, suffix) {
 		return nil
 	}
 	base := strings.TrimSuffix(subURL, suffix)
@@ -124,6 +128,12 @@ func sniOf(p map[string]any) string {
 	return appleStr(p, "sni")
 }
 
+// vlessEncrypted reports VLESS post-quantum encryption, which these apps cannot speak.
+func vlessEncrypted(p map[string]any) bool {
+	enc := appleStr(p, "encryption")
+	return appleStr(p, "type") == "vless" && enc != "" && enc != "none"
+}
+
 // transportOK reports whether the proxy's transport is one these apps understand (tcp or ws).
 func transportOK(p map[string]any) bool {
 	n := appleStr(p, "network")
@@ -147,6 +157,9 @@ func surgeLine(p map[string]any) string {
 	case "trojan":
 		parts = []string{"trojan", server, port, "password=" + appleStr(p, "password")}
 	case "hysteria2":
+		if appleStr(p, "obfs") != "" {
+			return ""
+		}
 		parts = []string{"hysteria2", server, port, "password=" + appleStr(p, "password")}
 	case "tuic":
 		parts = []string{"tuic-v5", server, port, "uuid=" + appleStr(p, "uuid"), "password=" + appleStr(p, "password"), "alpn=h3"}
@@ -169,13 +182,16 @@ func surgeLine(p map[string]any) string {
 			parts = append(parts, "sni="+sni)
 		}
 		parts = append(parts, "skip-cert-verify="+strconv.FormatBool(appleBool(p, "skip-cert-verify")))
+		if fp := appleStr(p, "fingerprint"); fp != "" {
+			parts = append(parts, "server-cert-fingerprint-sha256="+fp)
+		}
 	}
 	return name + " = " + strings.Join(parts, ", ")
 }
 
 func loonLine(p map[string]any) string {
 	name, server, port := appleName(appleStr(p, "name")), appleStr(p, "server"), appleStr(p, "port")
-	if !transportOK(p) {
+	if !transportOK(p) || vlessEncrypted(p) || appleStr(p, "fingerprint") != "" {
 		return ""
 	}
 	t := appleStr(p, "type")
@@ -194,6 +210,13 @@ func loonLine(p map[string]any) string {
 		parts = []string{"trojan", server, port, `"` + appleStr(p, "password") + `"`}
 	case "hysteria2":
 		parts = []string{"Hysteria2", server, port, `"` + appleStr(p, "password") + `"`}
+		switch appleStr(p, "obfs") {
+		case "":
+		case "salamander":
+			parts = append(parts, "salamander-password="+appleStr(p, "obfs-password"))
+		default:
+			return ""
+		}
 	default:
 		return ""
 	}
@@ -232,8 +255,11 @@ func loonLine(p map[string]any) string {
 
 func qxLine(p map[string]any) string {
 	name, server, port := appleName(appleStr(p, "name")), appleStr(p, "server"), appleStr(p, "port")
-	if !transportOK(p) {
+	if !transportOK(p) || vlessEncrypted(p) || appleStr(p, "fingerprint") != "" {
 		return ""
+	}
+	if strings.Contains(server, ":") && !strings.HasPrefix(server, "[") {
+		server = "[" + server + "]"
 	}
 	t := appleStr(p, "type")
 	var parts []string

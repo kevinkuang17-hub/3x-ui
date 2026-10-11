@@ -279,7 +279,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	// controller is HTTP-layer only (auth + upgrade).
 	s.ws = controller.NewWebSocketController(panel.NewWebSocketService(s.wsHub))
 	// Register WebSocket route with basePath (g already has basePath prefix)
-	g.GET("/ws", s.ws.HandleWebSocket)
+	g.GET("/ws", controller.DenyOperatorWebsocket, s.ws.HandleWebSocket)
 
 	// Chrome DevTools endpoint for debugging web apps
 	engine.GET("/.well-known/appspecific/com.chrome.devtools.json", func(c *gin.Context) {

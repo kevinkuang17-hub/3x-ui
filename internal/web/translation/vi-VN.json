@@ -1858,7 +1858,9 @@
         "primary": "Chính",
         "deleteConfirm": "Xóa tài khoản {name}?",
         "saved": "Đã lưu tài khoản",
-        "deleted": "Đã xóa tài khoản"
+        "deleted": "Đã xóa tài khoản",
+        "clearPasskeys": "Thu hồi khóa truy cập",
+        "clearPasskeysConfirm": "Thu hồi mọi khóa truy cập của {name}?"
       },
       "passkeys": {
         "title": "Khóa truy cập của tôi",

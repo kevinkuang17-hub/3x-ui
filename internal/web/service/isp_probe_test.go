@@ -97,3 +97,28 @@ func TestProbeTargetsAndReports(t *testing.T) {
 		t.Fatal("deleting a probe drops its results")
 	}
 }
+
+func TestBlockedFromProbesIgnoresBrokenProbes(t *testing.T) {
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
+	db := database.GetDB()
+	now := time.Now()
+	// Probes 1 and 2 fail everything (e.g. no TCP tool on the router): they must not hide lines.
+	for probe := 1; probe <= 2; probe++ {
+		for line := 1; line <= 4; line++ {
+			db.Create(&model.IspProbeResult{ProbeId: probe, InboundId: line, Ok: false, CheckedAt: now.Unix()})
+		}
+	}
+	if blocked := BlockedFromProbes(now); len(blocked) != 0 {
+		t.Fatalf("all-failing probes must be ignored, blocked %v", blocked)
+	}
+	// Probes 3 and 4 reach most lines but not line 1: that line is genuinely blocked.
+	for probe := 3; probe <= 4; probe++ {
+		for line := 1; line <= 4; line++ {
+			db.Create(&model.IspProbeResult{ProbeId: probe, InboundId: line, Ok: line != 1, CheckedAt: now.Unix()})
+		}
+	}
+	db.Where("probe_id IN ?", []int{1, 2}).Delete(&model.IspProbeResult{})
+	if blocked := BlockedFromProbes(now); !blocked[1] || len(blocked) != 1 {
+		t.Fatalf("blocked = %v, want only line 1", blocked)
+	}
+}

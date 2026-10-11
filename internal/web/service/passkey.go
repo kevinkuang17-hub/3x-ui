@@ -21,7 +21,11 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 )
 
-const passkeyFlowTTL = 5 * time.Minute
+const (
+	passkeyFlowTTL = 5 * time.Minute
+	// maxPasskeyFlows bounds pending ceremonies so the public begin endpoint cannot exhaust memory.
+	maxPasskeyFlows = 1000
+)
 
 type passkeyFlow struct {
 	session webauthn.SessionData
@@ -35,21 +39,26 @@ var (
 	passkeyFlows   = map[string]passkeyFlow{}
 )
 
-func storeFlow(f passkeyFlow) string {
+func storeFlow(f passkeyFlow) (string, error) {
 	b := make([]byte, 16)
 	_, _ = rand.Read(b)
 	id := hex.EncodeToString(b)
 	passkeyFlowsMu.Lock()
 	defer passkeyFlowsMu.Unlock()
 	now := time.Now()
-	for k, v := range passkeyFlows {
-		if now.After(v.expires) {
-			delete(passkeyFlows, k)
+	if len(passkeyFlows) >= maxPasskeyFlows {
+		for k, v := range passkeyFlows {
+			if now.After(v.expires) {
+				delete(passkeyFlows, k)
+			}
+		}
+		if len(passkeyFlows) >= maxPasskeyFlows {
+			return "", common.NewError("too many passkey requests; try again in a few minutes")
 		}
 	}
 	f.expires = now.Add(passkeyFlowTTL)
 	passkeyFlows[id] = f
-	return id
+	return id, nil
 }
 
 // takeFlow returns and forgets a pending ceremony, so each one can finish once.
@@ -151,13 +160,19 @@ func (s *PasskeyService) BeginRegistration(w *webauthn.WebAuthn, rpID string, us
 	for _, c := range pu.creds {
 		exclusions = append(exclusions, c.Descriptor())
 	}
+	// User verification (PIN/biometric) is required: a passkey replaces password and 2FA.
 	creation, session, err := w.BeginRegistration(pu,
-		webauthn.WithResidentKeyRequirement(protocol.ResidentKeyRequirementRequired),
+		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
+			RequireResidentKey: protocol.ResidentKeyRequired(),
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			UserVerification:   protocol.VerificationRequired,
+		}),
 		webauthn.WithExclusions(exclusions))
 	if err != nil {
 		return "", nil, err
 	}
-	return storeFlow(passkeyFlow{session: *session, userID: userID, rpID: rpID}), creation, nil
+	flow, err := storeFlow(passkeyFlow{session: *session, userID: userID, rpID: rpID})
+	return flow, creation, err
 }
 
 func (s *PasskeyService) FinishRegistration(w *webauthn.WebAuthn, rpID, flowID string, userID int, name string, r *http.Request) (*model.PasskeyCredential, error) {
@@ -191,11 +206,12 @@ func (s *PasskeyService) FinishRegistration(w *webauthn.WebAuthn, rpID, flowID s
 }
 
 func (s *PasskeyService) BeginLogin(w *webauthn.WebAuthn, rpID string) (string, *protocol.CredentialAssertion, error) {
-	assertion, session, err := w.BeginDiscoverableLogin()
+	assertion, session, err := w.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
 	if err != nil {
 		return "", nil, err
 	}
-	return storeFlow(passkeyFlow{session: *session, rpID: rpID}), assertion, nil
+	flow, err := storeFlow(passkeyFlow{session: *session, rpID: rpID})
+	return flow, assertion, err
 }
 
 // FinishLogin verifies the assertion and returns the user it belongs to.

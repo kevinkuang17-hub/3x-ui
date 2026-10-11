@@ -81,3 +81,24 @@ func TestAppleNameSanitised(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+func TestAppleFormatsSkipWhatTheyCannotExpress(t *testing.T) {
+	proxies := []map[string]any{
+		{"name": "PQ", "type": "vless", "server": "pq.example.com", "port": 443, "uuid": "u", "tls": true, "encryption": "mlkem768x25519plus.native.0rtt.abc"},
+		{"name": "HY", "type": "hysteria2", "server": "hy.example.com", "port": 443, "password": "p", "obfs": "salamander", "obfs-password": "s"},
+		{"name": "PIN", "type": "trojan", "server": "pin.example.com", "port": 443, "password": "p", "fingerprint": "abcd"},
+		{"name": "V6", "type": "trojan", "server": "2001:db8::1", "port": 443, "password": "p"},
+	}
+	surge := renderAppleProfile(formatSurge, proxies, "", 12)
+	if strings.Contains(surge, "HY =") || !strings.Contains(surge, "server-cert-fingerprint-sha256=abcd") {
+		t.Fatalf("surge: obfuscated hysteria2 must be skipped and pins kept\n%s", surge)
+	}
+	loon := renderAppleProfile(formatLoon, proxies, "", 12)
+	if strings.Contains(loon, "PQ =") || strings.Contains(loon, "PIN =") || !strings.Contains(loon, "salamander-password=s") {
+		t.Fatalf("loon output wrong\n%s", loon)
+	}
+	qx := renderAppleProfile(formatQX, proxies, "", 12)
+	if strings.Contains(qx, "tag=PQ") || !strings.Contains(qx, "trojan=[2001:db8::1]:443") {
+		t.Fatalf("qx output wrong\n%s", qx)
+	}
+}

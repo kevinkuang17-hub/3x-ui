@@ -2693,7 +2693,7 @@ export const sections: readonly Section[] = [
     id: 'panel-users',
     title: 'Panel users',
     description:
-      'Extra panel logins with a role. operator sessions may manage clients, groups and plans and read status; everything else answers 403. Users without a role row (including every user that existed before roles) keep full access, and the first user is always admin. API tokens keep their own scopes.',
+      'Extra panel logins with a role. Extra users work on the primary admin’s inbounds. operator sessions may manage clients, groups and plans and read status (an allowlist; full inbound objects with keys are not readable); everything else answers 403. Users without a role row (including every user that existed before roles) keep full access, and the first user is always admin. API tokens keep their own scopes.',
     endpoints: [
       { method: 'GET', path: '/panel/api/users/me', summary: 'The signed-in user and role.' },
       {
@@ -2713,6 +2713,13 @@ export const sections: readonly Section[] = [
         summary: 'Change role and/or password (empty keeps it); signs the user out everywhere.',
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'User id.' }],
         body: '{\n  "password": "",\n  "role": "admin"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/users/clearPasskeys/:id',
+        summary:
+          'Revoke every passkey of a user (lost device). Changing a password also revokes them.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'User id.' }],
       },
       {
         method: 'POST',
@@ -2771,7 +2778,7 @@ export const sections: readonly Section[] = [
     id: 'app-traffic',
     title: 'App traffic',
     description:
-      'Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named app-<key>, and a geosite rule after all existing rules, so routing is unchanged; outbound statistics are switched on.',
+      'Per-app byte counts (Netflix, YouTube, …) for all users. Tracking an app adds an outbound cloned from the default (first) outbound, named xui-app-<key>, and a geosite rule after all existing rules, so routing is unchanged (refused unless routing.domainStrategy is AsIs or when the default outbound is WireGuard); outbound statistics are switched on.',
     endpoints: [
       {
         method: 'GET',

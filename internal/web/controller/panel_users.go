@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 )
 
 // PanelUserController manages extra panel logins under /panel/api/users (admins only, except /me).
@@ -21,11 +20,12 @@ func NewPanelUserController(g *gin.RouterGroup) *PanelUserController {
 	g.POST("/add", a.add)
 	g.POST("/update/:id", a.update)
 	g.POST("/del/:id", a.del)
+	g.POST("/clearPasskeys/:id", a.clearPasskeys)
 	return a
 }
 
 func (a *PanelUserController) me(c *gin.Context) {
-	u := session.GetLoginUser(c)
+	u := realLoginUser(c)
 	if u == nil {
 		jsonObj(c, nil, nil)
 		return
@@ -79,8 +79,17 @@ func (a *PanelUserController) del(c *gin.Context) {
 		return
 	}
 	acting := 0
-	if u := session.GetLoginUser(c); u != nil {
+	if u := realLoginUser(c); u != nil {
 		acting = u.Id
 	}
 	jsonMsg(c, I18nWeb(c, "pages.settings.users.deleted"), a.users.Delete(id, acting))
+}
+
+func (a *PanelUserController) clearPasskeys(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.settings.passkeys.deleted"), a.users.ClearPasskeys(id))
 }

@@ -20,6 +20,8 @@ const (
 	// ProbeFresh is how long a probe result counts toward line health.
 	ProbeFresh = 15 * time.Minute
 	maxReport  = 2000
+	// probeSanityMin is how many lines a probe must report before its failure rate is judged.
+	probeSanityMin = 3
 )
 
 type IspProbeService struct{}
@@ -203,13 +205,29 @@ func (s *IspProbeService) Matrix() (*ProbeMatrix, error) {
 }
 
 // BlockedFromProbes returns inbounds that every fresh probe (at least two) failed to reach:
-// the line is up but blocked for users, so line health treats it as down.
+// the line is up but blocked for users, so line health treats it as down. A probe failing most
+// of its lines is more likely broken itself (no network, no TCP tool), so it is ignored.
 func BlockedFromProbes(now time.Time) map[int]bool {
 	var rows []model.IspProbeResult
 	database.GetDB().Where("checked_at >= ?", now.Add(-ProbeFresh).Unix()).Find(&rows)
 	type tally struct{ total, failed int }
+	perProbe := map[int]*tally{}
+	for _, r := range rows {
+		t := perProbe[r.ProbeId]
+		if t == nil {
+			t = &tally{}
+			perProbe[r.ProbeId] = t
+		}
+		t.total++
+		if !r.Ok {
+			t.failed++
+		}
+	}
 	counts := map[int]*tally{}
 	for _, r := range rows {
+		if p := perProbe[r.ProbeId]; p.total >= probeSanityMin && p.failed*2 > p.total {
+			continue
+		}
 		t := counts[r.InboundId]
 		if t == nil {
 			t = &tally{}

@@ -15,13 +15,14 @@ import (
 )
 
 type fakeXray struct {
-	running, crashed bool
-	restarts         int
+	running, crashed, heldBack bool
+	restarts                   int
 }
 
-func (f *fakeXray) IsXrayRunning() bool    { return f.running }
-func (f *fakeXray) DidXrayCrash() bool     { return f.crashed }
-func (f *fakeXray) RestartXray(bool) error { f.restarts++; return nil }
+func (f *fakeXray) IsXrayRunning() bool        { return f.running }
+func (f *fakeXray) DidXrayCrash() bool         { return f.crashed }
+func (f *fakeXray) RestartXray(bool) error     { f.restarts++; return nil }
+func (f *fakeXray) RunningConfigCurrent() bool { return f.running && !f.heldBack }
 
 func setTemplate(t *testing.T, content string) {
 	t.Helper()
@@ -98,5 +99,22 @@ func TestConfigHistoryIgnoresManualStop(t *testing.T) {
 	}
 	if fx.restarts != 0 {
 		t.Fatal("a manually stopped core must never trigger a rollback")
+	}
+}
+
+func TestConfigHistoryDoesNotTrustRefusedSaves(t *testing.T) {
+	xuilogger.InitLogger(logging.ERROR)
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
+	clock := time.Unix(1_800_000_000, 0)
+	fx := &fakeXray{running: true, heldBack: true}
+	j := NewConfigHistoryJob()
+	j.xray = fx
+	j.now = func() time.Time { return clock }
+	j.Run()
+	clock = clock.Add(2 * configGoodAfter)
+	j.Run()
+	snaps, _ := (&service.ConfigHistoryService{}).List()
+	if len(snaps) != 1 || snaps[0].Good {
+		t.Fatalf("a version the core refused must not become good: %+v", snaps)
 	}
 }

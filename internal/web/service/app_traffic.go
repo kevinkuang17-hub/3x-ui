@@ -11,7 +11,7 @@ import (
 )
 
 // AppTagPrefix marks the outbounds and rules this feature owns in the Xray template.
-const AppTagPrefix = "app-"
+const AppTagPrefix = "xui-app-"
 
 // appCatalog maps an app key to the geosite categories that identify its traffic.
 var appCatalog = map[string][]string{
@@ -101,10 +101,18 @@ func addApps(cfg map[string]any, apps []string) error {
 	if !ok {
 		return common.NewError("the first outbound is not an object")
 	}
+	// A second copy of a WireGuard outbound would open a competing tunnel with the same key.
+	if proto, _ := base["protocol"].(string); proto == "wireguard" {
+		return common.NewError("the default outbound is WireGuard; app tracking needs a freedom or proxy default outbound")
+	}
 	routing, _ := cfg["routing"].(map[string]any)
 	if routing == nil {
 		routing = map[string]any{}
 		cfg["routing"] = routing
+	}
+	// With IPIfNonMatch/IPOnDemand a new domain rule would win over the user's IP rules.
+	if ds, _ := routing["domainStrategy"].(string); ds != "" && ds != "AsIs" {
+		return common.NewError("app tracking needs routing domainStrategy AsIs; it is", ds)
 	}
 	rules, _ := routing["rules"].([]any)
 	seen := map[string]bool{}

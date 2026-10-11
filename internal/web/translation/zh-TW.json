@@ -1858,7 +1858,9 @@
         "primary": "主管理員",
         "deleteConfirm": "刪除帳號 {name}？",
         "saved": "帳號已儲存",
-        "deleted": "帳號已刪除"
+        "deleted": "帳號已刪除",
+        "clearPasskeys": "撤銷密碼金鑰",
+        "clearPasskeysConfirm": "撤銷 {name} 的所有密碼金鑰？"
       },
       "passkeys": {
         "title": "我的密碼金鑰",

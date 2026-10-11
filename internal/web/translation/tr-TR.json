@@ -1858,7 +1858,9 @@
         "primary": "Ana",
         "deleteConfirm": "{name} kullanıcısı silinsin mi?",
         "saved": "Kullanıcı kaydedildi",
-        "deleted": "Kullanıcı silindi"
+        "deleted": "Kullanıcı silindi",
+        "clearPasskeys": "Geçiş anahtarlarını iptal et",
+        "clearPasskeysConfirm": "{name} kullanıcısının tüm geçiş anahtarları iptal edilsin mi?"
       },
       "passkeys": {
         "title": "Geçiş anahtarlarım",

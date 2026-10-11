@@ -1858,7 +1858,9 @@
         "primary": "اصلی",
         "deleteConfirm": "کاربر {name} حذف شود؟",
         "saved": "کاربر ذخیره شد",
-        "deleted": "کاربر حذف شد"
+        "deleted": "کاربر حذف شد",
+        "clearPasskeys": "باطل‌کردن کلیدهای عبور",
+        "clearPasskeysConfirm": "همهٔ کلیدهای عبور {name} باطل شوند؟"
       },
       "passkeys": {
         "title": "کلیدهای عبور من",

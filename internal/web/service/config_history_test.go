@@ -55,14 +55,14 @@ func TestConfigHistoryRestore(t *testing.T) {
 	if good, _ := s.LastGood(""); good == nil || good.Id != original.Id {
 		t.Fatalf("LastGood = %+v", good)
 	}
-	if _, err := s.Restore(original.Id, "manual"); err != nil {
+	if _, err := s.Restore(original.Id, "manual", false); err != nil {
 		t.Fatalf("Restore: %v", err)
 	}
 	got, _ := (&SettingService{}).GetXrayConfigTemplate()
 	if got == `{"outbounds":[]}` {
 		t.Fatal("template not restored")
 	}
-	if _, err := s.Restore(9999, ""); err == nil {
+	if _, err := s.Restore(9999, "", true); err == nil {
 		t.Fatal("unknown versions must be refused")
 	}
 }

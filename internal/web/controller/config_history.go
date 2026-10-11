@@ -47,7 +47,7 @@ func (a *ConfigHistoryController) restore(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if _, err := a.history.Restore(id, "restored from version "+strconv.Itoa(id)); err != nil {
+	if _, err := a.history.Restore(id, "restored from version "+strconv.Itoa(id), true); err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.xray.history.restoreFailed"), err)
 		return
 	}

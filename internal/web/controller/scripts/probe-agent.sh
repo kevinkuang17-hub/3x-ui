@@ -9,7 +9,7 @@ set -eu
 DIR="${PROBE_DIR:-/etc/x-ui-probe}"
 CONF="$DIR/url"
 SELF="$DIR/probe-agent.sh"
-TIMEOUT="${PROBE_TIMEOUT:-5}"
+TIMEOUT="${PROBE_TIMEOUT:-3}"
 
 die() {
     echo "probe-agent: $*" >&2
@@ -63,14 +63,38 @@ uninstall_agent() {
     echo "probe-agent: removed."
 }
 
-# check <host> <port>: prints the TCP connect time in ms, or -1 when unreachable.
+# tcp_tool picks how to test a TCP connect: curl's telnet:// (with timing) or nc -z.
+tcp_tool() {
+    if curl -V 2> /dev/null | grep -q telnet; then
+        echo curl
+    elif nc -h 2>&1 | grep -q -- '-z'; then
+        echo nc
+    else
+        echo none
+    fi
+}
+
+# check <host> <port>: prints the TCP connect time in ms (0 when the tool cannot time it),
+# or -1 when unreachable.
 check() {
-    t=$(curl -s -o /dev/null -w '%{time_connect}' --connect-timeout "$TIMEOUT" --max-time "$((TIMEOUT + 1))" "telnet://$1:$2" < /dev/null 2> /dev/null || true)
-    awk -v t="${t:-0}" 'BEGIN { if (t + 0 > 0) printf "%d", t * 1000 + 0.5; else print -1 }'
+    if [ "$TOOL" = curl ]; then
+        t=$(curl -s -o /dev/null -w '%{time_connect}' --connect-timeout "$TIMEOUT" --max-time "$((TIMEOUT + 1))" "telnet://$1:$2" < /dev/null 2> /dev/null || true)
+        awk -v t="${t:-0}" 'BEGIN { if (t + 0 > 0) printf "%d", t * 1000 + 0.5; else print -1 }'
+    elif nc -z -w "$TIMEOUT" "$1" "$2" < /dev/null > /dev/null 2>&1; then
+        echo 0
+    else
+        echo -1
+    fi
 }
 
 run_agent() {
     [ -f "$CONF" ] || die "not installed"
+    TOOL=$(tcp_tool)
+    # Without a TCP tool every line would look blocked; report nothing rather than lie.
+    [ "$TOOL" != none ] || die "neither curl with telnet support nor nc -z is available (opkg install curl)"
+    # One run at a time: a slow round must not overlap the next cron tick.
+    mkdir "$DIR/lock" 2> /dev/null || exit 0
+    trap 'rmdir "$DIR/lock" 2> /dev/null' EXIT INT TERM
     url=$(cat "$CONF")
     targets=$(curl -fsS --max-time 30 "$url") || die "could not fetch targets"
     body='{"results":['

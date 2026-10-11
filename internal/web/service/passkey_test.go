@@ -27,7 +27,10 @@ func TestPasskeyRelyingParty(t *testing.T) {
 }
 
 func TestPasskeyFlowsAreSingleUse(t *testing.T) {
-	id := storeFlow(passkeyFlow{userID: 7, rpID: "panel.example.com"})
+	id, err := storeFlow(passkeyFlow{userID: 7, rpID: "panel.example.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	f, ok := takeFlow(id)
 	if !ok || f.userID != 7 {
 		t.Fatal("stored flow must be returned once")

@@ -33,7 +33,7 @@ func relyingParty(c *gin.Context) (*webauthn.WebAuthn, string, error) {
 }
 
 func sessionUserID(c *gin.Context) int {
-	if u := session.GetLoginUser(c); u != nil {
+	if u := realLoginUser(c); u != nil {
 		return u.Id
 	}
 	return 0
@@ -83,6 +83,10 @@ func (a *PasskeyController) del(c *gin.Context) {
 
 // PasskeyLoginBegin is public: it starts a username-less passkey sign-in.
 func PasskeyLoginBegin(c *gin.Context) {
+	if _, ok := defaultLoginLimiter.allow(getRemoteIp(c), "passkey"); !ok {
+		pureJsonMsg(c, http.StatusOK, false, I18nWeb(c, "pages.login.toasts.wrongUsernameOrPassword"))
+		return
+	}
 	w, rpID, err := relyingParty(c)
 	if err != nil {
 		pureJsonMsg(c, http.StatusOK, false, err.Error())
