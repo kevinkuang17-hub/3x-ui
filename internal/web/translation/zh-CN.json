@@ -2748,7 +2748,8 @@
       "frontRestarting": "面板正在重启，几秒后自动刷新本页。",
       "frontEnable": "在 {port} 端口发布网站",
       "frontOnly": "对外关闭面板端口 {port}（面板只能通过 443 访问）",
-      "frontOnlyNote": "只在主控上使用；443 正常运行后才能开启。万一进不去，在服务器上执行：x-ui setting -resetPanelAccess && x-ui restart"
+      "frontOnlyNote": "只在主控上使用；443 正常运行后才能开启。万一进不去，在服务器上执行：x-ui setting -resetPanelAccess && x-ui restart",
+      "frontOnlyVia443": "请先用不带端口的地址打开面板（{url}），确认能进入后再在那里关闭面板端口。"
     }
   },
   "tgbot": {

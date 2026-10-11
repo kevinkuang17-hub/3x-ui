@@ -3,6 +3,8 @@ package sub
 import (
 	"strings"
 	"testing"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 func appleSampleProxies() []map[string]any {
@@ -100,5 +102,26 @@ func TestAppleFormatsSkipWhatTheyCannotExpress(t *testing.T) {
 	qx := renderAppleProfile(formatQX, proxies, "", 12, nil, appleDNS{})
 	if strings.Contains(qx, "tag=PQ") || !strings.Contains(qx, "trojan=[2001:db8::1]:443") {
 		t.Fatalf("qx output wrong\n%s", qx)
+	}
+}
+
+func TestAppleProfileCompanyDNS(t *testing.T) {
+	dns := appleDNSFor(service.DnsConfig{
+		Enable: true, Domestic: []string{"https://doh.pub/dns-query", "119.29.29.29"},
+		Company: "kstar.com = 10.1.1.53", CompanyDirect: true,
+	})
+	out := renderAppleProfile(formatSurge, appleSampleProxies(), "", 12, appleRules(dns.direct), dns)
+	for _, want := range []string{
+		"dns-server = 119.29.29.29, system",
+		"[Host]\nkstar.com = server:10.1.1.53\n*.kstar.com = server:10.1.1.53",
+		"DOMAIN-SUFFIX,kstar.com,DIRECT",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("Surge profile lacks %q:\n%s", want, out)
+		}
+	}
+	plain := renderAppleProfile(formatSurge, appleSampleProxies(), "", 12, nil, appleDNSFor(service.DnsConfig{}))
+	if !strings.Contains(plain, "dns-server = 223.5.5.5, 119.29.29.29, system") || strings.Contains(plain, "[Host]") {
+		t.Fatal("with DNS off the profile must keep its old DNS line")
 	}
 }

@@ -52,17 +52,20 @@ export default function FrontSection() {
       if (!msg?.success) return;
       setRestarting(true);
       const base = (window.X_UI_BASE_PATH || '/').replace(/\/+$/, '');
-      // After the restart the panel answers on 443 only when its port was closed.
-      const next =
-        body.enabled && body.frontOnly
-          ? `https://${window.location.hostname}${base}/panel/protect`
-          : window.location.href;
+      const host = window.location.hostname;
+      // After the restart the panel answers on 443 only when its port was closed, and on its own
+      // port only once the 443 site is off.
+      let next = window.location.href;
+      if (body.enabled && body.frontOnly) next = `https://${host}${base}/panel/protect`;
+      else if (!body.enabled && front && window.location.port === '')
+        next = `https://${host}:${front.panelPort}${base}/panel/protect`;
       window.setTimeout(() => window.location.assign(next), 8000);
     },
   });
   if (!front) return null;
   const base = (window.X_UI_BASE_PATH || '/').replace(/\/+$/, '');
   const panelURL = `https://${window.location.hostname}${base}/`;
+  const on443 = window.location.protocol === 'https:' && ['', '443'].includes(window.location.port);
   return (
     <div style={{ marginBottom: 16 }}>
       <Typography.Text strong>
@@ -125,12 +128,17 @@ export default function FrontSection() {
         <Space wrap>
           <Switch
             checked={front.frontOnly}
-            disabled={!front.enabled || !front.running.listening}
+            disabled={!front.enabled || !front.running.listening || (!front.frontOnly && !on443)}
             loading={save.isPending}
             onChange={(on) => save.mutate({ enabled: true, frontOnly: on })}
           />
           <span>{t('pages.protect.frontOnly', { port: front.panelPort })}</span>
         </Space>
+        {front.running.listening && !front.frontOnly && !on443 && (
+          <Typography.Text type="warning" style={{ fontSize: 12 }}>
+            {t('pages.protect.frontOnlyVia443', { url: panelURL })}
+          </Typography.Text>
+        )}
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
           {t('pages.protect.frontOnlyNote')}
         </Typography.Text>

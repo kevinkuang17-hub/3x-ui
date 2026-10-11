@@ -714,7 +714,10 @@ func FetchClashConfig(raw string) ([]byte, string, error) {
 	}
 	// Subscription services return Clash YAML only to a Clash-like client.
 	req.Header.Set("User-Agent", "clash.meta")
-	resp, err := newRemoteRoutingHTTPClient().Do(req)
+	client := newRemoteRoutingHTTPClient()
+	// A full config can be several MB; give it longer than the routing fetches get.
+	client.Timeout = 30 * time.Second
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, "", err
 	}

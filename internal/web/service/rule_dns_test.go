@@ -84,7 +84,40 @@ rules:
 	if !dns.Enable || dns.Mode != "redir-host" || dns.Company != "kstar.com, gm.kstar.grp = 192.168.8.10" || dns.Foreign[0] != "https://1.1.1.1/dns-query" {
 		t.Fatalf("imported DNS = %+v", dns)
 	}
-	if _, err := svc.ImportClashConfig([]byte("proxies: []"), "x", false); err == nil {
-		t.Fatal("a config without usable rules must say so")
+	again, err := svc.ImportClashConfig([]byte(conf), "office", false)
+	if err != nil || len(again.Sets) != 3 {
+		t.Fatalf("re-import = %+v, %v", again, err)
+	}
+	var count int64
+	database.GetDB().Model(&model.RuleSet{}).Where("category = ?", "office").Count(&count)
+	if count != 3 {
+		t.Fatalf("importing the same source again must refresh its sets, not add %d", count-3)
+	}
+	if _, err := svc.ImportClashConfig([]byte("proxies: []"), "x", false); err == nil || !strings.Contains(err.Error(), "nothing to import") {
+		t.Fatalf("a config without usable rules must say so, got %v", err)
+	}
+	if _, _, ok := importRule("IP-CIDR,10.0.0.0/8,DIRECT,src"); ok {
+		t.Fatal("a source-address rule cannot become a destination rule")
+	}
+}
+
+func TestGroupDnsCanFollowGlobalAgain(t *testing.T) {
+	initTrafficTestDB(t)
+	seedGroupedClient(t, "alice", "corp", 0, 0)
+	if err := database.GetDB().Model(&model.ClientRecord{}).Where("email = ?", "alice").Update("sub_id", "sub-a").Error; err != nil {
+		t.Fatal(err)
+	}
+	svc := &ClientService{}
+	if err := svc.SetGroupDns("corp", &DnsConfig{Enable: true, Company: "corp.com = 10.0.0.53"}); err != nil {
+		t.Fatal(err)
+	}
+	if DnsForSub("sub-a").Company != "corp.com = 10.0.0.53" {
+		t.Fatal("the group's own DNS must apply to its members")
+	}
+	if err := svc.SetGroupDns("corp", nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := DnsForSub("sub-a"); got.Company != "" || got.Enable {
+		t.Fatalf("after clearing, the group follows the global DNS, got %+v", got)
 	}
 }

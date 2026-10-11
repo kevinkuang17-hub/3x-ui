@@ -2748,7 +2748,8 @@
       "frontRestarting": "The panel is restarting; this page reloads in a few seconds.",
       "frontEnable": "Serve the website on port {port}",
       "frontOnly": "Close the panel port {port} to the outside (panel only via port 443)",
-      "frontOnlyNote": "Only on the master. Can be switched on once port 443 is running. If you get locked out, run on the server: x-ui setting -resetPanelAccess && x-ui restart"
+      "frontOnlyNote": "Only on the master. Can be switched on once port 443 is running. If you get locked out, run on the server: x-ui setting -resetPanelAccess && x-ui restart",
+      "frontOnlyVia443": "Open the panel at {url} first and close the panel port from there, so you know that address works."
     }
   },
   "tgbot": {

@@ -14,6 +14,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
+	"github.com/mhsanaei/3x-ui/v3/internal/linehealth"
 	"github.com/mhsanaei/3x-ui/v3/internal/panelaccess"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 )
@@ -228,33 +229,60 @@ type FrontView struct {
 	Running   FrontStatus `json:"running"`
 }
 
-// frontConflict names a local Xray inbound already using port 443, which the front site would collide with.
-func frontConflict() string {
-	var ib model.Inbound
-	err := database.GetDB().Where("port = ? AND enable = ? AND node_id IS NULL", FrontPort, true).First(&ib).Error
-	if err != nil {
-		return ""
+// frontConflict names what already listens on TCP 443 here: a local Xray inbound, the panel or the
+// subscription server. Starting the front site next to it would fail or crash the panel.
+func (s *ProtectService) frontConflict() string {
+	var inbounds []model.Inbound
+	database.GetDB().Where("port = ? AND enable = ? AND node_id IS NULL", FrontPort, true).Find(&inbounds)
+	for i := range inbounds {
+		if linehealth.IsUDP(&inbounds[i]) {
+			continue
+		}
+		if inbounds[i].Remark != "" {
+			return inbounds[i].Remark
+		}
+		return inbounds[i].Tag
 	}
-	if ib.Remark != "" {
-		return ib.Remark
+	if s.panelPort() == FrontPort {
+		return "panel"
 	}
-	return ib.Tag
+	if on, _ := s.settingService.GetSubEnable(); on {
+		if port, _ := s.settingService.GetSubPort(); port == FrontPort {
+			return "subscription"
+		}
+	}
+	return ""
+}
+
+// panelPort is the port the panel listens on, honouring the XUI_PORT override.
+func (s *ProtectService) panelPort() int {
+	if port, configured, err := config.GetPortOverride(); configured && err == nil {
+		return port
+	}
+	port, _ := s.settingService.GetPort()
+	return port
+}
+
+// FrontConflict is checked again at every start, since inbounds and ports can change later.
+func (s *ProtectService) FrontConflict() string {
+	return s.frontConflict()
 }
 
 func (s *ProtectService) Front() *FrontView {
 	enabled, frontOnly := s.FrontSettings()
 	cert, _ := s.settingService.GetCertFile()
 	key, _ := s.settingService.GetKeyFile()
-	port, _ := s.settingService.GetPort()
 	return &FrontView{
-		Enabled: enabled, FrontOnly: frontOnly, HasCert: cert != "" && key != "", Conflict: frontConflict(),
-		Port: FrontPort, PanelPort: port, Running: CurrentFrontStatus(),
+		Enabled: enabled, FrontOnly: frontOnly, HasCert: cert != "" && key != "", Conflict: s.frontConflict(),
+		Port: FrontPort, PanelPort: s.panelPort(), Running: CurrentFrontStatus(),
 	}
 }
 
 // SaveFront stores the front-site switches; they apply when the panel restarts. Closing the panel
 // port is only allowed while the front site is already up, so the admin keeps a way in.
-func (s *ProtectService) SaveFront(enabled, frontOnly bool) error {
+// viaFront says the request itself came in on port 443, which proves 443 is reachable from outside
+// before the panel port is closed.
+func (s *ProtectService) SaveFront(enabled, frontOnly, viaFront bool) error {
 	v := s.Front()
 	if enabled && !v.HasCert {
 		return common.NewError("the panel has no certificate; set one up first (x-ui menu → SSL)")
@@ -264,6 +292,14 @@ func (s *ProtectService) SaveFront(enabled, frontOnly bool) error {
 	}
 	if frontOnly && (!enabled || !v.Running.Listening) {
 		return common.NewErrorf("turn on the website on port %d and restart the panel first, then close the panel port", FrontPort)
+	}
+	if frontOnly && !v.FrontOnly && !viaFront {
+		return common.NewErrorf("open the panel through https://<domain>/<path>/ (port %d) and close the panel port from there, so you know that address works", FrontPort)
+	}
+	if frontOnly {
+		if pool, _ := s.settingService.NodeMtlsClientCAPool(); pool != nil {
+			return common.NewError("this panel is a node managed over mTLS; its master needs the panel port")
+		}
 	}
 	if err := s.settingService.setString("decoyFront", strconv.FormatBool(enabled)); err != nil {
 		return err

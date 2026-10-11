@@ -3,11 +3,13 @@ package service
 import (
 	"fmt"
 	"net"
+	"slices"
 	"sort"
 	"strings"
 
 	yaml "github.com/goccy/go-yaml"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 )
@@ -49,9 +51,11 @@ func importRule(rule string) (line, target string, ok bool) {
 	i := len(parts) - 1
 	flag := ""
 	for i >= 2 && (strings.EqualFold(parts[i], "no-resolve") || strings.EqualFold(parts[i], "src")) {
-		if strings.EqualFold(parts[i], "no-resolve") {
-			flag = ",no-resolve"
+		// A src rule matches the source address, which a library line cannot express.
+		if strings.EqualFold(parts[i], "src") {
+			return "", "", false
 		}
+		flag = ",no-resolve"
 		i--
 	}
 	if i != 2 || parts[2] == "" {
@@ -101,9 +105,15 @@ func (s *RuleSetService) ImportClashConfig(content []byte, label string, importD
 			if start > 0 {
 				name = fmt.Sprintf("%s (%d)", name, start/maxRuleSetLines+1)
 			}
-			if _, err := s.Save(model.RuleSet{
+			set := model.RuleSet{
 				Name: name, Category: label, Rules: strings.Join(lines[start:end], "\n"), DefaultPolicy: importPolicy(target),
-			}); err != nil {
+			}
+			// Importing the same source again refreshes its sets instead of duplicating them.
+			var existing model.RuleSet
+			if database.GetDB().Where("name = ? AND category = ? AND builtin_key = ''", name, label).First(&existing).Error == nil {
+				set.Id = existing.Id
+			}
+			if _, err := s.Save(set); err != nil {
 				return res, err
 			}
 			res.Sets = append(res.Sets, name)
@@ -124,12 +134,25 @@ func (s *RuleSetService) ImportClashConfig(content []byte, label string, importD
 	return res, nil
 }
 
+// stringList keeps the usable servers of a config list; "#group" routing suffixes name groups the
+// panel's profiles may not have, so those entries are dropped.
 func stringList(v any) []string {
 	items, _ := v.([]any)
 	var out []string
 	for _, it := range items {
-		if s, ok := it.(string); ok && validDNSServer(strings.TrimSpace(s)) {
+		if s, ok := it.(string); ok && !strings.Contains(s, "#") && validDNSServer(strings.TrimSpace(s)) {
 			out = append(out, strings.TrimSpace(s))
+		}
+	}
+	return out
+}
+
+// publicServers drops internal resolvers, which only work inside one network and belong in company lines.
+func publicServers(list []string) []string {
+	var out []string
+	for _, s := range list {
+		if !isPrivateServerList([]string{s}) {
+			out = append(out, s)
 		}
 	}
 	return out
@@ -142,10 +165,10 @@ func importedDNS(dns map[string]any, base DnsConfig) DnsConfig {
 	if mode, _ := dns["enhanced-mode"].(string); mode == "fake-ip" || mode == "redir-host" {
 		cfg.Mode = mode
 	}
-	if v := stringList(dns["nameserver"]); len(v) > 0 {
+	if v := publicServers(stringList(dns["nameserver"])); len(v) > 0 {
 		cfg.Domestic = v
 	}
-	if v := stringList(dns["fallback"]); len(v) > 0 {
+	if v := publicServers(stringList(dns["fallback"])); len(v) > 0 {
 		cfg.Foreign = v
 	}
 	policy, _ := dns["nameserver-policy"].(map[string]any)
@@ -183,9 +206,14 @@ func importedDNS(dns map[string]any, base DnsConfig) DnsConfig {
 			lines = append(lines, strings.Join(domains, ", ")+" = "+strings.Join(valid, ", "))
 		}
 	}
-	if len(lines) > 0 {
-		cfg.Company = strings.Join(lines, "\n")
+	// Company lines are added to the existing ones, not swapped for them.
+	existing := ruleLines(cfg.Company)
+	for _, l := range lines {
+		if !slices.Contains(existing, l) {
+			existing = append(existing, l)
+		}
 	}
+	cfg.Company = strings.Join(existing, "\n")
 	return cfg
 }
 

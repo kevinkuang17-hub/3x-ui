@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
@@ -114,7 +115,13 @@ func (a *ProtectController) saveFront(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	if err := a.protect.SaveFront(body.Enabled, body.FrontOnly); err != nil {
+	viaFront := false
+	if addr, ok := c.Request.Context().Value(http.LocalAddrContextKey).(net.Addr); ok {
+		if _, port, err := net.SplitHostPort(addr.String()); err == nil {
+			viaFront = port == strconv.Itoa(service.FrontPort)
+		}
+	}
+	if err := a.protect.SaveFront(body.Enabled, body.FrontOnly, viaFront); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
