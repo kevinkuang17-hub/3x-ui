@@ -27,6 +27,9 @@ var name string
 var (
 	buildCommit string
 	buildDate   string
+	// releaseVersion is the release tag a tagged build was cut from ("3.9.0-k8"); it beats the
+	// embedded upstream version, which the fork's own -kN releases never bump.
+	releaseVersion string
 )
 
 // LogLevel represents the logging level for the application.
@@ -46,6 +49,9 @@ const (
 // version a panel advertises/displays (which adds a "dev+<sha>" label on dev
 // builds), use GetPanelVersion.
 func GetBaseVersion() string {
+	if tag := strings.TrimPrefix(strings.TrimSpace(releaseVersion), "v"); tag != "" {
+		return tag
+	}
 	return strings.TrimSpace(version)
 }
 
