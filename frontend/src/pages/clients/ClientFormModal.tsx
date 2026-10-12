@@ -19,6 +19,7 @@ import {
   Typography,
   message,
 } from 'antd';
+import ClientRoutingField from './ClientRoutingField';
 import {
   DeleteOutlined,
   EyeOutlined,
@@ -1084,6 +1085,16 @@ export default function ClientFormModal({
                           }}
                         />
                       </Form.Item>
+
+                      {isEdit && client?.email ? (
+                        <ClientRoutingField email={client.email} />
+                      ) : (
+                        <Form.Item label={t('pages.clients.routing')}>
+                          <Typography.Text type="secondary">
+                            {t('pages.clients.routingAfterCreate')}
+                          </Typography.Text>
+                        </Form.Item>
+                      )}
 
                       <Form.Item>
                         <Switch

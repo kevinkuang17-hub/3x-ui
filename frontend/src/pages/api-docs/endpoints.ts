@@ -2877,6 +2877,22 @@ export const sections: readonly Section[] = [
         body: '{\n  "enable": true,\n  "mode": "fake-ip",\n  "domestic": ["https://223.5.5.5/dns-query"],\n  "foreign": ["https://1.1.1.1/dns-query"],\n  "foreignViaProxy": true,\n  "company": "corp.com = 10.0.0.53",\n  "companyDirect": true\n}',
       },
       {
+        method: 'GET',
+        path: '/panel/api/ruleSets/client',
+        summary:
+          'One client’s routing: its own rules and DNS if set, its group, and source (client, group or global) — whose rules its subscription uses now.',
+        params: [{ name: 'email', in: 'query', type: 'string', desc: 'Client email.' }],
+        responseSchema: 'ClientRoutingView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/ruleSets/client',
+        summary:
+          'Give one client its own routing ahead of its group’s and the global one. own false follows the group again; dns null follows the group’s or global DNS.',
+        body: '{\n  "email": "alice",\n  "own": true,\n  "clashRules": "",\n  "ruleSets": [{ "id": 3, "policy": "DIRECT" }],\n  "extraRules": "DOMAIN-SUFFIX,corp.example,DIRECT",\n  "dns": null\n}',
+        responseSchema: 'ClientRoutingView',
+      },
+      {
         method: 'POST',
         path: '/panel/api/ruleSets/import',
         summary:

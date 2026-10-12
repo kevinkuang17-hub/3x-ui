@@ -1048,7 +1048,20 @@
       "renewsUsed": "Perpanjangan terpakai",
       "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto.",
       "renewIntervalDesc": "Setelah kedaluwarsa, menambahkan jumlah hari yang ditentukan (24 jam per hari) ke batas waktu sebelumnya dan mereset trafik klien. Nonaktifkan reset trafik terpisah kecuali Anda menginginkan reset tambahan.",
-      "renewWeeklyDesc": "Perpanjangan kalender dilakukan pada tengah malam menurut zona waktu panel dan juga mereset trafik klien. Nonaktifkan reset trafik terpisah kecuali Anda menginginkan reset tambahan."
+      "renewWeeklyDesc": "Perpanjangan kalender dilakukan pada tengah malam menurut zona waktu panel dan juga mereset trafik klien. Nonaktifkan reset trafik terpisah kecuali Anda menginginkan reset tambahan.",
+      "routing": "Routing rules",
+      "routingEdit": "Set routing",
+      "routingTitle": "Routing for {email}",
+      "routingDesc": "Decides which sites this client's subscription sends direct, through the proxy or blocks. Order: the client's own rules, else its group's, else the global ones (Rule library page).",
+      "routingOwn": "This client's own rules",
+      "routingFollowGroup": "Follow group {group}",
+      "routingFollowGlobal": "Follow the global rules",
+      "routingDnsFollow": "Follow the group or global DNS",
+      "routingDnsOwn": "This client's own DNS (e.g. its company DNS)",
+      "routingSourceClient": "Own rules",
+      "routingSourceGroup": "Group {group}'s rules",
+      "routingSourceGlobal": "Global rules",
+      "routingAfterCreate": "Follows the group or global rules; after saving, this client can get its own"
     },
     "groups": {
       "name": "Nama",

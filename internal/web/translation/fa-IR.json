@@ -1048,7 +1048,20 @@
       "renewsUsed": "تمدیدهای استفاده‌شده",
       "bulkAdTagHint": "یک برچسب هگز ۳۲ کاراکتری برای تنظیم وارد کنید، یا 'none' برای پاک کردن در MTProto.",
       "renewIntervalDesc": "پس از انقضا، تعداد روزهای تعیین‌شده (هر روز ۲۴ ساعت) به مهلت قبلی اضافه و ترافیک کاربر بازنشانی می‌شود. بازنشانی مستقل ترافیک را غیرفعال نگه دارید، مگر اینکه بازنشانی دیگری می‌خواهید.",
-      "renewWeeklyDesc": "تمدید تقویمی در نیمه‌شب به وقت پنل انجام می‌شود و ترافیک کاربر را نیز بازنشانی می‌کند. بازنشانی مستقل ترافیک را غیرفعال نگه دارید، مگر اینکه بازنشانی دیگری می‌خواهید."
+      "renewWeeklyDesc": "تمدید تقویمی در نیمه‌شب به وقت پنل انجام می‌شود و ترافیک کاربر را نیز بازنشانی می‌کند. بازنشانی مستقل ترافیک را غیرفعال نگه دارید، مگر اینکه بازنشانی دیگری می‌خواهید.",
+      "routing": "Routing rules",
+      "routingEdit": "Set routing",
+      "routingTitle": "Routing for {email}",
+      "routingDesc": "Decides which sites this client's subscription sends direct, through the proxy or blocks. Order: the client's own rules, else its group's, else the global ones (Rule library page).",
+      "routingOwn": "This client's own rules",
+      "routingFollowGroup": "Follow group {group}",
+      "routingFollowGlobal": "Follow the global rules",
+      "routingDnsFollow": "Follow the group or global DNS",
+      "routingDnsOwn": "This client's own DNS (e.g. its company DNS)",
+      "routingSourceClient": "Own rules",
+      "routingSourceGroup": "Group {group}'s rules",
+      "routingSourceGlobal": "Global rules",
+      "routingAfterCreate": "Follows the group or global rules; after saving, this client can get its own"
     },
     "groups": {
       "name": "نام",

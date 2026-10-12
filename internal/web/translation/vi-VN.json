@@ -1048,7 +1048,20 @@
       "renewsUsed": "Số lần gia hạn đã dùng",
       "bulkAdTagHint": "Nhập thẻ hex 32 ký tự để đặt hoặc 'none' để xóa kênh tài trợ trên MTProto.",
       "renewIntervalDesc": "Sau khi hết hạn, cộng số ngày đã đặt (mỗi ngày 24 giờ) vào thời điểm hết hạn trước đó và đặt lại lưu lượng của khách hàng. Tắt việc đặt lại lưu lượng độc lập trừ khi bạn muốn đặt lại thêm.",
-      "renewWeeklyDesc": "Gia hạn theo lịch diễn ra lúc nửa đêm theo múi giờ của bảng điều khiển và cũng đặt lại lưu lượng của khách hàng. Tắt việc đặt lại lưu lượng độc lập trừ khi bạn muốn đặt lại thêm."
+      "renewWeeklyDesc": "Gia hạn theo lịch diễn ra lúc nửa đêm theo múi giờ của bảng điều khiển và cũng đặt lại lưu lượng của khách hàng. Tắt việc đặt lại lưu lượng độc lập trừ khi bạn muốn đặt lại thêm.",
+      "routing": "Routing rules",
+      "routingEdit": "Set routing",
+      "routingTitle": "Routing for {email}",
+      "routingDesc": "Decides which sites this client's subscription sends direct, through the proxy or blocks. Order: the client's own rules, else its group's, else the global ones (Rule library page).",
+      "routingOwn": "This client's own rules",
+      "routingFollowGroup": "Follow group {group}",
+      "routingFollowGlobal": "Follow the global rules",
+      "routingDnsFollow": "Follow the group or global DNS",
+      "routingDnsOwn": "This client's own DNS (e.g. its company DNS)",
+      "routingSourceClient": "Own rules",
+      "routingSourceGroup": "Group {group}'s rules",
+      "routingSourceGlobal": "Global rules",
+      "routingAfterCreate": "Follows the group or global rules; after saving, this client can get its own"
     },
     "groups": {
       "name": "Tên",

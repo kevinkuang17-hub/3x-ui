@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 // RuleSetController serves the routing rule library and the global rule picks under /panel/api/ruleSets.
 type RuleSetController struct {
 	ruleSets service.RuleSetService
+	clients  service.ClientService
 }
 
 func NewRuleSetController(g *gin.RouterGroup) *RuleSetController {
@@ -29,6 +31,8 @@ func NewRuleSetController(g *gin.RouterGroup) *RuleSetController {
 	g.GET("/dns", a.dns)
 	g.POST("/dns", a.saveDns)
 	g.POST("/import", a.importConfig)
+	g.GET("/client", a.clientRouting)
+	g.POST("/client", a.saveClientRouting)
 	return a
 }
 
@@ -168,4 +172,47 @@ func (a *RuleSetController) importConfig(c *gin.Context) {
 	}
 	res, err := a.ruleSets.ImportClashConfig(content, label, body.ImportDns)
 	jsonMsgObj(c, I18nWeb(c, "pages.ruleSets.imported"), res, err)
+}
+
+func (a *RuleSetController) clientRouting(c *gin.Context) {
+	v, err := a.clients.GetClientRouting(c.Query("email"))
+	jsonObj(c, v, err)
+}
+
+type clientRoutingBody struct {
+	Email string `json:"email"`
+	// Own false makes the client follow its group's (or the global) rules again.
+	Own        bool                  `json:"own"`
+	ClashRules string                `json:"clashRules"`
+	RuleSets   []service.RuleSetPick `json:"ruleSets"`
+	ExtraRules string                `json:"extraRules"`
+	// Dns null or omitted follows the group's or global DNS; an object sets the client's own.
+	Dns json.RawMessage `json:"dns"`
+}
+
+func (a *RuleSetController) saveClientRouting(c *gin.Context) {
+	var body clientRoutingBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	var choice *service.RoutingChoice
+	if body.Own {
+		choice = &service.RoutingChoice{RuleSets: body.RuleSets, ExtraRules: body.ExtraRules}
+	}
+	var dns *service.DnsConfig
+	if len(body.Dns) > 0 && string(body.Dns) != "null" {
+		dns = &service.DnsConfig{}
+		if err := json.Unmarshal(body.Dns, dns); err != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+			return
+		}
+	}
+	if err := a.clients.SetClientRouting(body.Email, body.ClashRules, choice, dns); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	v, err := a.clients.GetClientRouting(body.Email)
+	jsonMsgObj(c, I18nWeb(c, "pages.ruleSets.saved"), v, err)
+	notifyClientsChanged()
 }

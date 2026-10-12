@@ -19,3 +19,18 @@ type RuleSet struct {
 }
 
 func (RuleSet) TableName() string { return "rule_sets" }
+
+// ClientRouting is one subscription's own routing, ahead of its group's and the global one. It is
+// keyed by subId because that is what a subscription request carries.
+type ClientRouting struct {
+	Id              int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	SubId           string `json:"subId" gorm:"column:sub_id;uniqueIndex;not null"`
+	ClashRules      string `json:"clashRules" gorm:"column:clash_rules;type:text;default:''"`
+	ClashRuleSets   string `json:"clashRuleSets" gorm:"column:clash_rule_sets;type:text;default:''"`
+	ClashExtraRules string `json:"clashExtraRules" gorm:"column:clash_extra_rules;type:text;default:''"`
+	// ClashDns is the subscription's own DNS (JSON); empty follows the group's or the global DNS.
+	ClashDns  string `json:"clashDns" gorm:"column:clash_dns;type:text;default:''"`
+	UpdatedAt int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+}
+
+func (ClientRouting) TableName() string { return "client_routings" }

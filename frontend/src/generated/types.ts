@@ -535,6 +535,18 @@ export interface ClientReverse {
   tag: string;
 }
 
+export interface ClientRoutingView {
+  clashRules: string;
+  dns?: DnsConfig | null;
+  email: string;
+  extraRules: string;
+  group: string;
+  own: boolean;
+  ownDns: boolean;
+  ruleSets: RuleSetPick[];
+  source: string;
+}
+
 export interface ClientSlim {
   comment?: string;
   createdAt: number;
@@ -586,6 +598,17 @@ export interface ClientsSummary {
   online: string[];
   onlineCount: number;
   total: number;
+}
+
+export interface DnsConfig {
+  company: string;
+  companyDirect: boolean;
+  domestic: string[];
+  enable: boolean;
+  foreign: string[];
+  foreignViaProxy: boolean;
+  ipv6: boolean;
+  mode: string;
 }
 
 export interface FallbackParentInfo {
@@ -1013,6 +1036,11 @@ export interface RealityScanResult {
   tls13: boolean;
   tlsVersion: string;
   x25519: boolean;
+}
+
+export interface RuleSetPick {
+  id: number;
+  policy: string;
 }
 
 export interface ServerSettings {
