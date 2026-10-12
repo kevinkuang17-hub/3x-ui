@@ -5,7 +5,7 @@ on:
     branches: ["dev/**"]
 env:
   PKGS: "./internal/web/service/ ./internal/web/job/ ./internal/sub/ ./internal/web/controller/"
-  RUN: "ConfigHistory|NodeCost|Plan|NodeJoin|NodeDns|Apple|Render|Probe|LineHealth|App|PanelUsers|OperatorAllowed|Passkey"
+  RUN: "Recommend|CheckCertFile|RouteRegistry|OpenAPI"
 jobs:
   test:
     runs-on: ubuntu-latest

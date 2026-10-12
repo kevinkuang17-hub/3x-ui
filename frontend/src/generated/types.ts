@@ -791,6 +791,21 @@ export interface InboundOption {
   wgPublicKey?: string;
 }
 
+export interface InboundRecommendation {
+  certFile: string;
+  certNotAfter: number;
+  certState: string;
+  domain: string;
+  domainIps: string[];
+  keyFile: string;
+  nodeId?: number | null;
+  pointsHere: boolean;
+  port: number;
+  preferredPortBusy: boolean;
+  recommended: string;
+  serverIps: string[];
+}
+
 export interface InboundTrafficSummary {
   down: number;
   enable: boolean;

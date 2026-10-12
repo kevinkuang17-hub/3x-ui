@@ -878,6 +878,24 @@ export const EXAMPLES: Record<string, unknown> = {
     "wgMtu": 0,
     "wgPublicKey": ""
   },
+  "InboundRecommendation": {
+    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+    "certNotAfter": 1767225600000,
+    "certState": "ok",
+    "domain": "hk.example.com",
+    "domainIps": [
+      ""
+    ],
+    "keyFile": "/root/cert/hk.example.com/privkey.pem",
+    "nodeId": 3,
+    "pointsHere": true,
+    "port": 443,
+    "preferredPortBusy": false,
+    "recommended": "tls",
+    "serverIps": [
+      ""
+    ]
+  },
   "InboundTrafficSummary": {
     "down": 2097152,
     "enable": true,

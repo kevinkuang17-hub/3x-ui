@@ -1,0 +1,27 @@
+.quick-inbound {
+  width: 100%;
+}
+
+.quick-inbound-row,
+.quick-inbound-row .ant-select {
+  width: 100%;
+}
+
+.quick-inbound-kinds {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.quick-inbound-kind {
+  align-items: flex-start;
+  margin-inline-end: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(128, 128, 128, 0.25));
+  border-radius: 8px;
+}
+
+.quick-inbound-kind.ant-radio-wrapper-checked {
+  border-color: var(--ant-color-primary, #1677ff);
+}

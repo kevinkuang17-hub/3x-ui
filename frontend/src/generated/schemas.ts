@@ -3418,6 +3418,80 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "InboundRecommendation": {
+    "description": "InboundRecommendation is what the one-click inbound dialog knows about a server: whether a\ndomain with a working certificate points at it (VLESS TLS) or not (VLESS Reality), and a free port.",
+    "properties": {
+      "certFile": {
+        "example": "/root/cert/hk.example.com/fullchain.pem",
+        "type": "string"
+      },
+      "certNotAfter": {
+        "description": "CertNotAfter is the certificate expiry in Unix milliseconds, 0 when unknown.",
+        "example": 1767225600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "certState": {
+        "example": "ok",
+        "type": "string"
+      },
+      "domain": {
+        "example": "hk.example.com",
+        "type": "string"
+      },
+      "domainIps": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "keyFile": {
+        "example": "/root/cert/hk.example.com/privkey.pem",
+        "type": "string"
+      },
+      "nodeId": {
+        "example": 3,
+        "nullable": true,
+        "type": "integer"
+      },
+      "pointsHere": {
+        "example": true,
+        "type": "boolean"
+      },
+      "port": {
+        "example": 443,
+        "type": "integer"
+      },
+      "preferredPortBusy": {
+        "example": false,
+        "type": "boolean"
+      },
+      "recommended": {
+        "example": "tls",
+        "type": "string"
+      },
+      "serverIps": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "certFile",
+      "certNotAfter",
+      "certState",
+      "domain",
+      "domainIps",
+      "keyFile",
+      "pointsHere",
+      "port",
+      "preferredPortBusy",
+      "recommended",
+      "serverIps"
+    ],
+    "type": "object"
+  },
   "InboundTrafficSummary": {
     "properties": {
       "down": {

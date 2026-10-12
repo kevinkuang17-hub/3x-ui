@@ -169,6 +169,8 @@ interface InboundFormModalProps {
   onSaved: () => void;
   mode: 'add' | 'edit';
   dbInbound: DBInbound | null;
+  // Add-mode starting values, e.g. from the one-click dialog; null for a blank inbound.
+  preset?: InboundFormValues | null;
   dbInbounds: DBInbound[];
   availableNodes?: NodeRecord[];
   availableNodesFetched?: boolean;
@@ -225,6 +227,7 @@ export default function InboundFormModal({
   onSaved,
   mode,
   dbInbound,
+  preset = null,
   dbInbounds,
   availableNodes,
   availableNodesFetched = true,
@@ -445,7 +448,7 @@ export default function InboundFormModal({
     const initial =
       mode === 'edit' && dbInbound
         ? withoutClients(rawInboundToFormValues(dbInbound))
-        : buildAddModeValues();
+        : (preset ?? buildAddModeValues());
     methods.reset(initial);
     setScanResult(null);
     setActiveTab('basic');

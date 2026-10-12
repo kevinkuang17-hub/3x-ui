@@ -838,6 +838,22 @@ export const InboundOptionSchema = z.object({
 });
 export type InboundOption = z.infer<typeof InboundOptionSchema>;
 
+export const InboundRecommendationSchema = z.object({
+  certFile: z.string(),
+  certNotAfter: z.number().int(),
+  certState: z.string(),
+  domain: z.string(),
+  domainIps: z.array(z.string()),
+  keyFile: z.string(),
+  nodeId: z.number().int().nullable().optional(),
+  pointsHere: z.boolean(),
+  port: z.number().int(),
+  preferredPortBusy: z.boolean(),
+  recommended: z.string(),
+  serverIps: z.array(z.string()),
+});
+export type InboundRecommendation = z.infer<typeof InboundRecommendationSchema>;
+
 export const InboundTrafficSummarySchema = z.object({
   down: z.number().int(),
   enable: z.boolean(),
