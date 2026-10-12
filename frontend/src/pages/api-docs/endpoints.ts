@@ -302,7 +302,7 @@ export const sections: readonly Section[] = [
         method: 'GET',
         path: '/panel/api/inbounds/recommend',
         summary:
-          'Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, a free port (443 first, then 8443, 2083, 2087, 2096) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).',
+          'Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, free TCP and UDP ports (443 first, then the other Cloudflare HTTPS ports, then random ones) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).',
         params: [
           {
             name: 'nodeId',

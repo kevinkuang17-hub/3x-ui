@@ -3458,14 +3458,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": true,
         "type": "boolean"
       },
-      "port": {
-        "example": 443,
-        "type": "integer"
-      },
-      "preferredPortBusy": {
-        "example": false,
-        "type": "boolean"
-      },
       "recommended": {
         "example": "tls",
         "type": "string"
@@ -3473,6 +3465,19 @@ export const SCHEMAS: Record<string, unknown> = {
       "serverIps": {
         "items": {
           "type": "string"
+        },
+        "type": "array"
+      },
+      "tcpPorts": {
+        "description": "TcpPorts and UdpPorts are free ports, preferred ones (443 first) before random ones.",
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "udpPorts": {
+        "items": {
+          "type": "integer"
         },
         "type": "array"
       }
@@ -3485,10 +3490,10 @@ export const SCHEMAS: Record<string, unknown> = {
       "domainIps",
       "keyFile",
       "pointsHere",
-      "port",
-      "preferredPortBusy",
       "recommended",
-      "serverIps"
+      "serverIps",
+      "tcpPorts",
+      "udpPorts"
     ],
     "type": "object"
   },

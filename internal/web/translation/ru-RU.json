@@ -738,13 +738,7 @@
         "certMismatch": "Does not cover {domain}",
         "certUnverified": "Set on the node, could not be checked",
         "port": "Port",
-        "portBusy": "443 is taken, using {port}",
-        "tlsTitle": "VLESS + TLS + Vision",
-        "tlsDesc": "Uses your domain and certificate. Real TLS with the widest client support; the domain must point straight at this server.",
-        "realityTitle": "VLESS + Reality + Vision",
-        "realityDesc": "No domain needed. Borrows the TLS handshake of a well-known site, which makes it hard to detect.",
         "recommended": "Recommended",
-        "tlsUnavailable": "Needs a domain with a valid certificate",
         "remark": "Remark",
         "remarkPlaceholder": "e.g. US A",
         "target": "Reality target",
@@ -755,9 +749,49 @@
         "clientsNone": "Don't add clients",
         "clientsAll": "All clients ({count})",
         "clientsGroup": "Group {name} ({count})",
-        "create": "Create",
+        "create": "Create ({count})",
         "advanced": "Open in full form",
-        "createdWithClients": "Inbound created and {count} clients added"
+        "baseName": "Name prefix",
+        "exists": "Exists: {remark} (port {port})",
+        "needsCert": "Needs a domain with a valid certificate",
+        "needsDirectDns": "The domain does not point straight at this server yet; clients cannot connect until it does",
+        "noCdnDetected": "No CDN detected on the domain; this also works directly, and through Cloudflare once proxying is on",
+        "selectOne": "Pick at least one protocol",
+        "remarkTaken": "Remark already exists: {remark}",
+        "noPort": "No free port left for a selected protocol; enter one",
+        "portTaken": "Port {port} is used twice",
+        "createdSummary": "Created {count} inbounds and added {clients} clients",
+        "createFailed": "Not created: {list}",
+        "presets": {
+          "tls-vision": {
+            "title": "VLESS + TLS + Vision",
+            "desc": "Your domain and certificate, real TLS. Fast, widest client support. The domain must point straight at this server."
+          },
+          "reality-vision": {
+            "title": "VLESS + Reality + Vision",
+            "desc": "No domain needed. Borrows the TLS handshake of a well-known site, hard to detect. The everyday default."
+          },
+          "xhttp-reality": {
+            "title": "VLESS + XHTTP + Reality",
+            "desc": "Reality over HTTP/2 streams. Survives stricter networks; needs a recent Xray or Mihomo client."
+          },
+          "ws-cdn": {
+            "title": "VLESS + WS + TLS (CDN)",
+            "desc": "Goes through Cloudflare when the domain is proxied, which hides the server IP and rescues a blocked IP."
+          },
+          "trojan-tls": {
+            "title": "Trojan + TLS",
+            "desc": "For older clients and routers that lack VLESS. Uses your domain and certificate."
+          },
+          "hysteria2": {
+            "title": "Hysteria2",
+            "desc": "UDP (QUIC). Very fast on lossy or long-distance links; some networks throttle UDP."
+          },
+          "ss2022": {
+            "title": "Shadowsocks 2022",
+            "desc": "Simple and supported everywhere, but easy to spot. Keep it as a backup for routers and old clients."
+          }
+        }
       }
     },
     "clients": {

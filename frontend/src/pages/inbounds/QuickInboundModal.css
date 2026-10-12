@@ -7,21 +7,50 @@
   width: 100%;
 }
 
-.quick-inbound-kinds {
+.quick-inbound-server {
+  min-width: 180px;
+}
+
+.quick-inbound-presets {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
 }
 
-.quick-inbound-kind {
-  align-items: flex-start;
-  margin-inline-end: 0;
+.quick-inbound-preset {
   padding: 10px 12px;
   border: 1px solid var(--ant-color-border-secondary, rgba(128, 128, 128, 0.25));
   border-radius: 8px;
 }
 
-.quick-inbound-kind.ant-radio-wrapper-checked {
+.quick-inbound-preset.is-checked {
   border-color: var(--ant-color-primary, #1677ff);
+}
+
+.quick-inbound-desc {
+  display: block;
+  margin: 4px 0 0 24px !important;
+}
+
+.quick-inbound-fields {
+  margin: 8px 0 0 24px;
+}
+
+.quick-inbound-fields .ant-input-affix-wrapper {
+  width: 220px;
+}
+
+.quick-inbound-fields .ant-input-number {
+  width: 130px;
+}
+
+@media (max-width: 576px) {
+  .quick-inbound-desc,
+  .quick-inbound-fields {
+    margin-left: 0 !important;
+  }
+
+  .quick-inbound-fields .ant-input-affix-wrapper {
+    width: 100%;
+  }
 }
