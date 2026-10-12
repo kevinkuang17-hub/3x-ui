@@ -889,11 +889,15 @@ export const EXAMPLES: Record<string, unknown> = {
     "keyFile": "/root/cert/hk.example.com/privkey.pem",
     "nodeId": 3,
     "pointsHere": true,
-    "port": 443,
-    "preferredPortBusy": false,
     "recommended": "tls",
     "serverIps": [
       ""
+    ],
+    "tcpPorts": [
+      0
+    ],
+    "udpPorts": [
+      0
     ]
   },
   "InboundTrafficSummary": {

@@ -847,10 +847,10 @@ export const InboundRecommendationSchema = z.object({
   keyFile: z.string(),
   nodeId: z.number().int().nullable().optional(),
   pointsHere: z.boolean(),
-  port: z.number().int(),
-  preferredPortBusy: z.boolean(),
   recommended: z.string(),
   serverIps: z.array(z.string()),
+  tcpPorts: z.array(z.number().int()),
+  udpPorts: z.array(z.number().int()),
 });
 export type InboundRecommendation = z.infer<typeof InboundRecommendationSchema>;
 

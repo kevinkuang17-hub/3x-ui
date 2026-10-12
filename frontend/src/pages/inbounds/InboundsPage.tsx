@@ -910,6 +910,7 @@ export default function InboundsPage() {
           <QuickInboundModal
             open={quickOpen}
             nodes={nodesList || []}
+            inbounds={dbInbounds}
             onClose={() => setQuickOpen(false)}
             onCreated={refresh}
             onAdvanced={openPresetForm}

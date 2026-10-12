@@ -738,13 +738,7 @@
         "certMismatch": "憑證不包含 {domain}",
         "certUnverified": "節點上已設定憑證，無法遠端驗證",
         "port": "連接埠",
-        "portBusy": "443 已被佔用，改用 {port}",
-        "tlsTitle": "VLESS + TLS + Vision",
-        "tlsDesc": "使用你的網域和憑證，真實 TLS，用戶端相容性最好；網域需要直接解析到這台伺服器。",
-        "realityTitle": "VLESS + Reality + Vision",
-        "realityDesc": "不需要網域，借用知名網站的 TLS 握手，難以被識別。",
         "recommended": "推薦",
-        "tlsUnavailable": "需要有效憑證的網域",
         "remark": "備註",
         "remarkPlaceholder": "例如 US A",
         "target": "Reality 偽裝目標",
@@ -755,9 +749,49 @@
         "clientsNone": "不新增用戶端",
         "clientsAll": "全部用戶端（{count} 個）",
         "clientsGroup": "分組 {name}（{count} 個）",
-        "create": "一鍵建立",
+        "create": "一鍵建立（{count} 個）",
         "advanced": "在完整表單中調整",
-        "createdWithClients": "入站已建立，並新增了 {count} 個用戶端"
+        "baseName": "名稱前綴",
+        "exists": "已存在：{remark}（連接埠 {port}）",
+        "needsCert": "需要有效憑證的網域",
+        "needsDirectDns": "網域還沒有直接解析到這台伺服器，解析好之前用戶端連不上",
+        "noCdnDetected": "未偵測到網域開啟 CDN；也可以直連使用，開啟 Cloudflare 代理後走 CDN",
+        "selectOne": "請至少選擇一個協定",
+        "remarkTaken": "備註已存在：{remark}",
+        "noPort": "有協定沒有可用連接埠，請手動填寫",
+        "portTaken": "連接埠 {port} 重複使用",
+        "createdSummary": "已建立 {count} 個入站，新增了 {clients} 個用戶端",
+        "createFailed": "以下未建立：{list}",
+        "presets": {
+          "tls-vision": {
+            "title": "VLESS + TLS + Vision",
+            "desc": "用你的網域和憑證，真實 TLS，速度快、用戶端相容最好；網域需直接解析到本伺服器。"
+          },
+          "reality-vision": {
+            "title": "VLESS + Reality + Vision",
+            "desc": "不需要網域，借用知名網站的 TLS 握手，難以識別，日常首選。"
+          },
+          "xhttp-reality": {
+            "title": "VLESS + XHTTP + Reality",
+            "desc": "Reality 走 HTTP/2 串流，更抗嚴格網路；需要較新的 Xray 或 Mihomo 用戶端。"
+          },
+          "ws-cdn": {
+            "title": "VLESS + WS + TLS（CDN）",
+            "desc": "網域開啟 Cloudflare 代理時走 CDN，可隱藏伺服器 IP，IP 被封時也能救急。"
+          },
+          "trojan-tls": {
+            "title": "Trojan + TLS",
+            "desc": "給不支援 VLESS 的舊用戶端和路由器用，使用你的網域和憑證。"
+          },
+          "hysteria2": {
+            "title": "Hysteria2",
+            "desc": "UDP（QUIC），掉包多、距離遠時速度很快；部分網路會限制 UDP。"
+          },
+          "ss2022": {
+            "title": "Shadowsocks 2022",
+            "desc": "簡單、到處都支援，但容易被識別，適合作為路由器和舊用戶端的備用。"
+          }
+        }
       }
     },
     "clients": {

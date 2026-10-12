@@ -738,13 +738,7 @@
         "certMismatch": "证书不包含 {domain}",
         "certUnverified": "节点上已设置证书，无法远程验证",
         "port": "端口",
-        "portBusy": "443 已被占用，改用 {port}",
-        "tlsTitle": "VLESS + TLS + Vision",
-        "tlsDesc": "使用你的域名和证书，真实 TLS，客户端兼容性最好；域名需要直接解析到这台服务器。",
-        "realityTitle": "VLESS + Reality + Vision",
-        "realityDesc": "不需要域名，借用知名网站的 TLS 握手，难以被识别。",
         "recommended": "推荐",
-        "tlsUnavailable": "需要有效证书的域名",
         "remark": "备注",
         "remarkPlaceholder": "例如 US A",
         "target": "Reality 伪装目标",
@@ -755,9 +749,49 @@
         "clientsNone": "不添加客户端",
         "clientsAll": "全部客户端（{count} 个）",
         "clientsGroup": "分组 {name}（{count} 个）",
-        "create": "一键创建",
+        "create": "一键创建（{count} 个）",
         "advanced": "在完整表单中调整",
-        "createdWithClients": "入站已创建，并添加了 {count} 个客户端"
+        "baseName": "名称前缀",
+        "exists": "已存在：{remark}（端口 {port}）",
+        "needsCert": "需要有效证书的域名",
+        "needsDirectDns": "域名还没有直接解析到这台服务器，解析好之前客户端连不上",
+        "noCdnDetected": "未检测到域名开启 CDN；也可以直连使用，开启 Cloudflare 代理后走 CDN",
+        "selectOne": "请至少选择一个协议",
+        "remarkTaken": "备注已存在：{remark}",
+        "noPort": "有协议没有可用端口，请手动填写",
+        "portTaken": "端口 {port} 重复使用",
+        "createdSummary": "已创建 {count} 个入站，添加了 {clients} 个客户端",
+        "createFailed": "以下未创建：{list}",
+        "presets": {
+          "tls-vision": {
+            "title": "VLESS + TLS + Vision",
+            "desc": "用你的域名和证书，真实 TLS，速度快、客户端兼容最好；域名需直接解析到本服务器。"
+          },
+          "reality-vision": {
+            "title": "VLESS + Reality + Vision",
+            "desc": "不需要域名，借用知名网站的 TLS 握手，难以识别，日常首选。"
+          },
+          "xhttp-reality": {
+            "title": "VLESS + XHTTP + Reality",
+            "desc": "Reality 走 HTTP/2 流，更抗严格网络；需要较新的 Xray 或 Mihomo 客户端。"
+          },
+          "ws-cdn": {
+            "title": "VLESS + WS + TLS（CDN）",
+            "desc": "域名开启 Cloudflare 代理时走 CDN，可隐藏服务器 IP，IP 被封时也能救急。"
+          },
+          "trojan-tls": {
+            "title": "Trojan + TLS",
+            "desc": "给不支持 VLESS 的老客户端和路由器用，使用你的域名和证书。"
+          },
+          "hysteria2": {
+            "title": "Hysteria2",
+            "desc": "UDP（QUIC），丢包多、距离远时速度很快；部分网络会限制 UDP。"
+          },
+          "ss2022": {
+            "title": "Shadowsocks 2022",
+            "desc": "简单、到处都支持，但容易被识别，适合作为路由器和老客户端的备用。"
+          }
+        }
       }
     },
     "clients": {

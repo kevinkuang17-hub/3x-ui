@@ -43,10 +43,11 @@ type InboundRecommendation struct {
 	KeyFile    string   `json:"keyFile" example:"/root/cert/hk.example.com/privkey.pem"`
 	CertState  string   `json:"certState" example:"ok"`
 	// CertNotAfter is the certificate expiry in Unix milliseconds, 0 when unknown.
-	CertNotAfter      int64  `json:"certNotAfter" example:"1767225600000"`
-	Port              int    `json:"port" example:"443"`
-	PreferredPortBusy bool   `json:"preferredPortBusy" example:"false"`
-	Recommended       string `json:"recommended" example:"tls"`
+	CertNotAfter int64 `json:"certNotAfter" example:"1767225600000"`
+	// TcpPorts and UdpPorts are free ports, preferred ones (443 first) before random ones.
+	TcpPorts    []int  `json:"tcpPorts"`
+	UdpPorts    []int  `json:"udpPorts"`
+	Recommended string `json:"recommended" example:"tls"`
 }
 
 type InboundRecommendService struct {
@@ -55,14 +56,27 @@ type InboundRecommendService struct {
 	inbounds InboundService
 }
 
-// recommendPorts are tried in order: 443 first, then ports Cloudflare also proxies.
-var recommendPorts = []int{443, 8443, 2083, 2087, 2096}
+// recommendPorts are tried in order: 443 first, then the other HTTPS ports Cloudflare proxies.
+var recommendPorts = []int{443, 8443, 2053, 2083, 2087, 2096}
+
+const (
+	recommendTCPPorts = 8
+	recommendUDPPorts = 3
+)
 
 var (
 	recommendLookupHost = net.DefaultResolver.LookupHost
 	recommendPublicIPv4 = cachedPublicIPv4
 	// recommendLocalPortFree binds the port briefly: the panel, nginx or a decoy may hold it.
-	recommendLocalPortFree = func(port int) bool {
+	recommendLocalPortFree = func(port int, udp bool) bool {
+		if udp {
+			c, err := net.ListenPacket("udp", ":"+strconv.Itoa(port))
+			if err != nil {
+				return false
+			}
+			_ = c.Close()
+			return true
+		}
 		l, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 		if err != nil {
 			return false
@@ -226,7 +240,8 @@ func (s *InboundRecommendService) recommendLocal(ctx context.Context) *InboundRe
 		rec.DomainIPs, _ = recommendLookupHost(ctx, rec.Domain)
 		rec.PointsHere = overlaps(rec.DomainIPs, rec.ServerIPs)
 	}
-	rec.Port, rec.PreferredPortBusy = s.pickPort(nil, func(port int) bool { return recommendLocalPortFree(port) })
+	rec.TcpPorts = s.freePorts(nil, false, recommendTCPPorts, func(p int) bool { return recommendLocalPortFree(p, false) })
+	rec.UdpPorts = s.freePorts(nil, true, recommendUDPPorts, func(p int) bool { return recommendLocalPortFree(p, true) })
 	return rec
 }
 
@@ -260,33 +275,60 @@ func (s *InboundRecommendService) recommendNode(ctx context.Context, nodeID int)
 		rec.DomainIPs, _ = recommendLookupHost(ctx, rec.Domain)
 		rec.PointsHere = strings.EqualFold(rec.Domain, n.Address) || overlaps(rec.DomainIPs, rec.ServerIPs)
 	}
-	rec.Port, rec.PreferredPortBusy = s.pickPort(&nodeID, func(port int) bool { return !recommendRemotePortOpen(n.Address, port) })
+	open := remoteOpenPorts(n.Address)
+	rec.TcpPorts = s.freePorts(&nodeID, false, recommendTCPPorts, func(p int) bool { return !open[p] })
+	// UDP gives no answer to probe, so on a node only the panel's own inbounds can rule a port out.
+	rec.UdpPorts = s.freePorts(&nodeID, true, recommendUDPPorts, func(int) bool { return true })
 	return rec, nil
 }
 
-// pickPort returns the first preferred port no inbound and no other program holds, else a random one.
-func (s *InboundRecommendService) pickPort(nodeID *int, systemFree func(int) bool) (int, bool) {
-	free := func(port int) bool {
-		probe := &model.Inbound{
-			Port: port, Protocol: model.VLESS, NodeID: nodeID,
-			Settings: `{"clients":[]}`, StreamSettings: `{"network":"tcp","security":"tls"}`,
+// remoteOpenPorts dials the preferred ports at once, so filtered ports cost one timeout, not six.
+func remoteOpenPorts(host string) map[int]bool {
+	open := make(map[int]bool, len(recommendPorts))
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	for _, p := range recommendPorts {
+		wg.Add(1)
+		go func(port int) {
+			defer wg.Done()
+			if recommendRemotePortOpen(host, port) {
+				mu.Lock()
+				open[port] = true
+				mu.Unlock()
+			}
+		}(p)
+	}
+	wg.Wait()
+	return open
+}
+
+// freePorts lists up to n ports that no inbound on the server and no other program holds,
+// preferred ports first; random ports are probed only for the local server.
+func (s *InboundRecommendService) freePorts(nodeID *int, udp bool, n int, systemFree func(int) bool) []int {
+	probe := func(port int) *model.Inbound {
+		if udp {
+			return &model.Inbound{Port: port, Protocol: model.Hysteria, NodeID: nodeID, Settings: `{"clients":[]}`, StreamSettings: `{"network":"hysteria","security":"tls"}`}
 		}
-		if conflict, err := s.inbounds.checkPortConflict(probe, 0); err != nil || conflict != nil {
+		return &model.Inbound{Port: port, Protocol: model.VLESS, NodeID: nodeID, Settings: `{"clients":[]}`, StreamSettings: `{"network":"tcp","security":"tls"}`}
+	}
+	free := func(port int) bool {
+		if conflict, err := s.inbounds.checkPortConflict(probe(port), 0); err != nil || conflict != nil {
 			return false
 		}
 		return systemFree(port)
 	}
-	for i, p := range recommendPorts {
-		if free(p) {
-			return p, i > 0
+	ports := []int{}
+	for _, p := range recommendPorts {
+		if len(ports) < n && free(p) {
+			ports = append(ports, p)
 		}
 	}
-	for range 50 {
-		if p := 10000 + rand.IntN(50000); free(p) {
-			return p, true
+	for tries := 0; len(ports) < n && tries < 200; tries++ {
+		if p := 10000 + rand.IntN(50000); !slices.Contains(ports, p) && free(p) {
+			ports = append(ports, p)
 		}
 	}
-	return 0, true
+	return ports
 }
 
 func localServerIPs() []string {

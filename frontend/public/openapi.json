@@ -3484,14 +3484,6 @@
             "example": true,
             "type": "boolean"
           },
-          "port": {
-            "example": 443,
-            "type": "integer"
-          },
-          "preferredPortBusy": {
-            "example": false,
-            "type": "boolean"
-          },
           "recommended": {
             "example": "tls",
             "type": "string"
@@ -3499,6 +3491,19 @@
           "serverIps": {
             "items": {
               "type": "string"
+            },
+            "type": "array"
+          },
+          "tcpPorts": {
+            "description": "TcpPorts and UdpPorts are free ports, preferred ones (443 first) before random ones.",
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "udpPorts": {
+            "items": {
+              "type": "integer"
             },
             "type": "array"
           }
@@ -3511,10 +3516,10 @@
           "domainIps",
           "keyFile",
           "pointsHere",
-          "port",
-          "preferredPortBusy",
           "recommended",
-          "serverIps"
+          "serverIps",
+          "tcpPorts",
+          "udpPorts"
         ],
         "type": "object"
       },
@@ -5605,7 +5610,7 @@
         "tags": [
           "Inbounds"
         ],
-        "summary": "Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, a free port (443 first, then 8443, 2083, 2087, 2096) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).",
+        "summary": "Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, free TCP and UDP ports (443 first, then the other Cloudflare HTTPS ports, then random ones) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).",
         "operationId": "get_panel_api_inbounds_recommend",
         "parameters": [
           {
@@ -5650,11 +5655,15 @@
                     "keyFile": "/root/cert/hk.example.com/privkey.pem",
                     "nodeId": 3,
                     "pointsHere": true,
-                    "port": 443,
-                    "preferredPortBusy": false,
                     "recommended": "tls",
                     "serverIps": [
                       ""
+                    ],
+                    "tcpPorts": [
+                      0
+                    ],
+                    "udpPorts": [
+                      0
                     ]
                   }
                 }

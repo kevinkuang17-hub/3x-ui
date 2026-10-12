@@ -95,7 +95,10 @@ func stubRecommendNet(t *testing.T, domainIPs map[string][]string, publicIP stri
 		return nil, &net.DNSError{Err: "no such host", Name: host, IsNotFound: true}
 	}
 	recommendPublicIPv4 = func() string { return publicIP }
-	recommendLocalPortFree = func(port int) bool {
+	recommendLocalPortFree = func(port int, udp bool) bool {
+		if udp {
+			return true
+		}
 		for _, p := range busyPorts {
 			if p == port {
 				return false
@@ -125,8 +128,8 @@ func TestRecommendLocalPicksTLSFromCertificate(t *testing.T) {
 	if got.Domain != "hk.example.com" || got.CertState != CertStateOK || !got.PointsHere {
 		t.Fatalf("domain/cert/points = %q/%q/%v", got.Domain, got.CertState, got.PointsHere)
 	}
-	if got.Recommended != RecommendTLS || got.CertFile != cert || got.KeyFile != key || got.Port != 443 {
-		t.Fatalf("recommended %q cert %q key %q port %d", got.Recommended, got.CertFile, got.KeyFile, got.Port)
+	if got.Recommended != RecommendTLS || got.CertFile != cert || got.KeyFile != key || got.TcpPorts[0] != 443 {
+		t.Fatalf("recommended %q cert %q key %q ports %v", got.Recommended, got.CertFile, got.KeyFile, got.TcpPorts)
 	}
 }
 
@@ -170,9 +173,18 @@ func TestRecommendPortSkipsTakenPorts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 443 is held by an inbound and 8443 by another program, so the next preferred port wins.
-	if got.Port != 2083 || !got.PreferredPortBusy {
-		t.Fatalf("port = %d busy=%v, want 2083 true", got.Port, got.PreferredPortBusy)
+	// 443 is held by a TCP inbound and 8443 by another program; neither may be offered for TCP.
+	if len(got.TcpPorts) != recommendTCPPorts || got.TcpPorts[0] != 2053 || got.TcpPorts[1] != 2083 {
+		t.Fatalf("tcp ports = %v, want %d starting 2053, 2083", got.TcpPorts, recommendTCPPorts)
+	}
+	for _, p := range got.TcpPorts {
+		if p == 443 || p == 8443 {
+			t.Fatalf("tcp ports %v offer taken port %d", got.TcpPorts, p)
+		}
+	}
+	// The inbound on 443 only holds TCP, so UDP protocols such as Hysteria2 can still use 443.
+	if len(got.UdpPorts) != recommendUDPPorts || got.UdpPorts[0] != 443 {
+		t.Fatalf("udp ports = %v, want %d starting 443", got.UdpPorts, recommendUDPPorts)
 	}
 	if got.Recommended != RecommendReality || got.CertState != CertStateMissing {
 		t.Fatalf("no domain: recommended %q cert %q", got.Recommended, got.CertState)

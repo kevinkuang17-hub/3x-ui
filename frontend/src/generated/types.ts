@@ -800,10 +800,10 @@ export interface InboundRecommendation {
   keyFile: string;
   nodeId?: number | null;
   pointsHere: boolean;
-  port: number;
-  preferredPortBusy: boolean;
   recommended: string;
   serverIps: string[];
+  tcpPorts: number[];
+  udpPorts: number[];
 }
 
 export interface InboundTrafficSummary {
