@@ -26,6 +26,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
+          trap 'echo "::error::同步失败：$BASH_COMMAND"' ERR
           git config user.name "sync-bot"
           git config user.email "sync-bot@users.noreply.github.com"
           git remote add upstream https://github.com/MHSanaei/3x-ui.git
@@ -38,15 +39,15 @@ jobs:
             if [ -z "$UP" ]; then
               UP=$(curl -fsSL https://api.github.com/repos/MHSanaei/3x-ui/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
             fi
-            [ -n "$UP" ] || { echo "取不到官方版本号"; exit 1; }
+            [ -n "$UP" ] || { echo "::error::取不到官方版本号"; exit 1; }
             case "$UP" in
               *-k*) TAG="$UP" ;;
               *)
-                git rev-parse -q --verify "refs/tags/$UP" >/dev/null || { echo "官方没有 $UP 这个版本"; exit 1; }
+                git rev-parse -q --verify "refs/tags/$UP" >/dev/null || { echo "::error::官方没有 $UP 这个版本"; exit 1; }
                 if git merge-base --is-ancestor "refs/tags/$UP" HEAD; then
                   echo "已经包含官方 $UP，无需同步"; exit 0
                 fi
-                git merge --no-edit "refs/tags/$UP" || { echo "合并 $UP 有冲突，需要人工处理"; exit 1; }
+                git merge --no-edit "refs/tags/$UP" || { echo "::error::合并 $UP 有冲突，需要人工处理"; exit 1; }
                 TAG="$UP-k1"
                 echo "$TAG" > .github/release-tag
                 git add .github/release-tag
@@ -55,7 +56,7 @@ jobs:
                 ;;
             esac
           fi
-          [ -n "$TAG" ] || { echo "版本号为空"; exit 1; }
+          [ -n "$TAG" ] || { echo "::error::版本号为空"; exit 1; }
           git tag -f "$TAG"
           git push -f origin "refs/tags/$TAG"
           # GITHUB_TOKEN 推的标签不会自动触发编译，这里手动触发
