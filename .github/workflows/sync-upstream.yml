@@ -37,7 +37,7 @@ jobs:
           else
             UP="${{ github.event.inputs.tag }}"
             if [ -z "$UP" ]; then
-              UP=$(curl -fsSL https://api.github.com/repos/MHSanaei/3x-ui/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+              UP=$(gh api repos/MHSanaei/3x-ui/releases/latest -q .tag_name)
             fi
             [ -n "$UP" ] || { echo "::error::取不到官方版本号"; exit 1; }
             case "$UP" in
