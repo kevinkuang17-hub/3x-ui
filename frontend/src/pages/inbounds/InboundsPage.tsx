@@ -43,6 +43,7 @@ import { withHostEndpoints } from '@/lib/hosts/host-link';
 import AppSidebar from '@/layouts/AppSidebar';
 const TextModal = lazy(() => import('@/components/feedback/TextModal'));
 import type { TextModalTab } from '@/components/feedback/TextModal';
+import type { InboundFormValues } from '@/schemas/forms/inbound-form';
 const PromptModal = lazy(() => import('@/components/feedback/PromptModal'));
 
 import { useInbounds } from './useInbounds';
@@ -50,6 +51,7 @@ import { InboundList } from './list';
 import { LazyMount } from '@/components/utility';
 const InboundFormModal = lazy(() => import('./form/InboundFormModal'));
 const CloneInboundModal = lazy(() => import('./CloneInboundModal'));
+const QuickInboundModal = lazy(() => import('./QuickInboundModal'));
 const InboundInfoModal = lazy(() => import('./info/InboundInfoModal'));
 const QrCodeModal = lazy(() => import('./qr/QrCodeModal'));
 const AttachClientsModal = lazy(() => import('./clients/AttachClientsModal'));
@@ -180,6 +182,8 @@ export default function InboundsPage() {
   const [groupOpen, setGroupOpen] = useState(false);
   const [groupSource, setGroupSource] = useState<DBInbound | null>(null);
 
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [formPreset, setFormPreset] = useState<InboundFormValues | null>(null);
   const [cloneOpen, setCloneOpen] = useState(false);
   const [cloneSource, setCloneSource] = useState<DBInbound | null>(null);
 
@@ -465,6 +469,16 @@ export default function InboundsPage() {
   const onAddInbound = useCallback(() => {
     setFormMode('add');
     setFormDbInbound(null);
+    setFormPreset(null);
+    setFormOpen(true);
+  }, []);
+
+  const onQuickAddInbound = useCallback(() => setQuickOpen(true), []);
+
+  const openPresetForm = useCallback((values: InboundFormValues) => {
+    setFormMode('add');
+    setFormDbInbound(null);
+    setFormPreset(values);
     setFormOpen(true);
   }, []);
 
@@ -805,6 +819,7 @@ export default function InboundsPage() {
                       hasActiveNode={showNodeInfo}
                       hosts={hosts}
                       onAddInbound={onAddInbound}
+                      onQuickAddInbound={onQuickAddInbound}
                       onGeneralAction={onGeneralAction}
                       onRowAction={({ key, dbInbound }) =>
                         onRowAction({ key, dbInbound: dbInbound as unknown as DBInbound })
@@ -825,6 +840,7 @@ export default function InboundsPage() {
             onSaved={refresh}
             mode={formMode}
             dbInbound={formDbInbound}
+            preset={formPreset}
             dbInbounds={dbInbounds}
             availableNodes={nodesList}
             availableNodesFetched={nodesFetched}
@@ -888,6 +904,15 @@ export default function InboundsPage() {
             onClose={() => setGroupOpen(false)}
             onAdded={refresh}
             source={groupSource}
+          />
+        </LazyMount>
+        <LazyMount when={quickOpen}>
+          <QuickInboundModal
+            open={quickOpen}
+            nodes={nodesList || []}
+            onClose={() => setQuickOpen(false)}
+            onCreated={refresh}
+            onAdvanced={openPresetForm}
           />
         </LazyMount>
         <LazyMount when={cloneOpen}>

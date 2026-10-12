@@ -3444,6 +3444,80 @@
         ],
         "type": "object"
       },
+      "InboundRecommendation": {
+        "description": "InboundRecommendation is what the one-click inbound dialog knows about a server: whether a\ndomain with a working certificate points at it (VLESS TLS) or not (VLESS Reality), and a free port.",
+        "properties": {
+          "certFile": {
+            "example": "/root/cert/hk.example.com/fullchain.pem",
+            "type": "string"
+          },
+          "certNotAfter": {
+            "description": "CertNotAfter is the certificate expiry in Unix milliseconds, 0 when unknown.",
+            "example": 1767225600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "certState": {
+            "example": "ok",
+            "type": "string"
+          },
+          "domain": {
+            "example": "hk.example.com",
+            "type": "string"
+          },
+          "domainIps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "keyFile": {
+            "example": "/root/cert/hk.example.com/privkey.pem",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 3,
+            "nullable": true,
+            "type": "integer"
+          },
+          "pointsHere": {
+            "example": true,
+            "type": "boolean"
+          },
+          "port": {
+            "example": 443,
+            "type": "integer"
+          },
+          "preferredPortBusy": {
+            "example": false,
+            "type": "boolean"
+          },
+          "recommended": {
+            "example": "tls",
+            "type": "string"
+          },
+          "serverIps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "certFile",
+          "certNotAfter",
+          "certState",
+          "domain",
+          "domainIps",
+          "keyFile",
+          "pointsHere",
+          "port",
+          "preferredPortBusy",
+          "recommended",
+          "serverIps"
+        ],
+        "type": "object"
+      },
       "InboundTrafficSummary": {
         "properties": {
           "down": {
@@ -5518,6 +5592,70 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/inbounds/recommend": {
+      "get": {
+        "tags": [
+          "Inbounds"
+        ],
+        "summary": "Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, a free port (443 first, then 8443, 2083, 2087, 2096) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).",
+        "operationId": "get_panel_api_inbounds_recommend",
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "query",
+            "required": true,
+            "description": "Node to inspect; omit for this panel’s own server.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/InboundRecommendation"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+                    "certNotAfter": 1767225600000,
+                    "certState": "ok",
+                    "domain": "hk.example.com",
+                    "domainIps": [
+                      ""
+                    ],
+                    "keyFile": "/root/cert/hk.example.com/privkey.pem",
+                    "nodeId": 3,
+                    "pointsHere": true,
+                    "port": 443,
+                    "preferredPortBusy": false,
+                    "recommended": "tls",
+                    "serverIps": [
+                      ""
+                    ]
                   }
                 }
               }

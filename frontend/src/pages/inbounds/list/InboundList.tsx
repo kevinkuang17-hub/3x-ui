@@ -17,6 +17,7 @@ import {
 } from 'antd';
 import {
   PlusOutlined,
+  ThunderboltOutlined,
   MenuOutlined,
   MoreOutlined,
   ExportOutlined,
@@ -61,6 +62,7 @@ export default function InboundList({
   hasActiveNode,
   hosts,
   onAddInbound,
+  onQuickAddInbound,
   onGeneralAction,
   onRowAction,
   onBulkDelete,
@@ -225,6 +227,13 @@ export default function InboundList({
             aria-label={t('pages.inbounds.addInbound')}
           >
             {!isMobile && t('pages.inbounds.addInbound')}
+          </Button>
+          <Button
+            onClick={onQuickAddInbound}
+            icon={<ThunderboltOutlined />}
+            aria-label={t('pages.inbounds.quick.open')}
+          >
+            {!isMobile && t('pages.inbounds.quick.open')}
           </Button>
           <Dropdown trigger={['click']} menu={generalActionsMenu}>
             <Button

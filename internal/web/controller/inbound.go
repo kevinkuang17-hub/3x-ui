@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/wirecodec"
@@ -23,6 +26,7 @@ type InboundController struct {
 	clientService   service.ClientService
 	xrayService     service.XrayService
 	fallbackService service.FallbackService
+	recommend       service.InboundRecommendService
 }
 
 // NewInboundController creates a new InboundController and sets up its routes.
@@ -79,6 +83,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.GET("/allLinks", a.getAllInboundLinks)
 	g.GET("/get/:id", a.getInbound)
 	g.GET("/:id/fallbacks", a.getFallbacks)
+	g.GET("/recommend", a.recommendInbound)
 
 	g.POST("/add", a.addInbound)
 	g.POST("/del/:id", a.delInbound)
@@ -502,4 +507,22 @@ func (a *InboundController) setFallbacks(c *gin.Context) {
 	}
 	a.xrayService.SetToNeedRestart()
 	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), nil)
+}
+
+// recommendInbound tells the one-click dialog whether this server (or ?nodeId=) suits VLESS TLS
+// or VLESS Reality, with the domain, certificate and a free port to use.
+func (a *InboundController) recommendInbound(c *gin.Context) {
+	var nodeID *int
+	if raw := c.Query("nodeId"); raw != "" {
+		id, err := strconv.Atoi(raw)
+		if err != nil || id <= 0 {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), errors.New("invalid nodeId"))
+			return
+		}
+		nodeID = &id
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
+	defer cancel()
+	rec, err := a.recommend.Recommend(ctx, nodeID)
+	jsonObj(c, rec, err)
 }

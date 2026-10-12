@@ -81,6 +81,7 @@ export interface InboundListProps {
   hasActiveNode: boolean;
   hosts: HostRecord[];
   onAddInbound: () => void;
+  onQuickAddInbound: () => void;
   onGeneralAction: (key: GeneralAction) => void;
   onRowAction: (action: { key: RowAction; dbInbound: DBInboundRecord }) => void;
   onBulkDelete: (ids: number[]) => Promise<boolean>;
