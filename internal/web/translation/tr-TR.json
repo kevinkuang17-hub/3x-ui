@@ -1048,7 +1048,20 @@
       "renewsUsed": "Kullanılan yenileme",
       "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın.",
       "renewIntervalDesc": "Süre dolduktan sonra önceki bitiş zamanına belirlenen sayıda 24 saatlik gün ekler ve istemci trafiğini sıfırlar. Ek bir sıfırlama istemiyorsanız bağımsız trafik sıfırlamalarını devre dışı bırakın.",
-      "renewWeeklyDesc": "Takvim yenilemesi panelin saat diliminde gece yarısı gerçekleşir ve istemci trafiğini de sıfırlar. Ek bir sıfırlama istemiyorsanız bağımsız trafik sıfırlamalarını devre dışı bırakın."
+      "renewWeeklyDesc": "Takvim yenilemesi panelin saat diliminde gece yarısı gerçekleşir ve istemci trafiğini de sıfırlar. Ek bir sıfırlama istemiyorsanız bağımsız trafik sıfırlamalarını devre dışı bırakın.",
+      "routing": "Routing rules",
+      "routingEdit": "Set routing",
+      "routingTitle": "Routing for {email}",
+      "routingDesc": "Decides which sites this client's subscription sends direct, through the proxy or blocks. Order: the client's own rules, else its group's, else the global ones (Rule library page).",
+      "routingOwn": "This client's own rules",
+      "routingFollowGroup": "Follow group {group}",
+      "routingFollowGlobal": "Follow the global rules",
+      "routingDnsFollow": "Follow the group or global DNS",
+      "routingDnsOwn": "This client's own DNS (e.g. its company DNS)",
+      "routingSourceClient": "Own rules",
+      "routingSourceGroup": "Group {group}'s rules",
+      "routingSourceGlobal": "Global rules",
+      "routingAfterCreate": "Follows the group or global rules; after saving, this client can get its own"
     },
     "groups": {
       "name": "İsim",

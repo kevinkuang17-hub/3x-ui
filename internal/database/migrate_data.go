@@ -73,6 +73,7 @@ func migrationModels() []any {
 		&model.PanelRole{},
 		&model.PasskeyCredential{},
 		&model.RuleSet{},
+		&model.ClientRouting{},
 	}
 }
 

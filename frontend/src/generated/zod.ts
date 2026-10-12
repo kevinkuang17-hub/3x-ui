@@ -563,6 +563,19 @@ export const ClientReverseSchema = z.object({
 });
 export type ClientReverse = z.infer<typeof ClientReverseSchema>;
 
+export const ClientRoutingViewSchema = z.object({
+  clashRules: z.string(),
+  dns: z.lazy(() => DnsConfigSchema).nullable().optional(),
+  email: z.string(),
+  extraRules: z.string(),
+  group: z.string(),
+  own: z.boolean(),
+  ownDns: z.boolean(),
+  ruleSets: z.array(z.lazy(() => RuleSetPickSchema)),
+  source: z.string(),
+});
+export type ClientRoutingView = z.infer<typeof ClientRoutingViewSchema>;
+
 export const ClientSlimSchema = z.object({
   comment: z.string().optional(),
   createdAt: z.number().int(),
@@ -618,6 +631,18 @@ export const ClientsSummarySchema = z.object({
   total: z.number().int(),
 });
 export type ClientsSummary = z.infer<typeof ClientsSummarySchema>;
+
+export const DnsConfigSchema = z.object({
+  company: z.string(),
+  companyDirect: z.boolean(),
+  domestic: z.array(z.string()),
+  enable: z.boolean(),
+  foreign: z.array(z.string()),
+  foreignViaProxy: z.boolean(),
+  ipv6: z.boolean(),
+  mode: z.string(),
+});
+export type DnsConfig = z.infer<typeof DnsConfigSchema>;
 
 export const FallbackParentInfoSchema = z.object({
   masterId: z.number().int(),
@@ -1076,6 +1101,12 @@ export const RealityScanResultSchema = z.object({
   x25519: z.boolean(),
 });
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
+
+export const RuleSetPickSchema = z.object({
+  id: z.number().int(),
+  policy: z.string(),
+});
+export type RuleSetPick = z.infer<typeof RuleSetPickSchema>;
 
 export const ServerSettingsSchema = z.object({
   contentPaddingAddition: z.string().optional(),

@@ -136,21 +136,21 @@ func TestGroupRoutingFollowsGlobalUntilSet(t *testing.T) {
 	if err := svc.SetGroupClashRules("vip", ""); err != nil {
 		t.Fatal(err)
 	}
-	if g := GroupRoutingBySubID("sub-alice"); g.Override {
+	if g := RoutingBySubID("sub-alice"); g.Override {
 		t.Fatalf("a group with nothing set follows the global routing, got %+v", g)
 	}
 	choice := &RoutingChoice{RuleSets: []RuleSetPick{{Id: 7, Policy: "direct"}}, ExtraRules: "x.example"}
 	if err := svc.SetGroupRouting("vip", "", choice); err != nil {
 		t.Fatal(err)
 	}
-	g := GroupRoutingBySubID("sub-alice")
+	g := RoutingBySubID("sub-alice")
 	if !g.Override || g.Template != "" || len(g.Choice.RuleSets) != 1 || g.Choice.RuleSets[0].Policy != "DIRECT" {
 		t.Fatalf("group picks must override the global routing, got %+v", g)
 	}
 	if err := svc.SetGroupClashRules("vip", ""); err != nil {
 		t.Fatal(err)
 	}
-	if g := GroupRoutingBySubID("sub-alice"); !g.Override || g.Choice.ExtraRules != "x.example" {
+	if g := RoutingBySubID("sub-alice"); !g.Override || g.Choice.ExtraRules != "x.example" {
 		t.Fatalf("saving only the template must keep the group's picks, got %+v", g)
 	}
 	if err := svc.SetGroupRouting("vip", "", &RoutingChoice{RuleSets: []RuleSetPick{{Id: 1, Policy: "HK,US"}}}); err == nil {

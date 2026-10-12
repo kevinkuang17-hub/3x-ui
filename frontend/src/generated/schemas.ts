@@ -2218,6 +2218,65 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ClientRoutingView": {
+    "description": "ClientRoutingView is what the client routing dialog shows: the client's own routing, and where\nthe routing its subscription gets right now comes from.",
+    "properties": {
+      "clashRules": {
+        "type": "string"
+      },
+      "dns": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DnsConfig"
+          }
+        ],
+        "nullable": true
+      },
+      "email": {
+        "example": "alice",
+        "type": "string"
+      },
+      "extraRules": {
+        "example": "DOMAIN-SUFFIX,corp.example,DIRECT",
+        "type": "string"
+      },
+      "group": {
+        "example": "vip",
+        "type": "string"
+      },
+      "own": {
+        "description": "Own is true when the client has its own rules; OwnDns when it has its own DNS.",
+        "example": true,
+        "type": "boolean"
+      },
+      "ownDns": {
+        "example": false,
+        "type": "boolean"
+      },
+      "ruleSets": {
+        "items": {
+          "$ref": "#/components/schemas/RuleSetPick"
+        },
+        "type": "array"
+      },
+      "source": {
+        "description": "Source is client, group or global: whose rules the subscription currently uses.",
+        "example": "client",
+        "type": "string"
+      }
+    },
+    "required": [
+      "clashRules",
+      "email",
+      "extraRules",
+      "group",
+      "own",
+      "ownDns",
+      "ruleSets",
+      "source"
+    ],
+    "type": "object"
+  },
   "ClientSlim": {
     "description": "ClientSlim is the row-shape used by the clients page. It drops fields the\ntable never reads (UUID, password, auth, flow, security, reverse, tgId)\nso the list payload stays compact even when the panel manages thousands\nof clients. Modals that need the full record still call /get/:email.",
     "properties": {
@@ -2496,6 +2555,54 @@ export const SCHEMAS: Record<string, unknown> = {
       "online",
       "onlineCount",
       "total"
+    ],
+    "type": "object"
+  },
+  "DnsConfig": {
+    "description": "DnsConfig is the DNS a Clash/Mihomo profile gets: domestic and foreign resolvers plus company\nrules that send a company's own domains to its internal DNS servers.",
+    "properties": {
+      "company": {
+        "description": "Company holds lines \"corp.com, corp.local = 10.0.0.53, 10.0.0.54\".",
+        "type": "string"
+      },
+      "companyDirect": {
+        "type": "boolean"
+      },
+      "domestic": {
+        "description": "Domestic resolves everything not covered below; Foreign resolves non-mainland domains.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "enable": {
+        "type": "boolean"
+      },
+      "foreign": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "foreignViaProxy": {
+        "type": "boolean"
+      },
+      "ipv6": {
+        "type": "boolean"
+      },
+      "mode": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "company",
+      "companyDirect",
+      "domestic",
+      "enable",
+      "foreign",
+      "foreignViaProxy",
+      "ipv6",
+      "mode"
     ],
     "type": "object"
   },
@@ -4460,6 +4567,22 @@ export const SCHEMAS: Record<string, unknown> = {
       "tls13",
       "tlsVersion",
       "x25519"
+    ],
+    "type": "object"
+  },
+  "RuleSetPick": {
+    "description": "RuleSetPick is one rule set chosen by a routing profile, with the policy its matches go to.",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "policy": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "policy"
     ],
     "type": "object"
   },

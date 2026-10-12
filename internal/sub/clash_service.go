@@ -175,7 +175,7 @@ func (s *SubClashService) getClash(subId string, host string, legacy bool) (stri
 	if s.live {
 		clashRules, enableRouting = liveClashTemplate(clashRules, enableRouting)
 	}
-	group := service.GroupRoutingBySubID(subId)
+	group := service.RoutingBySubID(subId)
 	if group.Override {
 		clashRules, enableRouting = group.Template, group.Template != ""
 	}
@@ -249,7 +249,7 @@ func libraryChoice(group service.GroupRouting) service.RoutingChoice {
 }
 
 func libraryChoiceForSub(subID string) service.RoutingChoice {
-	return libraryChoice(service.GroupRoutingBySubID(subID))
+	return libraryChoice(service.RoutingBySubID(subID))
 }
 
 // prependLibraryRules puts the profile's hand-written and rule-library rules ahead of the template's,

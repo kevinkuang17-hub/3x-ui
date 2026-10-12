@@ -573,6 +573,22 @@ export const EXAMPLES: Record<string, unknown> = {
   "ClientReverse": {
     "tag": ""
   },
+  "ClientRoutingView": {
+    "clashRules": "",
+    "dns": null,
+    "email": "alice",
+    "extraRules": "DOMAIN-SUFFIX,corp.example,DIRECT",
+    "group": "vip",
+    "own": true,
+    "ownDns": false,
+    "ruleSets": [
+      {
+        "id": 0,
+        "policy": ""
+      }
+    ],
+    "source": "client"
+  },
   "ClientSlim": {
     "comment": "Primary device",
     "createdAt": 1735000000000,
@@ -629,6 +645,20 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "onlineCount": 1,
     "total": 2000
+  },
+  "DnsConfig": {
+    "company": "",
+    "companyDirect": false,
+    "domestic": [
+      ""
+    ],
+    "enable": false,
+    "foreign": [
+      ""
+    ],
+    "foreignViaProxy": false,
+    "ipv6": false,
+    "mode": ""
   },
   "FallbackParentInfo": {
     "masterId": 0,
@@ -1102,6 +1132,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "tls13": true,
     "tlsVersion": "1.3",
     "x25519": true
+  },
+  "RuleSetPick": {
+    "id": 0,
+    "policy": ""
   },
   "ServerSettings": {
     "contentPaddingAddition": "",

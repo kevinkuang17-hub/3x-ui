@@ -1048,7 +1048,20 @@
       "renewsUsed": "Renovações usadas",
       "bulkAdTagHint": "Insira uma tag hexadecimal de 32 caracteres para definir ou 'none' para limpar no MTProto.",
       "renewIntervalDesc": "Após a expiração, adiciona o número configurado de dias de 24 horas ao prazo anterior e redefine o tráfego do cliente. Mantenha as redefinições independentes de tráfego desativadas, a menos que queira uma redefinição adicional.",
-      "renewWeeklyDesc": "A renovação por calendário ocorre à meia-noite no fuso horário do painel e também redefine o tráfego do cliente. Mantenha as redefinições independentes de tráfego desativadas, a menos que queira uma redefinição adicional."
+      "renewWeeklyDesc": "A renovação por calendário ocorre à meia-noite no fuso horário do painel e também redefine o tráfego do cliente. Mantenha as redefinições independentes de tráfego desativadas, a menos que queira uma redefinição adicional.",
+      "routing": "Routing rules",
+      "routingEdit": "Set routing",
+      "routingTitle": "Routing for {email}",
+      "routingDesc": "Decides which sites this client's subscription sends direct, through the proxy or blocks. Order: the client's own rules, else its group's, else the global ones (Rule library page).",
+      "routingOwn": "This client's own rules",
+      "routingFollowGroup": "Follow group {group}",
+      "routingFollowGlobal": "Follow the global rules",
+      "routingDnsFollow": "Follow the group or global DNS",
+      "routingDnsOwn": "This client's own DNS (e.g. its company DNS)",
+      "routingSourceClient": "Own rules",
+      "routingSourceGroup": "Group {group}'s rules",
+      "routingSourceGlobal": "Global rules",
+      "routingAfterCreate": "Follows the group or global rules; after saving, this client can get its own"
     },
     "groups": {
       "name": "Nome",

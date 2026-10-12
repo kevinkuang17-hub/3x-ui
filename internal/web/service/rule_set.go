@@ -470,35 +470,67 @@ func (s *RuleSetService) BuildRules(ch RoutingChoice) ([]string, error) {
 	return out, nil
 }
 
-// GroupRouting is a client group's own routing; Override is false when the group follows the global one.
+// Where a subscription's routing comes from: its own, its group's, or the global profile.
+const (
+	RoutingSourceClient = "client"
+	RoutingSourceGroup  = "group"
+	RoutingSourceGlobal = "global"
+)
+
+// GroupRouting is the routing a subscription gets; Override is false when it follows the global one.
 type GroupRouting struct {
 	Template string
 	Choice   RoutingChoice
 	Override bool
-	// Dns is the group's own DNS; nil follows the global DNS whether or not routing is overridden.
+	Source   string
+	// Dns is the subscription's or group's own DNS; nil follows the global DNS.
 	Dns *DnsConfig
 }
 
-// GroupRoutingBySubID finds the routing of the subscriber's group, using the oldest client of the
-// subId like the other per-group subscription lookups.
-func GroupRoutingBySubID(subID string) GroupRouting {
-	if subID == "" {
-		return GroupRouting{}
-	}
-	db := database.GetDB()
-	var rec model.ClientRecord
-	if err := db.Where("sub_id = ?", subID).Order("id ASC").First(&rec).Error; err != nil || rec.Group == "" {
-		return GroupRouting{}
-	}
-	var group model.ClientGroup
-	if err := db.Where("name = ?", rec.Group).First(&group).Error; err != nil {
-		return GroupRouting{}
-	}
+func routingFrom(template, picks, extra, dns string) GroupRouting {
 	g := GroupRouting{
-		Template: strings.TrimSpace(group.ClashRules),
-		Choice:   RoutingChoice{RuleSets: ParseRuleSetPicks(group.ClashRuleSets), ExtraRules: group.ClashExtraRules},
+		Template: strings.TrimSpace(template),
+		Choice:   RoutingChoice{RuleSets: ParseRuleSetPicks(picks), ExtraRules: extra},
 	}
 	g.Override = g.Template != "" || !g.Choice.Empty()
-	g.Dns = ParseDns(group.ClashDns)
+	g.Dns = ParseDns(dns)
 	return g
+}
+
+// RoutingBySubID resolves a subscription's routing: the client's own, else its group's (found via the
+// oldest client of the subId like the other per-group lookups), else the global one. DNS falls back
+// the same way on its own, so a client may keep the group's rules and set only its DNS.
+func RoutingBySubID(subID string) GroupRouting {
+	out := GroupRouting{Source: RoutingSourceGlobal}
+	if subID == "" {
+		return out
+	}
+	db := database.GetDB()
+	var own model.ClientRouting
+	hasOwn := db.Where("sub_id = ?", subID).First(&own).Error == nil
+	var group GroupRouting
+	var rec model.ClientRecord
+	if err := db.Where("sub_id = ?", subID).Order("id ASC").First(&rec).Error; err == nil && rec.Group != "" {
+		var row model.ClientGroup
+		if db.Where("name = ?", rec.Group).First(&row).Error == nil {
+			group = routingFrom(row.ClashRules, row.ClashRuleSets, row.ClashExtraRules, row.ClashDns)
+		}
+	}
+	if hasOwn {
+		mine := routingFrom(own.ClashRules, own.ClashRuleSets, own.ClashExtraRules, own.ClashDns)
+		if mine.Override {
+			out = mine
+			out.Source = RoutingSourceClient
+		}
+		if mine.Dns != nil {
+			out.Dns = mine.Dns
+		}
+	}
+	if out.Source == RoutingSourceGlobal && group.Override {
+		out.Template, out.Choice, out.Override, out.Source = group.Template, group.Choice, true, RoutingSourceGroup
+	}
+	if out.Dns == nil {
+		out.Dns = group.Dns
+	}
+	return out
 }

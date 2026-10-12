@@ -171,7 +171,7 @@ func (s *ClientService) SetGroupDns(name string, cfg *DnsConfig) error {
 
 // DnsForSub is the DNS of the subscriber's group, or the global one when the group has none.
 func DnsForSub(subID string) DnsConfig {
-	if g := GroupRoutingBySubID(subID); g.Dns != nil {
+	if g := RoutingBySubID(subID); g.Dns != nil {
 		return *g.Dns
 	}
 	return (&RuleSetService{}).GlobalDns()

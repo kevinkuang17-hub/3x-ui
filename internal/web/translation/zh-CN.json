@@ -1048,7 +1048,20 @@
       "renewsUsed": "已用续期次数",
       "bulkAdTagHint": "输入 32 位十六进制标签以设置，或输入 'none' 清除 MTProto 赞助频道。",
       "renewIntervalDesc": "到期后从上次截止时间增加指定天数（每天 24 小时），并重置客户端流量。若不需要额外重置，请关闭独立的流量重置。",
-      "renewWeeklyDesc": "日历续期按面板时区的午夜执行，并重置客户端流量。若不需要额外重置，请关闭独立的流量重置。"
+      "renewWeeklyDesc": "日历续期按面板时区的午夜执行，并重置客户端流量。若不需要额外重置，请关闭独立的流量重置。",
+      "routing": "分流规则",
+      "routingEdit": "设置分流",
+      "routingTitle": "{email} 的分流规则",
+      "routingDesc": "决定这个客户端的订阅里哪些网站直连、走代理或拦截。生效顺序：客户端自己的规则 → 所在分组的规则 → 全局规则（规则库页面）。",
+      "routingOwn": "该客户端单独设置",
+      "routingFollowGroup": "跟随分组 {group}",
+      "routingFollowGlobal": "跟随全局规则",
+      "routingDnsFollow": "跟随分组或全局 DNS",
+      "routingDnsOwn": "该客户端单独的 DNS（如该公司的 DNS）",
+      "routingSourceClient": "单独规则",
+      "routingSourceGroup": "分组 {group} 的规则",
+      "routingSourceGlobal": "全局规则",
+      "routingAfterCreate": "默认跟随分组或全局规则；保存后可为该客户端单独设置"
     },
     "groups": {
       "name": "名称",
