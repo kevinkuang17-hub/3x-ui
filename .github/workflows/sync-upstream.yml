@@ -1,5 +1,6 @@
 # 每天检查官方 3X-UI 有没有发新版本：有就合并到本仓库（保留我们的修改），打 vX.Y.Z-k1 标签并编译发布，
-# 服务器上 x-ui update / 面板里的“更新”就能拿到“官方新版 + 我们的修改”。合并冲突时会失败并发邮件提醒。
+# 服务器上 x-ui update / 面板里的“更新”就能拿到“官方新版 + 我们的修改”。
+# 两边改了同一段代码时以官方为准，并开 Issue 列出被官方覆盖的文件；合并后编译不过则不发布、开 Issue 通知。
 name: sync-upstream
 on:
   schedule:
@@ -23,6 +24,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - name: 合并官方最新版本
+        id: merge
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -34,42 +36,81 @@ jobs:
           git config merge.jsonkeys.driver "python3 .github/scripts/merge-json-keys.py %O %A %B"
           git remote add upstream https://github.com/MHSanaei/3x-ui.git
           git fetch upstream --tags --force
-          # 官方版本 vX.Y.Z 合并后发布为 vX.Y.Z-k1；我们自己的改动由 .github/release-tag 发布 -k2、-k3…
           if [ "${{ github.event_name }}" = "push" ]; then
-            TAG=$(tr -d ' \r\n' < .github/release-tag)
-          else
-            UP="${{ github.event.inputs.tag }}"
-            if [ -z "$UP" ]; then
-              UP=$(gh api repos/MHSanaei/3x-ui/releases/latest -q .tag_name)
-            fi
-            [ -n "$UP" ] || { echo "::error::取不到官方版本号"; exit 1; }
-            case "$UP" in
-              *-k*) TAG="$UP" ;;
-              *)
-                git rev-parse -q --verify "refs/tags/$UP" >/dev/null || { echo "::error::官方没有 $UP 这个版本"; exit 1; }
-                if git merge-base --is-ancestor "refs/tags/$UP" HEAD; then
-                  echo "已经包含官方 $UP，无需同步"; exit 0
-                fi
-                if ! git merge --no-edit "refs/tags/$UP"; then
-                  git diff --name-only --diff-filter=U > "$RUNNER_TEMP/conflicts.txt"
-                  echo "$UP" > "$RUNNER_TEMP/upstream-tag.txt"
-                  git merge --abort
-                  echo "::error::合并 $UP 有冲突，需要人工处理：$(tr '\n' ' ' < "$RUNNER_TEMP/conflicts.txt")"
-                  exit 1
-                fi
-                TAG="$UP-k1"
-                echo "$TAG" > .github/release-tag
-                git add .github/release-tag
-                git commit -m "release: $TAG (官方 $UP + 本仓库修改)"
-                git push origin HEAD:main
-                ;;
-            esac
+            echo "tag=$(tr -d ' \r\n' < .github/release-tag)" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-          [ -n "$TAG" ] || { echo "::error::版本号为空"; exit 1; }
+          UP="${{ github.event.inputs.tag }}"
+          if [ -z "$UP" ]; then
+            UP=$(gh api repos/MHSanaei/3x-ui/releases/latest -q .tag_name)
+          fi
+          [ -n "$UP" ] || { echo "::error::取不到官方版本号"; exit 1; }
+          echo "$UP" > "$RUNNER_TEMP/upstream-tag.txt"
+          case "$UP" in *-k*) echo "tag=$UP" >> "$GITHUB_OUTPUT"; exit 0 ;; esac
+          git rev-parse -q --verify "refs/tags/$UP" >/dev/null || { echo "::error::官方没有 $UP 这个版本"; exit 1; }
+          if git merge-base --is-ancestor "refs/tags/$UP" HEAD; then
+            echo "已经包含官方 $UP，无需同步"; exit 0
+          fi
+          if ! git merge --no-edit "refs/tags/$UP"; then
+            # 两边改了同一段代码：记下冲突文件，按用户要求以官方代码为准重新合并。
+            git diff --name-only --diff-filter=U > "$RUNNER_TEMP/overridden.txt"
+            git merge --abort
+            MERGE_PREFER_THEIRS=1 git merge --no-edit -X theirs "refs/tags/$UP" || true
+            # -X theirs 处理不了的（一边删了文件、另一边改了）同样以官方为准。
+            for f in $(git diff --name-only --diff-filter=U); do
+              if git cat-file -e "refs/tags/$UP:$f" 2>/dev/null; then
+                git checkout --theirs -- "$f" && git add -- "$f"
+              else
+                git rm -q -- "$f"
+              fi
+            done
+            if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+              git commit --no-edit
+            fi
+            echo "overridden=1" >> "$GITHUB_OUTPUT"
+          fi
+          TAG="$UP-k1"
+          echo "$TAG" > .github/release-tag
+          git add .github/release-tag
+          git commit -m "release: $TAG (官方 $UP + 本仓库修改)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "merged=1" >> "$GITHUB_OUTPUT"
+      # 合并结果先编译一遍，编译不过就不推送、不发布，避免服务器更新到坏版本。
+      - uses: actions/setup-go@v5
+        if: steps.merge.outputs.merged == '1'
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: 编译检查
+        if: steps.merge.outputs.merged == '1'
+        run: |
+          make dist-stub
+          go build ./...
+          go vet ./internal/... > "$RUNNER_TEMP/vet.txt" 2>&1 || { cat "$RUNNER_TEMP/vet.txt"; exit 1; }
+      - name: 推送并发布
+        if: steps.merge.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.merge.outputs.tag }}
+        run: |
+          set -e
+          if [ "${{ steps.merge.outputs.merged }}" = "1" ]; then
+            git push origin HEAD:main
+          fi
           git tag -f "$TAG"
           git push -f origin "refs/tags/$TAG"
           # GITHUB_TOKEN 推的标签不会自动触发编译，这里手动触发
           gh workflow run release.yml -R "$GITHUB_REPOSITORY" --ref "$TAG"
+      - name: 记录被官方覆盖的文件
+        if: success() && steps.merge.outputs.overridden == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          UP=$(cat "$RUNNER_TEMP/upstream-tag.txt")
+          FILES=$(sed 's/^/- `/; s/$/`/' "$RUNNER_TEMP/overridden.txt")
+          BODY=$(printf '同步官方 %s 时，下面这些文件两边改了同一段代码，已按规则以官方代码为准，编译检查已通过并已发布。\n\n这些文件里本仓库的修改可能被官方版本替换，相关功能请留意：\n%s\n\n运行记录：%s/%s/actions/runs/%s' "$UP" "$FILES" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          gh label create sync-overridden --color FBCA04 --description "同步时以官方代码覆盖了冲突" -R "$GITHUB_REPOSITORY" 2>/dev/null || true
+          gh issue create -R "$GITHUB_REPOSITORY" --label sync-overridden --title "同步官方 $UP：冲突处已采用官方代码" --body "$BODY"
       # A failed sync must not go unnoticed: one open issue (GitHub emails the owner) until a sync succeeds.
       - name: 同步失败时开 Issue 通知
         if: failure()
@@ -77,8 +118,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           UP=$(cat "$RUNNER_TEMP/upstream-tag.txt" 2>/dev/null || echo "官方新版")
-          FILES=$(sed 's/^/- `/; s/$/`/' "$RUNNER_TEMP/conflicts.txt" 2>/dev/null || true)
-          BODY=$(printf '自动同步官方 3X-UI %s 失败，服务器暂时收不到这个版本。\n\n冲突文件：\n%s\n\n运行记录：%s/%s/actions/runs/%s\n\n处理好后重新运行 sync-upstream，成功后这条 Issue 会自动关闭。' "$UP" "${FILES:-（见运行记录）}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          DETAIL=$(head -c 3000 "$RUNNER_TEMP/vet.txt" 2>/dev/null || true)
+          BODY=$(printf '自动同步官方 3X-UI %s 失败，没有发布，服务器暂时收不到这个版本。\n\n%s\n\n运行记录：%s/%s/actions/runs/%s\n\n处理好后重新运行 sync-upstream，成功后这条 Issue 会自动关闭。' "$UP" "${DETAIL:-（原因见运行记录，常见是合并后编译不通过）}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
           gh label create sync-failed --color B60205 --description "自动同步官方版本失败" -R "$GITHUB_REPOSITORY" 2>/dev/null || true
           NUM=$(gh issue list -R "$GITHUB_REPOSITORY" --label sync-failed --state open --json number -q '.[0].number')
           if [ -n "$NUM" ]; then

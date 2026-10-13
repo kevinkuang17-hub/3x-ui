@@ -3,10 +3,13 @@
 # Usage (set up by sync-upstream.yml): merge-json-keys.py BASE OURS THEIRS; the result replaces OURS.
 import collections
 import json
+import os
 import sys
 
 MISSING = object()
 conflicts = []
+# Set by sync-upstream.yml on its second attempt: a string both sides changed takes upstream's text.
+PREFER_THEIRS = os.environ.get("MERGE_PREFER_THEIRS") == "1"
 
 
 def load(path):
@@ -22,7 +25,7 @@ def merge(base, ours, theirs, path):
     if not (isinstance(ours, dict) and isinstance(theirs, dict)):
         if theirs == base:
             return ours
-        if ours == base or ours == theirs:
+        if ours == base or ours == theirs or PREFER_THEIRS:
             return theirs
         conflicts.append(path)
         return ours
@@ -41,7 +44,10 @@ def merge(base, ours, theirs, path):
             if b is MISSING:
                 out[k] = t
             elif t != b:
-                conflicts.append(path + "." + k)
+                if PREFER_THEIRS:
+                    out[k] = t
+                else:
+                    conflicts.append(path + "." + k)
             continue
         if t is MISSING:
             if b is MISSING or o != b:
