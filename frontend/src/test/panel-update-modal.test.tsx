@@ -69,14 +69,24 @@ describe('panel update modal', () => {
       upstreamVersion: 'v3.10.0',
     };
     const { rerender } = renderWithProviders(
-      <PanelUpdateModal open info={{ ...info, upstreamPending: true }} onClose={vi.fn()} />,
+      <PanelUpdateModal
+        open
+        info={{ ...info, upstreamPending: true }}
+        onClose={vi.fn()}
+        onBusy={vi.fn()}
+      />,
     );
     expect(
       screen.getByText('Official 3X-UI v3.10.0 is out but not in this build yet'),
     ).toBeTruthy();
 
     rerender(
-      <PanelUpdateModal open info={{ ...info, upstreamPending: false }} onClose={vi.fn()} />,
+      <PanelUpdateModal
+        open
+        info={{ ...info, upstreamPending: false }}
+        onClose={vi.fn()}
+        onBusy={vi.fn()}
+      />,
     );
     expect(screen.queryByText(/is out but not in this build yet/)).toBeNull();
   });
