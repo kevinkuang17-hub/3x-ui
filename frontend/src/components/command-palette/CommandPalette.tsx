@@ -364,6 +364,7 @@ export default function CommandPalette() {
           'shadowsocks',
           'wireguard',
           'hysteria',
+          'masque',
         ],
         icon: <ImportOutlined />,
       },
