@@ -36,6 +36,26 @@ func TestIsNewerVersion(t *testing.T) {
 	}
 }
 
+// The panel warns that the sync is behind only when official 3X-UI is really ahead of every fork
+// release: v3.10.0-k1 already carries v3.10.0.
+func TestUpstreamPending(t *testing.T) {
+	cases := []struct {
+		upstream, fork string
+		want           bool
+	}{
+		{"v3.10.0", "v3.9.0-k12", true},
+		{"v3.10.0", "v3.10.0-k1", false},
+		{"v3.10.0", "v3.10.0-k3", false},
+		{"v3.9.0", "v3.10.0-k1", false},
+		{"nightly", "v3.10.0-k1", false},
+	}
+	for _, tc := range cases {
+		if got := upstreamPending(tc.upstream, tc.fork); got != tc.want {
+			t.Errorf("upstreamPending(%q, %q) = %v, want %v", tc.upstream, tc.fork, got, tc.want)
+		}
+	}
+}
+
 func TestShellQuote(t *testing.T) {
 	if got := shellQuote("/usr/bin/curl"); got != "'/usr/bin/curl'" {
 		t.Fatalf("unexpected quote result: %s", got)

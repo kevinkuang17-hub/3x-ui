@@ -295,7 +295,10 @@
       "accessBlocked": "ЗАБЛОКОВАНО",
       "accessProxy": "ЧЕРЕЗ ПРОКСІ",
       "importKeepHostSettings": "Зберегти налаштування цієї машини",
-      "importKeepHostSettingsDesc": "Залишає адреси та порти цієї панелі, базовий шлях, сертифікати та посвідчення для вузлів замість тих, що у завантаженому файлі."
+      "importKeepHostSettingsDesc": "Залишає адреси та порти цієї панелі, базовий шлях, сертифікати та посвідчення для вузлів замість тих, що у завантаженому файлі.",
+      "upstreamPending": "Official 3X-UI {version} is out but not in this build yet",
+      "upstreamPendingDesc": "The fork syncs official releases every morning and publishes them with its changes. If this stays for more than a day, the automatic merge needs a hand: see the open issue on the fork's GitHub page.",
+      "upstreamPendingTag": "Official {version} pending"
     },
     "inbounds": {
       "totalDownUp": "Всього надісланих/отриманих",

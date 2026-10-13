@@ -201,6 +201,9 @@ export default function IndexPage() {
                     panelVersion={displayVersion}
                     latestVersion={panelUpdateInfo.latestVersion}
                     updateAvailable={panelUpdateInfo.updateAvailable}
+                    upstreamPending={
+                      panelUpdateInfo.upstreamPending ? panelUpdateInfo.upstreamVersion : undefined
+                    }
                     onStopXray={stopXray}
                     onRestartXray={restartXray}
                     onOpenLogs={() => setLogsOpen(true)}

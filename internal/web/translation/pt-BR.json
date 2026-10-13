@@ -295,7 +295,10 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "Manter as configurações desta máquina",
-      "importKeepHostSettingsDesc": "Mantém os endereços de escuta, as portas, o caminho base, os certificados e a identidade de nó deste painel em vez de obtê-los do arquivo enviado."
+      "importKeepHostSettingsDesc": "Mantém os endereços de escuta, as portas, o caminho base, os certificados e a identidade de nó deste painel em vez de obtê-los do arquivo enviado.",
+      "upstreamPending": "Official 3X-UI {version} is out but not in this build yet",
+      "upstreamPendingDesc": "The fork syncs official releases every morning and publishes them with its changes. If this stays for more than a day, the automatic merge needs a hand: see the open issue on the fork's GitHub page.",
+      "upstreamPendingTag": "Official {version} pending"
     },
     "inbounds": {
       "totalDownUp": "Total Enviado/Recebido",

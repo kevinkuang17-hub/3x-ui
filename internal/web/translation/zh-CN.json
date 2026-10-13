@@ -295,7 +295,10 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "保留本机设置",
-      "importKeepHostSettingsDesc": "保留本面板的监听地址、端口、基础路径、证书和节点身份，而不是使用上传文件中的值。"
+      "importKeepHostSettingsDesc": "保留本面板的监听地址、端口、基础路径、证书和节点身份，而不是使用上传文件中的值。",
+      "upstreamPending": "官方 3X-UI {version} 已发布，本系统还没有同步",
+      "upstreamPendingDesc": "系统每天早上自动合并官方新版并发布（保留我们的修改）。如果超过一天还在提示，说明自动合并遇到冲突需要人工处理，GitHub 仓库里会有一条“同步失败”的 Issue，也会发邮件通知。",
+      "upstreamPendingTag": "官方 {version} 待同步"
     },
     "inbounds": {
       "totalDownUp": "总上传 / 下载",

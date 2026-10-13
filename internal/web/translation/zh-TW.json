@@ -295,7 +295,10 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "保留本機設定",
-      "importKeepHostSettingsDesc": "保留本面板的監聽位址、連接埠、基礎路徑、憑證與節點身分，而不是使用上傳檔案中的值。"
+      "importKeepHostSettingsDesc": "保留本面板的監聽位址、連接埠、基礎路徑、憑證與節點身分，而不是使用上傳檔案中的值。",
+      "upstreamPending": "官方 3X-UI {version} 已發布，本系統還沒有同步",
+      "upstreamPendingDesc": "系統每天早上自動合併官方新版並發布（保留我們的修改）。如果超過一天還在提示，說明自動合併遇到衝突需要人工處理，GitHub 倉庫裡會有一條「同步失敗」的 Issue，也會發郵件通知。",
+      "upstreamPendingTag": "官方 {version} 待同步"
     },
     "inbounds": {
       "totalDownUp": "總上傳 / 下載",

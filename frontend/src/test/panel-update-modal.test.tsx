@@ -59,4 +59,25 @@ describe('panel update modal', () => {
       tip: 'Installation is in progress, please do not refresh this page (dev+new)',
     });
   });
+
+  it('warns when official 3X-UI is ahead of every release of this build', () => {
+    const info = {
+      channel: 'stable',
+      currentVersion: '3.9.0-k12',
+      latestVersion: 'v3.9.0-k12',
+      updateAvailable: false,
+      upstreamVersion: 'v3.10.0',
+    };
+    const { rerender } = renderWithProviders(
+      <PanelUpdateModal open info={{ ...info, upstreamPending: true }} onClose={vi.fn()} />,
+    );
+    expect(
+      screen.getByText('Official 3X-UI v3.10.0 is out but not in this build yet'),
+    ).toBeTruthy();
+
+    rerender(
+      <PanelUpdateModal open info={{ ...info, upstreamPending: false }} onClose={vi.fn()} />,
+    );
+    expect(screen.queryByText(/is out but not in this build yet/)).toBeNull();
+  });
 });

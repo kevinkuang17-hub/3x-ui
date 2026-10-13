@@ -25,6 +25,8 @@ interface OverviewActionBarProps {
   panelVersion: string;
   latestVersion: string;
   updateAvailable: boolean;
+  // Official 3X-UI release the fork has not shipped yet; empty when in sync.
+  upstreamPending?: string;
   onStopXray: () => void;
   onRestartXray: () => void;
   onOpenLogs: () => void;
@@ -59,6 +61,7 @@ export default function OverviewActionBar({
   panelVersion,
   latestVersion,
   updateAvailable,
+  upstreamPending,
   onStopXray,
   onRestartXray,
   onOpenLogs,
@@ -170,6 +173,14 @@ export default function OverviewActionBar({
       {status.xray.state === 'running' && status.xray.errorMsg ? (
         <Tooltip title={<span className="ov-error-detail">{status.xray.errorMsg}</span>}>
           <Tag color="error">{t('pages.index.xrayStatusError')}</Tag>
+        </Tooltip>
+      ) : null}
+
+      {upstreamPending ? (
+        <Tooltip title={t('pages.index.upstreamPendingDesc')}>
+          <Tag className="ov-update-tag" color="orange" onClick={onOpenPanelUpdate}>
+            {t('pages.index.upstreamPendingTag', { version: formatPanelVersion(upstreamPending) })}
+          </Tag>
         </Tooltip>
       ) : null}
 

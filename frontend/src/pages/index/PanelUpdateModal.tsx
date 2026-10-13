@@ -17,6 +17,8 @@ export interface PanelUpdateInfo {
   currentCommit?: string;
   latestCommit?: string;
   updateAvailable: boolean;
+  upstreamVersion?: string;
+  upstreamPending?: boolean;
 }
 
 interface BusyEvent {
@@ -137,6 +139,18 @@ export default function PanelUpdateModal({
             type="warning"
             className="mb-12"
             title={t('pages.index.panelUpdateDesc')}
+            showIcon
+          />
+        )}
+
+        {info.upstreamPending && (
+          <Alert
+            type="warning"
+            className="mb-12"
+            title={t('pages.index.upstreamPending', {
+              version: formatPanelVersion(info.upstreamVersion),
+            })}
+            description={t('pages.index.upstreamPendingDesc')}
             showIcon
           />
         )}

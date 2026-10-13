@@ -402,3 +402,20 @@ jobs:
           fi
 
           retry gh release upload dev-latest dev-artifacts/*.tar.gz dev-artifacts/*.zip dev-artifacts/*.sha256 --clobber
+
+  # A release that fails to build leaves servers on the old version silently; open an issue instead.
+  notify-failure:
+    needs: [build, build-windows]
+    if: failure() && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open an issue for the failed release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create release-failed --color B60205 --description "版本编译失败" -R "$GITHUB_REPOSITORY" 2>/dev/null || true
+          gh issue create -R "$GITHUB_REPOSITORY" --label release-failed \
+            --title "发布 ${GITHUB_REF_NAME} 编译失败，需要处理" \
+            --body "版本 ${GITHUB_REF_NAME} 编译失败，服务器暂时收不到这个版本。运行记录：${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

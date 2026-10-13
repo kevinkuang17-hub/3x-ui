@@ -295,7 +295,10 @@
       "accessBlocked": "BLOCKED",
       "accessProxy": "PROXY",
       "importKeepHostSettings": "حفظ تنظیمات این دستگاه",
-      "importKeepHostSettingsDesc": "آدرس‌ها و پورت‌های شنود، مسیر پایه، گواهی‌ها و هویت نودِ همین پنل را نگه می‌دارد و آن‌ها را از فایل بارگذاری‌شده نمی‌گیرد."
+      "importKeepHostSettingsDesc": "آدرس‌ها و پورت‌های شنود، مسیر پایه، گواهی‌ها و هویت نودِ همین پنل را نگه می‌دارد و آن‌ها را از فایل بارگذاری‌شده نمی‌گیرد.",
+      "upstreamPending": "Official 3X-UI {version} is out but not in this build yet",
+      "upstreamPendingDesc": "The fork syncs official releases every morning and publishes them with its changes. If this stays for more than a day, the automatic merge needs a hand: see the open issue on the fork's GitHub page.",
+      "upstreamPendingTag": "Official {version} pending"
     },
     "inbounds": {
       "totalDownUp": "دریافت/ارسال کل",

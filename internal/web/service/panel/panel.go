@@ -38,6 +38,10 @@ type PanelUpdateInfo struct {
 	CurrentCommit   string `json:"currentCommit,omitempty"`
 	LatestCommit    string `json:"latestCommit,omitempty"`
 	UpdateAvailable bool   `json:"updateAvailable"`
+	// UpstreamVersion is official 3X-UI's latest release; UpstreamPending is true while it is newer
+	// than anything this fork has released, i.e. the daily sync has not shipped it (yet).
+	UpstreamVersion string `json:"upstreamVersion,omitempty"`
+	UpstreamPending bool   `json:"upstreamPending,omitempty"`
 }
 
 const (
@@ -138,12 +142,24 @@ func (s *PanelService) GetUpdateInfo() (*PanelUpdateInfo, error) {
 		return nil, err
 	}
 	current := config.GetBaseVersion()
-	return &PanelUpdateInfo{
+	info := &PanelUpdateInfo{
 		Channel:         "stable",
 		CurrentVersion:  current,
 		LatestVersion:   latest,
 		UpdateAvailable: isNewerVersion(latest, current),
-	}, nil
+	}
+	if upstream, err := fetchReleaseURL(upstreamLatestURL); err == nil {
+		info.UpstreamVersion = upstream.TagName
+		info.UpstreamPending = upstreamPending(upstream.TagName, latest)
+	}
+	return info, nil
+}
+
+// upstreamPending reports an official release newer than the fork's latest one; an unparsable
+// tag on either side never raises the alarm.
+func upstreamPending(upstream, forkLatest string) bool {
+	cmp, ok := version.Compare(upstream, forkLatest)
+	return ok && cmp > 0
 }
 
 // devChannelActive reports whether self-update should track the rolling dev
@@ -435,6 +451,12 @@ func fetchPanelRelease(tag string) (*service.Release, error) {
 	if tag != "" {
 		url = "https://api.github.com/repos/kevinkuang17-hub/3x-ui/releases/tags/" + tag
 	}
+	return fetchReleaseURL(url)
+}
+
+const upstreamLatestURL = "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest"
+
+func fetchReleaseURL(url string) (*service.Release, error) {
 	client := (&service.SettingService{}).NewProxiedHTTPClient(10 * time.Second)
 	req, reqErr := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
 	if reqErr != nil {
