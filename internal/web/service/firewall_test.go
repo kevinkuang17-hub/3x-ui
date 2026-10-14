@@ -58,12 +58,12 @@ func TestInboundFirewallRulesOpenUDPForHysteria(t *testing.T) {
 }
 
 func TestAllowPortsRunsUfwOnlyWhenActive(t *testing.T) {
-	calls := fakeUfw(t, "Status: inactive\n")
+	fakeUfw(t, "Status: inactive\n")
 	svc := &ProtectService{}
 	if _, err := svc.AllowPorts([]FirewallRule{{443, "udp"}}); err == nil {
 		t.Fatal("with ufw inactive there is nothing to open, and saying so beats a silent no-op")
 	}
-	calls = fakeUfw(t, "Status: active\n\nTo Action From\n")
+	calls := fakeUfw(t, "Status: active\n\nTo Action From\n")
 	done, err := svc.AllowPorts([]FirewallRule{{443, "udp"}, {443, "udp"}, {8443, "tcp"}})
 	if err != nil || len(done) != 2 {
 		t.Fatalf("done = %v, %v", done, err)
