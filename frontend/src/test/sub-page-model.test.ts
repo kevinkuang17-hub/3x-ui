@@ -4,6 +4,7 @@ import {
   buildSubApps,
   daysUntil,
   detectPlatform,
+  hasSurgeUsableLink,
   resolveSubStatus,
   usagePercent,
 } from '@/pages/sub/subPageModel';
@@ -144,5 +145,32 @@ describe('buildSubApps', () => {
     expect(buildSubApps(withQuery).ios[0].url).toBe(
       `shadowrocket://add/sub://${rocket}?remark=Nova%20Net`,
     );
+  });
+});
+
+describe('Stash and Surge import', () => {
+  it('offers one-tap import into Stash and Surge with their own profile URLs', () => {
+    const apps = buildSubApps({
+      subUrl: 'https://sub.example.com/sub/abc',
+      sId: 'abc',
+      subTitle: '',
+      stashUrl: 'https://sub.example.com/stash/abc',
+      surgeUrl: 'https://sub.example.com/surge/abc',
+    });
+    const byName = Object.fromEntries(apps.ios.map((a) => [a.name, a.url]));
+    expect(byName.Stash).toBe(
+      'stash://install-config?url=https%3A%2F%2Fsub.example.com%2Fstash%2Fabc',
+    );
+    expect(byName.Surge).toBe(
+      'surge:///install-config?url=https%3A%2F%2Fsub.example.com%2Fsurge%2Fabc',
+    );
+    const without = buildSubApps({ subUrl: 'https://x/sub/a', sId: 'a', subTitle: '' });
+    expect(without.ios.some((a) => a.name === 'Stash' || a.name === 'Surge')).toBe(false);
+  });
+
+  it('knows when Surge has no line to connect with', () => {
+    expect(hasSurgeUsableLink(['vless://u@h:443?security=reality#US A'])).toBe(false);
+    expect(hasSurgeUsableLink(['vless://u@h:443#A', 'hysteria2://p@h:443#Hy2'])).toBe(true);
+    expect(hasSurgeUsableLink(['trojan://p@h:443#T'])).toBe(true);
   });
 });

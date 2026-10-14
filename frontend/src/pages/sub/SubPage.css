@@ -533,3 +533,9 @@ a.sub-row-title:hover {
     display: none;
   }
 }
+
+.sub-row-note {
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}

@@ -105,7 +105,8 @@
     "support": "支持",
     "qrTitle": "扫码。导入。连接。",
     "qrHint": "使用客户端应用扫描。请勿泄露此二维码。",
-    "saveQr": "保存二维码"
+    "saveQr": "保存二维码",
+    "surgeNoNodes": "这个订阅里没有 Surge 能用的线路（Surge 不支持 VLESS/Reality），需要 Hysteria2 或 Trojan 线路。"
   },
   "menu": {
     "theme": "主题",

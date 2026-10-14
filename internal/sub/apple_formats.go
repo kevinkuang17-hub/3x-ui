@@ -23,15 +23,18 @@ const (
 	// Shadowrocket gets a rules-only config (nodes come from its subscription), sing-box a full profile.
 	formatShadowrocket = "shadowrocket"
 	formatSingbox      = "singbox"
+	// Stash reads Clash configs but not every Mihomo addition; it gets a filtered Clash profile.
+	formatStash = "stash"
 )
 
 var applePaths = map[string]string{
 	formatSurge: "/surge/", formatLoon: "/loon/", formatQX: "/qx/",
-	formatShadowrocket: "/shadowrocket/", formatSingbox: "/singbox/",
+	formatShadowrocket: "/shadowrocket/", formatSingbox: "/singbox/", formatStash: "/stash/",
 }
 
 var appleURLKeys = map[string]string{
 	formatSurge: "Surge", formatLoon: "Loon", formatQX: "Qx", formatShadowrocket: "Shadowrocket", formatSingbox: "Singbox",
+	formatStash: "Stash",
 }
 
 func (a *SUBController) initAppleFormats(g *gin.RouterGroup) {
@@ -39,7 +42,7 @@ func (a *SUBController) initAppleFormats(g *gin.RouterGroup) {
 	if !a.clashEnabled {
 		return
 	}
-	for _, format := range []string{formatSurge, formatLoon, formatQX, formatShadowrocket, formatSingbox} {
+	for _, format := range []string{formatSurge, formatLoon, formatQX, formatShadowrocket, formatSingbox, formatStash} {
 		path := applePaths[format]
 		if owner := a.configuredSubscriptionPathOwner(path); owner != "" {
 			continue
@@ -81,6 +84,17 @@ func (a *SUBController) subApple(c *gin.Context, format string) {
 	}
 	if clashSub == "" && header == "" {
 		writeSubError(c, nil)
+		return
+	}
+	if format == formatStash {
+		body, err := renderStash(clashSub)
+		if err != nil {
+			writeSubError(c, err)
+			return
+		}
+		a.ApplyCommonHeaders(c, header, a.updateInterval, "", "", "", "", false, "", false)
+		c.Data(http.StatusOK, "text/yaml; charset=utf-8", []byte(body))
+		a.recordSubscriptionFetch(c)
 		return
 	}
 	var doc struct {

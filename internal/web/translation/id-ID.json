@@ -105,7 +105,8 @@
     "support": "Dukungan",
     "qrTitle": "Pindai. Impor. Terhubung.",
     "qrHint": "Pindai dengan aplikasi klien Anda. Jaga kerahasiaan kode ini.",
-    "saveQr": "Simpan QR"
+    "saveQr": "Simpan QR",
+    "surgeNoNodes": "Surge cannot use any line of this subscription (Surge has no VLESS/REALITY); ask for a Hysteria2 or Trojan line."
   },
   "menu": {
     "theme": "Tema",

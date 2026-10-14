@@ -105,7 +105,8 @@
     "support": "الدعم",
     "qrTitle": "امسح. استورد. اتصل.",
     "qrHint": "امسح الرمز بتطبيق العميل. لا تشارك هذا الرمز مع أحد.",
-    "saveQr": "حفظ QR"
+    "saveQr": "حفظ QR",
+    "surgeNoNodes": "Surge cannot use any line of this subscription (Surge has no VLESS/REALITY); ask for a Hysteria2 or Trojan line."
   },
   "menu": {
     "theme": "الثيم",

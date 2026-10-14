@@ -48,6 +48,14 @@ export interface SubAppSource {
   // sing-box profile and Shadowrocket rules config; empty when the panel does not serve them.
   singboxUrl?: string;
   shadowrocketUrl?: string;
+  // Stash (filtered Clash profile) and Surge profile URLs; empty when the panel does not serve them.
+  stashUrl?: string;
+  surgeUrl?: string;
+}
+
+// Surge has no VLESS, so a subscription of only VLESS/REALITY lines gives it nothing to connect with.
+export function hasSurgeUsableLink(links: readonly string[]): boolean {
+  return links.some((l) => /^(ss|vmess|trojan|hysteria2|hy2|tuic):\/\//i.test(l.trim()));
 }
 
 export function buildSubApps({
@@ -56,6 +64,8 @@ export function buildSubApps({
   subTitle,
   singboxUrl,
   shadowrocketUrl,
+  stashUrl,
+  surgeUrl,
 }: SubAppSource): Record<AppPlatform, SubApp[]> {
   const encSub = encodeURIComponent(subUrl);
   const profileName = encodeURIComponent(subTitle || sId);
@@ -90,6 +100,12 @@ export function buildSubApps({
       },
       ...(shadowrocketUrl
         ? [{ name: 'Shadowrocket Rules', url: `shadowrocket://config/add/${shadowrocketUrl}` }]
+        : []),
+      ...(stashUrl
+        ? [{ name: 'Stash', url: `stash://install-config?url=${encodeURIComponent(stashUrl)}` }]
+        : []),
+      ...(surgeUrl
+        ? [{ name: 'Surge', url: `surge:///install-config?url=${encodeURIComponent(surgeUrl)}` }]
         : []),
       v2box,
       { name: 'Streisand', url: `streisand://import/${encSub}` },

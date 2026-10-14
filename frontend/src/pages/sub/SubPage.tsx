@@ -18,7 +18,13 @@ import SubConfigsTab from './SubConfigsTab';
 import SubHeader from './SubHeader';
 import SubHero from './SubHero';
 import SubLinksTab from './SubLinksTab';
-import { buildSubApps, daysUntil, detectPlatform, resolveSubStatus } from './subPageModel';
+import {
+  buildSubApps,
+  daysUntil,
+  detectPlatform,
+  hasSurgeUsableLink,
+  resolveSubStatus,
+} from './subPageModel';
 import './SubPage.css';
 
 const subData = window.__SUB_PAGE_DATA__ || {};
@@ -33,6 +39,7 @@ const appleUrls = {
   qx: subData.subQxUrl || '',
   shadowrocket: subData.subShadowrocketUrl || '',
   singbox: subData.subSingboxUrl || '',
+  stash: subData.subStashUrl || '',
 };
 const subTitle = subData.subTitle || '';
 const subSupportUrl = subData.subSupportUrl || '';
@@ -69,6 +76,8 @@ const apps = buildSubApps({
   subTitle,
   singboxUrl: appleUrls.singbox,
   shadowrocketUrl: appleUrls.shadowrocket,
+  stashUrl: appleUrls.stash,
+  surgeUrl: appleUrls.surge,
 });
 const initialPlatform = detectPlatform(navigator.userAgent);
 const RTL_LANGUAGES = new Set(['fa-IR', 'ar-EG']);
@@ -113,6 +122,7 @@ export default function SubPage() {
             subJsonUrl={subJsonUrl}
             subClashUrl={subClashUrl}
             appleUrls={appleUrls}
+            surgeNoNodes={!!appleUrls.surge && links.length > 0 && !hasSurgeUsableLink(links)}
             onCopy={copy}
           />
         ),
