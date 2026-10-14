@@ -177,8 +177,10 @@ export default function QuickInboundModal({
   };
 
   const needsReality = checked.some(usesReality);
+  // When the website already runs behind REALITY, new REALITY inbounds front it too, no scan needed.
+  const selfTarget = rec?.realityTarget && rec.domain ? rec.realityTarget : '';
   useEffect(() => {
-    if (open && needsReality && !scanned && !scanning) void scanReality();
+    if (open && needsReality && !selfTarget && !scanned && !scanning) void scanReality();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [open, needsReality]);
 
@@ -232,10 +234,10 @@ export default function QuickInboundModal({
           return t('pages.inbounds.quick.portTaken', { port: a.port });
       }
     }
-    if (rows.some((r) => usesReality(r.id)) && !reality)
+    if (rows.some((r) => usesReality(r.id)) && !reality && !selfTarget)
       return t('pages.inbounds.quick.targetNone');
     return '';
-  }, [rows, inbounds, reality, t]);
+  }, [rows, inbounds, reality, selfTarget, t]);
 
   const groups = useMemo(() => {
     const counts = new Map<string, number>();
@@ -283,8 +285,9 @@ export default function QuickInboundModal({
       domain: rec.domain,
       certFile: rec.certFile,
       keyFile: rec.keyFile,
-      realityTarget: reality?.target ?? '',
-      realityServerNames: reality?.serverNames ?? [],
+      realityTarget: selfTarget || (reality?.target ?? ''),
+      realityServerNames: selfTarget ? [rec.domain] : (reality?.serverNames ?? []),
+      realityXver: selfTarget ? 1 : undefined,
       realityPrivateKey: keys.privateKey,
       realityPublicKey: keys.publicKey,
       masquerade,
@@ -587,6 +590,10 @@ export default function QuickInboundModal({
                 {scanning ? (
                   <Typography.Text type="secondary">
                     {t('pages.inbounds.quick.targetScanning')}
+                  </Typography.Text>
+                ) : selfTarget ? (
+                  <Typography.Text code>
+                    {t('pages.inbounds.quick.targetSelf', { domain: rec.domain })}
                   </Typography.Text>
                 ) : reality ? (
                   <Typography.Text code>{reality.serverNames[0] || reality.target}</Typography.Text>

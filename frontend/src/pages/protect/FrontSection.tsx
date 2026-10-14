@@ -16,7 +16,8 @@ export interface FrontView {
   conflict: string;
   port: number;
   panelPort: number;
-  running: { listening: boolean; frontOnly: boolean; error: string };
+  running: { listening: boolean; frontOnly: boolean; error: string; addr?: string };
+  loopback?: boolean;
 }
 
 export const frontKey = () => [...keys.protect.root(), 'front'] as const;
@@ -39,9 +40,14 @@ export function siteOrigin(port: number): string {
   return port === 443 ? `https://${host}` : `https://${host}:${port}`;
 }
 
+// publicPort is where visitors reach the website: 443 through REALITY when it sits behind it.
+export function publicPort(front: FrontView): number {
+  return front.loopback ? 443 : front.port;
+}
+
 // publicSiteURL is the decoy's address as visitors see it once the website runs.
 export function publicSiteURL(front: FrontView | undefined): string {
-  if (front?.running.listening) return `${siteOrigin(front.port)}/`;
+  if (front?.running.listening) return `${siteOrigin(publicPort(front))}/`;
   return '/';
 }
 
@@ -60,8 +66,12 @@ export default function FrontSection() {
   const [restarting, setRestarting] = useState(false);
   const [portDraft, setPortDraft] = useState<number | null>(null);
   const save = useMutation({
-    mutationFn: (body: { enabled: boolean; frontOnly: boolean; port: number }) =>
-      HttpUtil.post(`${API}/front`, body, { headers: { 'Content-Type': 'application/json' } }),
+    mutationFn: (body: {
+      enabled: boolean;
+      frontOnly: boolean;
+      port: number;
+      loopback?: boolean;
+    }) => HttpUtil.post(`${API}/front`, body, { headers: { 'Content-Type': 'application/json' } }),
     onSuccess: (msg, body) => {
       if (!msg?.success) return;
       setRestarting(true);
@@ -78,8 +88,8 @@ export default function FrontSection() {
   });
   if (!front) return null;
   const base = (window.X_UI_BASE_PATH || '/').replace(/\/+$/, '');
-  const panelURL = `${siteOrigin(front.port)}${base}/`;
-  const onFront = onFrontPort(front.port);
+  const panelURL = `${siteOrigin(publicPort(front))}${base}/`;
+  const onFront = onFrontPort(publicPort(front));
   const port = portDraft ?? front.port;
   const portChanged = port !== front.port;
   return (
@@ -119,8 +129,27 @@ export default function FrontSection() {
           type="success"
           showIcon
           style={{ marginBottom: 8 }}
-          title={t('pages.protect.frontRunning', { url: `${siteOrigin(front.port)}/` })}
+          title={t('pages.protect.frontRunning', { url: `${siteOrigin(publicPort(front))}/` })}
           description={t('pages.protect.frontPanelURL', { url: panelURL })}
+        />
+      )}
+      {front.loopback && (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 8 }}
+          title={t('pages.protect.frontBehindReality', { addr: front.running.addr || front.port })}
+          action={
+            <Button
+              size="small"
+              loading={save.isPending}
+              onClick={() =>
+                save.mutate({ enabled: true, frontOnly: false, port: 443, loopback: false })
+              }
+            >
+              {t('pages.protect.frontMakePublic')}
+            </Button>
+          }
         />
       )}
       {restarting && (
@@ -147,7 +176,7 @@ export default function FrontSection() {
             min={1}
             max={65535}
             value={port}
-            disabled={front.frontOnly}
+            disabled={front.frontOnly || !!front.loopback}
             onChange={(v) => setPortDraft(v ?? front.port)}
           />
           {portChanged && front.enabled && (
@@ -189,7 +218,12 @@ export default function FrontSection() {
       </Space>
       {front.running.listening && (
         <div style={{ marginTop: 8 }}>
-          <Button size="small" href={`${siteOrigin(front.port)}/`} target="_blank" rel="noreferrer">
+          <Button
+            size="small"
+            href={`${siteOrigin(publicPort(front))}/`}
+            target="_blank"
+            rel="noreferrer"
+          >
             {t('pages.protect.decoyOpen')}
           </Button>
         </div>

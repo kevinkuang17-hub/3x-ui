@@ -111,6 +111,7 @@ func run(root, outDir string) error {
 				"DnsConfig",
 				"RuleSetPick",
 				"PortCheck",
+				"RealitySelfPlan",
 				"GeodataTokenIssue",
 				"AmneziaWGLogs",
 				"PeerActivity",

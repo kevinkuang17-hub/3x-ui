@@ -881,6 +881,7 @@ export const InboundRecommendationSchema = z.object({
   keyFile: z.string(),
   nodeId: z.number().int().nullable().optional(),
   pointsHere: z.boolean(),
+  realityTarget: z.string(),
   recommended: z.string(),
   serverIps: z.array(z.string()),
   tcpPorts: z.array(z.number().int()),
@@ -1119,6 +1120,12 @@ export const RealityScanResultSchema = z.object({
   x25519: z.boolean(),
 });
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
+
+export const RealitySelfPlanSchema = z.object({
+  domain: z.string(),
+  internalPort: z.number().int(),
+});
+export type RealitySelfPlan = z.infer<typeof RealitySelfPlanSchema>;
 
 export const ReportSchema = z.object({
   address: z.string(),

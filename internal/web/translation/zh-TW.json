@@ -836,7 +836,8 @@
         "hyDecoy": "訪問者打開時顯示面板的偽裝網站（偽裝）",
         "hyUdpNote": "Hysteria2 走 UDP {port}，雲服務器安全組也要放行 UDP {port}。",
         "hyDecoyMissing": "已創建，但沒有設置偽裝網站：{msg}",
-        "openFirewall": "在本服務器防火牆（ufw）放行新入站的端口"
+        "openFirewall": "在本服務器防火牆（ufw）放行新入站的端口",
+        "targetSelf": "自己的網站（{domain}）"
       },
       "diagnose": {
         "action": "診斷",
@@ -2955,7 +2956,21 @@
       "firewallInactive": "本服務器沒有開啟 ufw；這裡只有雲服務商的防火牆（安全組）可能拦截端口。",
       "firewallAllowAll": "一键放行全部入站端口",
       "firewallCloud": "雲服務器的安全組（阿裡雲、腾訊雲、AWS 等）是另一道防火牆，需要在服務商後臺同樣放行這些端口，Hysteria2 要放行 UDP。",
-      "firewallOpened": "已在 ufw 放行端口"
+      "firewallOpened": "已在 ufw 放行端口",
+      "realitySelfTitle": "Reality 使用自己的網站（推薦）",
+      "realitySelfDesc": "把 Reality 入站放到 TCP 443，SNI 用你自己的網域，偽裝網站挪到它後面。任何人打開 https://你的網域/ 或探測伺服器，看到的都是你的真實網站和有效憑證；只有帶 Reality 金鑰的用戶端能走代理。Hysteria2 繼續用 UDP 443。過程中面板會重啟一次。",
+      "realitySelfActive": "已啟用：Reality 在 443，網站在它後面運行（{addr}）。",
+      "realitySelfDone": "完成：Reality 已在 443 連接埠為 https://{domain}/ 提供服務",
+      "realitySelfUpdateSubs": "入站連接埠已改為 443，用戶端需要更新訂閱。",
+      "realitySelfNoInbound": "本伺服器還沒有 VLESS + Reality 入站，請先用「一鍵入站」建立一個。",
+      "realitySelfRun": "一鍵設定",
+      "realitySelfStepMove": "網站挪到內部連接埠",
+      "realitySelfStepRestart": "重啟面板",
+      "realitySelfStepReality": "Reality 改到 443",
+      "realitySelfTimeout": "一分鐘內沒等到面板帶著內部網站重啟完成。請重新整理本頁後再點一次。",
+      "realitySelfDoneMsg": "Reality 已改到 443",
+      "frontBehindReality": "網站在 Reality 後面運行（{addr}），訪問者透過 443 連接埠打開 https://你的網域/。",
+      "frontMakePublic": "改回公開網站"
     }
   },
   "tgbot": {

@@ -836,7 +836,8 @@
         "hyDecoy": "Show the panel's decoy website to visitors (masquerade)",
         "hyUdpNote": "Hysteria2 uses UDP {port}: open UDP {port} in the cloud security group as well.",
         "hyDecoyMissing": "Created without a website: {msg}",
-        "openFirewall": "Open the new ports in this server's firewall (ufw)"
+        "openFirewall": "Open the new ports in this server's firewall (ufw)",
+        "targetSelf": "your own website ({domain})"
       },
       "diagnose": {
         "action": "Diagnose",
@@ -2955,7 +2956,21 @@
       "firewallInactive": "ufw is not active on this server; only the cloud provider's firewall can block ports here.",
       "firewallAllowAll": "Open all inbound ports",
       "firewallCloud": "Your VPS provider's security group (Aliyun, Tencent, AWS, …) is a separate firewall: open the same ports there, UDP included for Hysteria2.",
-      "firewallOpened": "Ports opened in ufw"
+      "firewallOpened": "Ports opened in ufw",
+      "realitySelfTitle": "REALITY with your own website (recommended)",
+      "realitySelfDesc": "Puts a REALITY inbound on TCP 443 with your own domain as its SNI, and moves the decoy website behind it. Anyone who opens https://your-domain/ (or probes the server) sees your real website with a valid certificate; only clients with the REALITY key get through. Hysteria2 keeps UDP 443. The panel restarts once.",
+      "realitySelfActive": "Active: REALITY is on 443, the website runs behind it at {addr}.",
+      "realitySelfDone": "Done: REALITY now runs on 443 in front of https://{domain}/",
+      "realitySelfUpdateSubs": "The inbound moved to port 443: clients must update their subscription.",
+      "realitySelfNoInbound": "There is no VLESS + REALITY inbound on this server yet; create one with the one-click inbound dialog first.",
+      "realitySelfRun": "Set up",
+      "realitySelfStepMove": "Move the website inside",
+      "realitySelfStepRestart": "Restart the panel",
+      "realitySelfStepReality": "Move REALITY to 443",
+      "realitySelfTimeout": "The panel did not come back with the website on its internal port within a minute. Reload this page and press the button again.",
+      "realitySelfDoneMsg": "REALITY moved to 443",
+      "frontBehindReality": "The website runs behind REALITY at {addr}; visitors reach it on https://your-domain/ through port 443.",
+      "frontMakePublic": "Serve it publicly again"
     }
   },
   "tgbot": {

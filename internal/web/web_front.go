@@ -12,6 +12,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/proxyproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
@@ -35,12 +36,12 @@ func (s *Server) startFront(engine http.Handler, certFile, keyFile string) bool 
 		return false
 	}
 	if conflict := protect.FrontConflict(); conflict != "" {
-		logger.Warning("Front website on port 443 not started: already used by", conflict)
-		service.SetFrontStatus(service.FrontStatus{Error: "port 443 is used by " + conflict})
+		logger.Warning("Front website not started: its port is already used by", conflict)
+		service.SetFrontStatus(service.FrontStatus{Error: "the website port is used by " + conflict})
 		return false
 	}
 	fail := func(err error) bool {
-		logger.Warning("Front website on port 443 not started:", err)
+		logger.Warning("Front website not started:", err)
 		service.SetFrontStatus(service.FrontStatus{Error: err.Error()})
 		return false
 	}
@@ -48,9 +49,18 @@ func (s *Server) startFront(engine http.Handler, certFile, keyFile string) bool 
 	if err != nil {
 		return fail(err)
 	}
-	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", net.JoinHostPort("", strconv.Itoa(protect.FrontPort())))
+	host := ""
+	loopback := protect.FrontLoopback()
+	if loopback {
+		host = "127.0.0.1"
+	}
+	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", net.JoinHostPort(host, strconv.Itoa(protect.FrontPort())))
 	if err != nil {
 		return fail(err)
+	}
+	if loopback {
+		// Behind REALITY every visitor arrives from Xray on loopback; its PROXY line names the real one.
+		ln = &proxyproto.Listener{Listener: ln, HeaderTimeout: 5 * time.Second}
 	}
 	s.frontServer = &http.Server{
 		Handler:           engine,
@@ -62,6 +72,6 @@ func (s *Server) startFront(engine http.Handler, certFile, keyFile string) bool 
 	tlsLn := tls.NewListener(ln, &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12})
 	go network.ServeHTTP(s.frontServer, tlsLn, "Front website")
 	logger.Info("Front website running HTTPS on", ln.Addr())
-	service.SetFrontStatus(service.FrontStatus{Listening: true, FrontOnly: frontOnly})
+	service.SetFrontStatus(service.FrontStatus{Listening: true, FrontOnly: frontOnly, Addr: ln.Addr().String()})
 	return frontOnly
 }

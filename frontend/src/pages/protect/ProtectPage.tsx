@@ -35,6 +35,7 @@ import { setMessageInstance } from '@/utils/messageBus';
 import AppSidebar from '@/layouts/AppSidebar';
 import { keys } from '@/api/queryKeys';
 import FirewallCard from './FirewallCard';
+import RealitySelfCard from './RealitySelfCard';
 import DecoyCard from './DecoyCard';
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
@@ -501,6 +502,7 @@ export default function ProtectPage() {
           <Layout.Content id="content-layout" className="content-area">
             <Space orientation="vertical" size={16} style={{ width: '100%' }}>
               <DecoyCard />
+              <RealitySelfCard />
               <AccessCard />
               <CloudflareCard />
               <SpeedupCard />

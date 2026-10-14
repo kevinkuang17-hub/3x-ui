@@ -230,11 +230,24 @@ func (s *ProtectService) FrontPort() int {
 	return DefaultFrontPort
 }
 
+// FrontLoopback says the website listens on 127.0.0.1 only, as the target REALITY hands its
+// unauthenticated visitors to; the public 443 then belongs to the REALITY inbound.
+func (s *ProtectService) FrontLoopback() bool {
+	on, _ := s.settingService.getBool("decoyFrontLoopback")
+	return on
+}
+
+func (s *ProtectService) SetFrontLoopback(on bool) error {
+	return s.settingService.setString("decoyFrontLoopback", strconv.FormatBool(on))
+}
+
 // FrontStatus is what the running panel did with the front website at its last start.
 type FrontStatus struct {
 	Listening bool   `json:"listening"`
 	FrontOnly bool   `json:"frontOnly"`
 	Error     string `json:"error"`
+	// Addr is where the website listened, e.g. 127.0.0.1:24873 behind REALITY.
+	Addr string `json:"addr"`
 }
 
 var frontStatus atomic.Pointer[FrontStatus]
@@ -264,6 +277,7 @@ type FrontView struct {
 	Port      int         `json:"port"`
 	PanelPort int         `json:"panelPort"`
 	Running   FrontStatus `json:"running"`
+	Loopback  bool        `json:"loopback"`
 }
 
 // frontConflict names what already listens on the TCP port here: a local Xray inbound, the panel or
@@ -311,7 +325,7 @@ func (s *ProtectService) Front() *FrontView {
 	key, _ := s.settingService.GetKeyFile()
 	return &FrontView{
 		Enabled: enabled, FrontOnly: frontOnly, HasCert: cert != "" && key != "", Conflict: s.FrontConflict(),
-		Port: s.FrontPort(), PanelPort: s.panelPort(), Running: CurrentFrontStatus(),
+		Port: s.FrontPort(), PanelPort: s.panelPort(), Running: CurrentFrontStatus(), Loopback: s.FrontLoopback(),
 	}
 }
 

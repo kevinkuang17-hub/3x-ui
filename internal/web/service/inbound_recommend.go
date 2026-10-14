@@ -50,6 +50,8 @@ type InboundRecommendation struct {
 	Recommended string `json:"recommended" example:"tls"`
 	// Firewall is "ufw" when ufw filters this server, so new inbound ports must be opened in it.
 	Firewall string `json:"firewall" example:"ufw"`
+	// RealityTarget is the loopback website REALITY should front, when it runs behind REALITY.
+	RealityTarget string `json:"realityTarget" example:"127.0.0.1:24873"`
 }
 
 type InboundRecommendService struct {
@@ -245,6 +247,9 @@ func (s *InboundRecommendService) recommendLocal(ctx context.Context) *InboundRe
 	}
 	if fw := recommendFirewall(); fw.Active {
 		rec.Firewall = fw.Tool
+	}
+	if protect := (&ProtectService{}); protect.FrontLoopback() && CurrentFrontStatus().Listening {
+		rec.RealityTarget = CurrentFrontStatus().Addr
 	}
 	rec.TcpPorts = s.freePorts(nil, false, recommendTCPPorts, func(p int) bool { return recommendLocalPortFree(p, false) })
 	rec.UdpPorts = s.freePorts(nil, true, recommendUDPPorts, func(p int) bool { return recommendLocalPortFree(p, true) })

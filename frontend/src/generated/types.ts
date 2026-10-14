@@ -831,6 +831,7 @@ export interface InboundRecommendation {
   keyFile: string;
   nodeId?: number | null;
   pointsHere: boolean;
+  realityTarget: string;
   recommended: string;
   serverIps: string[];
   tcpPorts: number[];
@@ -1052,6 +1053,11 @@ export interface RealityScanResult {
   tls13: boolean;
   tlsVersion: string;
   x25519: boolean;
+}
+
+export interface RealitySelfPlan {
+  domain: string;
+  internalPort: number;
 }
 
 export interface Report {
