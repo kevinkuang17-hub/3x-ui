@@ -6,7 +6,10 @@ import {
 import { rawInboundToFormValues } from '@/lib/xray/inbound-form-adapter';
 import { coerceInboundJsonField } from '@/models/dbinbound';
 import { RealityStreamSettingsSchema } from '@/schemas/protocols/security/reality';
-import { HysteriaStreamSettingsSchema } from '@/schemas/protocols/stream/hysteria';
+import {
+  type HysteriaMasquerade,
+  HysteriaStreamSettingsSchema,
+} from '@/schemas/protocols/stream/hysteria';
 import { TcpStreamSettingsSchema } from '@/schemas/protocols/stream/tcp';
 import { WsStreamSettingsSchema } from '@/schemas/protocols/stream/ws';
 import { XHttpStreamSettingsSchema } from '@/schemas/protocols/stream/xhttp';
@@ -224,6 +227,8 @@ export interface QuickInboundInput {
   realityServerNames: string[];
   realityPrivateKey: string;
   realityPublicKey: string;
+  // Hysteria2 only: what a browser gets over HTTP/3 without the password, e.g. the panel's decoy.
+  masquerade?: HysteriaMasquerade;
 }
 
 function withCert(tls: Record<string, unknown>, input: QuickInboundInput): Record<string, unknown> {
@@ -260,7 +265,9 @@ function streamFor(preset: QuickPreset, input: QuickInboundInput): Record<string
       return {
         network: 'hysteria',
         security: 'tls',
-        hysteriaSettings: HysteriaStreamSettingsSchema.parse({}),
+        hysteriaSettings: HysteriaStreamSettingsSchema.parse(
+          input.masquerade ? { masquerade: input.masquerade } : {},
+        ),
         tlsSettings: withCert(createHysteriaTlsSettingsWithDefaultCert(), input),
         finalmask: {
           tcp: [],

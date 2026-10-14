@@ -3579,6 +3579,11 @@
             },
             "type": "array"
           },
+          "firewall": {
+            "description": "Firewall is \"ufw\" when ufw filters this server, so new inbound ports must be opened in it.",
+            "example": "ufw",
+            "type": "string"
+          },
           "keyFile": {
             "example": "/root/cert/hk.example.com/privkey.pem",
             "type": "string"
@@ -3622,6 +3627,7 @@
           "certState",
           "domain",
           "domainIps",
+          "firewall",
           "keyFile",
           "pointsHere",
           "recommended",
@@ -5776,6 +5782,7 @@
                     "domainIps": [
                       ""
                     ],
+                    "firewall": "ufw",
                     "keyFile": "/root/cert/hk.example.com/privkey.pem",
                     "nodeId": 3,
                     "pointsHere": true,
@@ -17127,7 +17134,7 @@
         "tags": [
           "Protect & speed"
         ],
-        "summary": "Whether the panel is also served on port 443 (decoy without a port), whether its own port is closed, and what happened at the last start.",
+        "summary": "Whether the panel is also served as a website (on 443 its address has no port; port says which), whether its own port is closed, and what happened at the last start.",
         "operationId": "get_panel_api_protect_front",
         "responses": {
           "200": {
@@ -17155,7 +17162,7 @@
         "tags": [
           "Protect & speed"
         ],
-        "summary": "Switch the port-443 site and closing the panel port; the panel restarts. Closing is refused until 443 is running.",
+        "summary": "Switch the website (TCP port, 443 by default; 0 keeps the current one) and closing the panel port; the panel restarts. Closing is refused until the website runs, and the port cannot move while the panel port is closed.",
         "operationId": "post_panel_api_protect_front",
         "requestBody": {
           "required": true,
@@ -17166,7 +17173,8 @@
               },
               "example": {
                 "enabled": true,
-                "frontOnly": false
+                "frontOnly": false,
+                "port": 443
               }
             }
           }
@@ -17211,6 +17219,129 @@
               "example": {
                 "mode": "logistics",
                 "title": "Bluewater Freight"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/decoy/page": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "The deployed decoy as one HTML document (obj), for embedding as a Hysteria2 inbound masquerade; fails while no decoy is deployed.",
+        "operationId": "get_panel_api_protect_decoy_page",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/firewall": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Whether ufw filters this server (status) and the port rules (port, proto tcp/udp) the enabled local inbounds need.",
+        "operationId": "get_panel_api_protect_firewall",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "status": {
+                      "tool": "ufw",
+                      "active": true
+                    },
+                    "rules": [
+                      {
+                        "port": 443,
+                        "proto": "udp"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/firewall/allow": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Open ports in ufw: the given rules, or every enabled local inbound port (with its tcp/udp protocol) when rules is empty. Returns the rules opened.",
+        "operationId": "post_panel_api_protect_firewall_allow",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "rules": [
+                  {
+                    "port": 443,
+                    "proto": "udp"
+                  }
+                ]
               }
             }
           }

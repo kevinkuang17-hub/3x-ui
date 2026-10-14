@@ -916,6 +916,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "domainIps": [
       ""
     ],
+    "firewall": "ufw",
     "keyFile": "/root/cert/hk.example.com/privkey.pem",
     "nodeId": 3,
     "pointsHere": true,

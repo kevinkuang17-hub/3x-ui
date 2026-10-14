@@ -70,6 +70,24 @@ describe('buildQuickInbound', () => {
     expect(stream.finalmask.udp[0].settings.password).toMatch(/^[a-z0-9]{16}$/);
   });
 
+  it('puts the masquerade site into Hysteria2 so HTTP/3 visitors see a website', () => {
+    const masquerade = {
+      type: 'string' as const,
+      dir: '',
+      url: '',
+      rewriteHost: false,
+      insecure: false,
+      content: '<html>Star Tech</html>',
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      statusCode: 200,
+    };
+    const { stream } = wireOf('hysteria2', { masquerade });
+    expect(stream.hysteriaSettings.masquerade.type).toBe('string');
+    expect(stream.hysteriaSettings.masquerade.content).toBe('<html>Star Tech</html>');
+    expect(stream.hysteriaSettings.masquerade.statusCode).toBe(200);
+    expect(wireOf('hysteria2').stream.hysteriaSettings.masquerade).toBeUndefined();
+  });
+
   it('builds Shadowsocks 2022 on TCP and UDP with a server key', () => {
     const { settings } = wireOf('ss2022');
     expect(settings.method).toBe('2022-blake3-aes-256-gcm');

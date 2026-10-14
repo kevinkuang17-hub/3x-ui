@@ -2963,20 +2963,41 @@ export const sections: readonly Section[] = [
         method: 'GET',
         path: '/panel/api/protect/front',
         summary:
-          'Whether the panel is also served on port 443 (decoy without a port), whether its own port is closed, and what happened at the last start.',
+          'Whether the panel is also served as a website (on 443 its address has no port; port says which), whether its own port is closed, and what happened at the last start.',
       },
       {
         method: 'POST',
         path: '/panel/api/protect/front',
         summary:
-          'Switch the port-443 site and closing the panel port; the panel restarts. Closing is refused until 443 is running.',
-        body: '{\n  "enabled": true,\n  "frontOnly": false\n}',
+          'Switch the website (TCP port, 443 by default; 0 keeps the current one) and closing the panel port; the panel restarts. Closing is refused until the website runs, and the port cannot move while the panel port is closed.',
+        body: '{\n  "enabled": true,\n  "frontOnly": false,\n  "port": 443\n}',
       },
       {
         method: 'POST',
         path: '/panel/api/protect/decoy/preview',
         summary: 'Render a template with unsaved details; returns the HTML as obj.',
         body: '{\n  "mode": "logistics",\n  "title": "Bluewater Freight"\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/decoy/page',
+        summary:
+          'The deployed decoy as one HTML document (obj), for embedding as a Hysteria2 inbound masquerade; fails while no decoy is deployed.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/firewall',
+        summary:
+          'Whether ufw filters this server (status) and the port rules (port, proto tcp/udp) the enabled local inbounds need.',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "status": { "tool": "ufw", "active": true },\n    "rules": [{ "port": 443, "proto": "udp" }]\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/firewall/allow',
+        summary:
+          'Open ports in ufw: the given rules, or every enabled local inbound port (with its tcp/udp protocol) when rules is empty. Returns the rules opened.',
+        body: '{\n  "rules": [{ "port": 443, "proto": "udp" }]\n}',
       },
       {
         method: 'POST',

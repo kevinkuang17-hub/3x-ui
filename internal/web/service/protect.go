@@ -108,6 +108,33 @@ func (s *ProtectService) SaveDecoy(mode string, site decoy.Site) error {
 	return nil
 }
 
+// maxDecoyPageBytes caps the page embedded into Xray's config as Hysteria2's masquerade.
+const maxDecoyPageBytes = 512 << 10
+
+// DecoyPage is the deployed decoy as one HTML document, which Hysteria2 serves over HTTP/3 to
+// anyone who opens its address without the password.
+func (s *ProtectService) DecoyPage() (string, error) {
+	mode, _ := s.settingService.getString("decoyMode")
+	var page []byte
+	var err error
+	switch {
+	case mode == decoy.ModeCustom:
+		if page, err = os.ReadFile(filepath.Join(DecoySiteDir(), "index.html")); err != nil {
+			return "", common.NewError("upload a site archive (zip with index.html) first")
+		}
+	case mode == "" || mode == decoy.ModeOff || !decoy.ValidMode(mode):
+		return "", common.NewError("deploy a decoy website on the Protect page first")
+	default:
+		if page, err = decoy.Page(mode, s.storedSite()); err != nil {
+			return "", err
+		}
+	}
+	if len(page) > maxDecoyPageBytes {
+		return "", common.NewErrorf("the site page is over %d KB; use a smaller index.html", maxDecoyPageBytes>>10)
+	}
+	return string(page), nil
+}
+
 // PreviewDecoy renders a template with unsaved details for the panel's preview.
 func (s *ProtectService) PreviewDecoy(mode string, site decoy.Site) ([]byte, error) {
 	if mode == decoy.ModeOff || mode == decoy.ModeCustom || !decoy.ValidMode(mode) {
@@ -190,8 +217,18 @@ func (s *SettingService) ClearPanelAccess() error {
 	return s.setString("panelAllowIps", "")
 }
 
-// FrontPort is where the decoy site is served as a normal website, so its address has no port.
-const FrontPort = 443
+// DefaultFrontPort is where the decoy site is served unless the admin picks another port; on 443
+// its address has no port, like any website.
+const DefaultFrontPort = 443
+
+// FrontPort is the TCP port the front website (decoy plus panel) listens on.
+func (s *ProtectService) FrontPort() int {
+	raw, _ := s.settingService.getString("decoyFrontPort")
+	if port, err := strconv.Atoi(strings.TrimSpace(raw)); err == nil && port > 0 && port <= 65535 {
+		return port
+	}
+	return DefaultFrontPort
+}
 
 // FrontStatus is what the running panel did with the front website at its last start.
 type FrontStatus struct {
@@ -229,11 +266,11 @@ type FrontView struct {
 	Running   FrontStatus `json:"running"`
 }
 
-// frontConflict names what already listens on TCP 443 here: a local Xray inbound, the panel or the
-// subscription server. Starting the front site next to it would fail or crash the panel.
-func (s *ProtectService) frontConflict() string {
+// frontConflict names what already listens on the TCP port here: a local Xray inbound, the panel or
+// the subscription server. Starting the front site next to it would fail or crash the panel.
+func (s *ProtectService) frontConflict(port int) string {
 	var inbounds []model.Inbound
-	database.GetDB().Where("port = ? AND enable = ? AND node_id IS NULL", FrontPort, true).Find(&inbounds)
+	database.GetDB().Where("port = ? AND enable = ? AND node_id IS NULL", port, true).Find(&inbounds)
 	for i := range inbounds {
 		if linehealth.IsUDP(&inbounds[i]) {
 			continue
@@ -243,11 +280,11 @@ func (s *ProtectService) frontConflict() string {
 		}
 		return inbounds[i].Tag
 	}
-	if s.panelPort() == FrontPort {
+	if s.panelPort() == port {
 		return "panel"
 	}
 	if on, _ := s.settingService.GetSubEnable(); on {
-		if port, _ := s.settingService.GetSubPort(); port == FrontPort {
+		if subPort, _ := s.settingService.GetSubPort(); subPort == port {
 			return "subscription"
 		}
 	}
@@ -265,7 +302,7 @@ func (s *ProtectService) panelPort() int {
 
 // FrontConflict is checked again at every start, since inbounds and ports can change later.
 func (s *ProtectService) FrontConflict() string {
-	return s.frontConflict()
+	return s.frontConflict(s.FrontPort())
 }
 
 func (s *ProtectService) Front() *FrontView {
@@ -273,28 +310,37 @@ func (s *ProtectService) Front() *FrontView {
 	cert, _ := s.settingService.GetCertFile()
 	key, _ := s.settingService.GetKeyFile()
 	return &FrontView{
-		Enabled: enabled, FrontOnly: frontOnly, HasCert: cert != "" && key != "", Conflict: s.frontConflict(),
-		Port: FrontPort, PanelPort: s.panelPort(), Running: CurrentFrontStatus(),
+		Enabled: enabled, FrontOnly: frontOnly, HasCert: cert != "" && key != "", Conflict: s.FrontConflict(),
+		Port: s.FrontPort(), PanelPort: s.panelPort(), Running: CurrentFrontStatus(),
 	}
 }
 
 // SaveFront stores the front-site switches; they apply when the panel restarts. Closing the panel
 // port is only allowed while the front site is already up, so the admin keeps a way in.
-// viaFront says the request itself came in on port 443, which proves 443 is reachable from outside
-// before the panel port is closed.
-func (s *ProtectService) SaveFront(enabled, frontOnly, viaFront bool) error {
+// viaFront says the request itself came in on the front port, which proves that port is reachable
+// from outside before the panel port is closed. port 0 keeps the current front port.
+func (s *ProtectService) SaveFront(enabled, frontOnly, viaFront bool, port int) error {
 	v := s.Front()
+	if port == 0 {
+		port = v.Port
+	}
+	if port < 1 || port > 65535 {
+		return common.NewErrorf("not a port: %d", port)
+	}
+	if port != v.Port && v.FrontOnly {
+		return common.NewError("open the panel port again before moving the website to another port")
+	}
 	if enabled && !v.HasCert {
 		return common.NewError("the panel has no certificate; set one up first (x-ui menu → SSL)")
 	}
-	if enabled && v.Conflict != "" {
-		return common.NewErrorf("port %d is used by the inbound %q; move it or keep the site on the panel port", FrontPort, v.Conflict)
+	if conflict := s.frontConflict(port); enabled && conflict != "" {
+		return common.NewErrorf("port %d is used by %q; move it or pick another port for the website", port, conflict)
 	}
-	if frontOnly && (!enabled || !v.Running.Listening) {
-		return common.NewErrorf("turn on the website on port %d and restart the panel first, then close the panel port", FrontPort)
+	if frontOnly && (!enabled || !v.Running.Listening || port != v.Port) {
+		return common.NewErrorf("turn on the website on port %d and restart the panel first, then close the panel port", port)
 	}
 	if frontOnly && !v.FrontOnly && !viaFront {
-		return common.NewErrorf("open the panel through https://<domain>/<path>/ (port %d) and close the panel port from there, so you know that address works", FrontPort)
+		return common.NewErrorf("open the panel through the website address (port %d) and close the panel port from there, so you know that address works", port)
 	}
 	if frontOnly {
 		if pool, _ := s.settingService.NodeMtlsClientCAPool(); pool != nil {
@@ -302,6 +348,9 @@ func (s *ProtectService) SaveFront(enabled, frontOnly, viaFront bool) error {
 		}
 	}
 	if err := s.settingService.setString("decoyFront", strconv.FormatBool(enabled)); err != nil {
+		return err
+	}
+	if err := s.settingService.setString("decoyFrontPort", strconv.Itoa(port)); err != nil {
 		return err
 	}
 	return s.settingService.setString("panelFrontOnly", strconv.FormatBool(enabled && frontOnly))

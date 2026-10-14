@@ -42,6 +42,9 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.POST("/decoy", a.saveDecoy)
 	g.POST("/decoy/upload", a.uploadDecoy)
 	g.POST("/decoy/preview", a.previewDecoy)
+	g.GET("/decoy/page", a.decoyPage)
+	g.GET("/firewall", a.firewall)
+	g.POST("/firewall/allow", a.allowFirewall)
 	g.GET("/front", a.front)
 	g.POST("/front", a.saveFront)
 	g.GET("/cf", a.cfInfo)
@@ -110,6 +113,8 @@ func (a *ProtectController) saveFront(c *gin.Context) {
 	var body struct {
 		Enabled   bool `json:"enabled"`
 		FrontOnly bool `json:"frontOnly"`
+		// Port is the website's TCP port; 0 keeps the current one.
+		Port int `json:"port"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
@@ -118,10 +123,10 @@ func (a *ProtectController) saveFront(c *gin.Context) {
 	viaFront := false
 	if addr, ok := c.Request.Context().Value(http.LocalAddrContextKey).(net.Addr); ok {
 		if _, port, err := net.SplitHostPort(addr.String()); err == nil {
-			viaFront = port == strconv.Itoa(service.FrontPort)
+			viaFront = port == strconv.Itoa(a.protect.FrontPort())
 		}
 	}
-	if err := a.protect.SaveFront(body.Enabled, body.FrontOnly, viaFront); err != nil {
+	if err := a.protect.SaveFront(body.Enabled, body.FrontOnly, viaFront, body.Port); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
@@ -151,6 +156,38 @@ func (a *ProtectController) previewDecoy(c *gin.Context) {
 	}
 	page, err := a.protect.PreviewDecoy(body.Mode, body.Site)
 	jsonObj(c, string(page), err)
+}
+
+// decoyPage hands the deployed decoy to the inbound form, which embeds it as Hysteria2's masquerade.
+func (a *ProtectController) decoyPage(c *gin.Context) {
+	page, err := a.protect.DecoyPage()
+	jsonObj(c, page, err)
+}
+
+func (a *ProtectController) firewall(c *gin.Context) {
+	rules, err := service.InboundFirewallRules()
+	jsonObj(c, gin.H{"status": a.protect.Firewall(), "rules": rules}, err)
+}
+
+// allowFirewall opens the given ports in ufw, or every local inbound's ports when none are given.
+func (a *ProtectController) allowFirewall(c *gin.Context) {
+	var body struct {
+		Rules []service.FirewallRule `json:"rules"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	rules := body.Rules
+	if len(rules) == 0 {
+		var err error
+		if rules, err = service.InboundFirewallRules(); err != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+			return
+		}
+	}
+	done, err := a.protect.AllowPorts(rules)
+	jsonMsgObj(c, I18nWeb(c, "pages.protect.firewallOpened"), done, err)
 }
 
 func (a *ProtectController) uploadDecoy(c *gin.Context) {

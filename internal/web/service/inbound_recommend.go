@@ -48,6 +48,8 @@ type InboundRecommendation struct {
 	TcpPorts    []int  `json:"tcpPorts"`
 	UdpPorts    []int  `json:"udpPorts"`
 	Recommended string `json:"recommended" example:"tls"`
+	// Firewall is "ufw" when ufw filters this server, so new inbound ports must be opened in it.
+	Firewall string `json:"firewall" example:"ufw"`
 }
 
 type InboundRecommendService struct {
@@ -67,6 +69,7 @@ const (
 var (
 	recommendLookupHost = net.DefaultResolver.LookupHost
 	recommendPublicIPv4 = cachedPublicIPv4
+	recommendFirewall   = func() FirewallStatus { return (&ProtectService{}).Firewall() }
 	// recommendLocalPortFree binds the port briefly: the panel, nginx or a decoy may hold it.
 	recommendLocalPortFree = func(port int, udp bool) bool {
 		if udp {
@@ -239,6 +242,9 @@ func (s *InboundRecommendService) recommendLocal(ctx context.Context) *InboundRe
 	if rec.Domain != "" {
 		rec.DomainIPs, _ = recommendLookupHost(ctx, rec.Domain)
 		rec.PointsHere = overlaps(rec.DomainIPs, rec.ServerIPs)
+	}
+	if fw := recommendFirewall(); fw.Active {
+		rec.Firewall = fw.Tool
 	}
 	rec.TcpPorts = s.freePorts(nil, false, recommendTCPPorts, func(p int) bool { return recommendLocalPortFree(p, false) })
 	rec.UdpPorts = s.freePorts(nil, true, recommendUDPPorts, func(p int) bool { return recommendLocalPortFree(p, true) })

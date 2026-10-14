@@ -34,6 +34,7 @@ import { HttpUtil } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import AppSidebar from '@/layouts/AppSidebar';
 import { keys } from '@/api/queryKeys';
+import FirewallCard from './FirewallCard';
 import DecoyCard from './DecoyCard';
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
@@ -503,6 +504,7 @@ export default function ProtectPage() {
               <AccessCard />
               <CloudflareCard />
               <SpeedupCard />
+              <FirewallCard />
               <NodesCard />
             </Space>
           </Layout.Content>

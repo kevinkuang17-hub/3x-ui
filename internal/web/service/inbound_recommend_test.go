@@ -84,10 +84,11 @@ func TestCheckCertFile(t *testing.T) {
 
 func stubRecommendNet(t *testing.T, domainIPs map[string][]string, publicIP string, busyPorts ...int) {
 	t.Helper()
-	oldLookup, oldPublic, oldFree := recommendLookupHost, recommendPublicIPv4, recommendLocalPortFree
+	oldLookup, oldPublic, oldFree, oldFw := recommendLookupHost, recommendPublicIPv4, recommendLocalPortFree, recommendFirewall
 	t.Cleanup(func() {
-		recommendLookupHost, recommendPublicIPv4, recommendLocalPortFree = oldLookup, oldPublic, oldFree
+		recommendLookupHost, recommendPublicIPv4, recommendLocalPortFree, recommendFirewall = oldLookup, oldPublic, oldFree, oldFw
 	})
+	recommendFirewall = func() FirewallStatus { return FirewallStatus{} }
 	recommendLookupHost = func(_ context.Context, host string) ([]string, error) {
 		if ips, ok := domainIPs[host]; ok {
 			return ips, nil

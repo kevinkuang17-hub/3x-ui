@@ -32,6 +32,8 @@ import {
   type QuickServerFacts,
 } from '@/lib/xray/inbound-presets';
 import { formValuesToWirePayload } from '@/lib/xray/inbound-form-adapter';
+import { decoyMasquerade } from '@/lib/xray/hysteria-masquerade';
+import { allowFirewall, type FirewallRule } from '@/pages/protect/FirewallCard';
 import { InboundFormSchema, type InboundFormValues } from '@/schemas/forms/inbound-form';
 import type { InboundRecommendation, RealityScanResult } from '@/generated/types';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
@@ -103,6 +105,8 @@ export default function QuickInboundModal({
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [clientsChoice, setClientsChoice] = useState<string>(ALL_CLIENTS);
+  const [hyDecoy, setHyDecoy] = useState(true);
+  const [openFirewall, setOpenFirewall] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { data: clients = [] } = useClientRecords(open);
 
@@ -111,6 +115,7 @@ export default function QuickInboundModal({
     [nodes],
   );
   const nodeId = server === LOCAL ? null : server;
+  const firewallOn = server === LOCAL && rec?.firewall === 'ufw';
   const facts = rec ? factsOf(rec) : null;
 
   useEffect(() => {
@@ -250,6 +255,18 @@ export default function QuickInboundModal({
 
   const buildValues = async (row: Row): Promise<InboundFormValues | null> => {
     if (!rec) return null;
+    let masquerade;
+    if (row.id === 'hysteria2' && hyDecoy) {
+      try {
+        masquerade = await decoyMasquerade();
+      } catch (err) {
+        messageApi.warning(
+          t('pages.inbounds.quick.hyDecoyMissing', {
+            msg: err instanceof Error ? err.message : String(err),
+          }),
+        );
+      }
+    }
     let keys = { privateKey: '', publicKey: '' };
     if (usesReality(row.id)) {
       const msg = await HttpUtil.get<{ privateKey: string; publicKey: string }>(
@@ -270,6 +287,7 @@ export default function QuickInboundModal({
       realityServerNames: reality?.serverNames ?? [],
       realityPrivateKey: keys.privateKey,
       realityPublicKey: keys.publicKey,
+      masquerade,
     });
   };
 
@@ -277,6 +295,7 @@ export default function QuickInboundModal({
     setSubmitting(true);
     try {
       const createdIds: number[] = [];
+      const opened: FirewallRule[] = [];
       const failed: string[] = [];
       for (const row of rows) {
         const values = await buildValues(row);
@@ -293,9 +312,14 @@ export default function QuickInboundModal({
           },
         );
         const id = (msg?.obj as { id?: number } | null)?.id;
-        if (msg?.success && id) createdIds.push(id);
-        else failed.push(row.remark);
+        if (msg?.success && id) {
+          createdIds.push(id);
+          const transport = QUICK_PRESETS.find((p) => p.id === row.id)!.transport;
+          if (transport !== 'udp') opened.push({ port: row.port, proto: 'tcp' });
+          if (transport !== 'tcp') opened.push({ port: row.port, proto: 'udp' });
+        } else failed.push(row.remark);
       }
+      if (opened.length > 0 && firewallOn && openFirewall) await allowFirewall(opened);
       const emails = selectedEmails();
       if (createdIds.length > 0 && emails.length > 0) {
         await HttpUtil.post(
@@ -506,6 +530,16 @@ export default function QuickInboundModal({
                     <Typography.Paragraph type="secondary" className="quick-inbound-desc">
                       {t(`pages.inbounds.quick.presets.${preset.id}.desc`)}
                     </Typography.Paragraph>
+                    {row && preset.id === 'hysteria2' && (
+                      <div className="quick-inbound-desc">
+                        <Checkbox checked={hyDecoy} onChange={(e) => setHyDecoy(e.target.checked)}>
+                          {t('pages.inbounds.quick.hyDecoy')}
+                        </Checkbox>
+                        <Typography.Text type="secondary" className="quick-inbound-desc">
+                          {t('pages.inbounds.quick.hyUdpNote', { port: row.port })}
+                        </Typography.Text>
+                      </div>
+                    )}
                     {row && warning && (
                       <Typography.Text type="warning" className="quick-inbound-desc">
                         {t(`pages.inbounds.quick.${warning}`)}
@@ -540,6 +574,12 @@ export default function QuickInboundModal({
                 );
               })}
             </div>
+
+            {firewallOn && (
+              <Checkbox checked={openFirewall} onChange={(e) => setOpenFirewall(e.target.checked)}>
+                {t('pages.inbounds.quick.openFirewall')}
+              </Checkbox>
+            )}
 
             {needsReality && (
               <Space size={8} wrap>

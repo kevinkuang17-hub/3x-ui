@@ -39,6 +39,7 @@ function mockServer(rec: Record<string, unknown>) {
   getSpy.mockImplementation(async (url: string) => {
     if (url.startsWith('/panel/api/inbounds/recommend')) return new Msg(true, '', rec);
     if (url === '/panel/api/clients/list') return new Msg(true, '', CLIENTS);
+    if (url === '/panel/api/protect/decoy/page') return new Msg(true, '', '<html>Star Tech</html>');
     if (url === '/panel/api/server/getNewX25519Cert')
       return new Msg(true, '', { privateKey: 'priv-key', publicKey: 'pub-key' });
     return new Msg(true, '', {});
@@ -154,5 +155,23 @@ describe('QuickInboundModal', () => {
     expect(await screen.findByText('Remark already exists: HK')).toBeTruthy();
     const button = screen.getByRole('button', { name: /^Create/ }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
+  });
+
+  it('opens the new ports in ufw and gives Hysteria2 the decoy website', async () => {
+    mockServer(recommendation({ firewall: 'ufw' }));
+    const { onCreated } = renderModal();
+    fireEvent.click(await createButton());
+
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    const hy = added().find((b) => b.protocol === 'hysteria')!;
+    expect(hy.stream.hysteriaSettings.masquerade.content).toBe('<html>Star Tech</html>');
+    const allow = postSpy.mock.calls.find((c) => c[0] === '/panel/api/protect/firewall/allow');
+    expect(allow?.[1]).toEqual({
+      rules: [
+        { port: 443, proto: 'tcp' },
+        { port: 8443, proto: 'tcp' },
+        { port: 443, proto: 'udp' },
+      ],
+    });
   });
 });
