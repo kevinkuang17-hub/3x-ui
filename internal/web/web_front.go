@@ -48,7 +48,7 @@ func (s *Server) startFront(engine http.Handler, certFile, keyFile string) bool 
 	if err != nil {
 		return fail(err)
 	}
-	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", net.JoinHostPort("", strconv.Itoa(service.FrontPort)))
+	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", net.JoinHostPort("", strconv.Itoa(protect.FrontPort())))
 	if err != nil {
 		return fail(err)
 	}

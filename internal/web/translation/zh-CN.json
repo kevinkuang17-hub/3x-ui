@@ -735,7 +735,11 @@
         "autoSystemDnsToGateway": "系统 DNS 指向网关",
         "autoSystemDnsToGatewayTooltip": "仅限 Linux：将 systemd-resolved 指向 TUN 网关，使系统解析经过 Xray。需要设置网关，失败时 TUN 不会启动。",
         "autoSystemWfpBlockLeak": "阻止泄漏 (WFP)",
-        "autoSystemWfpBlockLeakTooltip": "仅限 Windows，需配合自动系统路由：dns 让 DNS 只走 TUN（需设置 DNS 服务器），misconfigtun 阻止没有任何路由指向 TUN 的 IP 版本。"
+        "autoSystemWfpBlockLeakTooltip": "仅限 Windows，需配合自动系统路由：dns 让 DNS 只走 TUN（需设置 DNS 服务器），misconfigtun 阻止没有任何路由指向 TUN 的 IP 版本。",
+        "masqueradeSite": "伪装网站",
+        "masqueradeUseDecoy": "使用面板的伪装网站",
+        "masqueradeDecoyHint": "不带密码用 HTTP/3 打开这个地址时，显示“防护”页面部署的伪装网站。想让浏览器（TCP）也能打开，在“防护”页面再开启“发布为网站”（443 = 不带端口）。",
+        "masqueradeDecoyApplied": "已设置为伪装网站"
       },
       "info": {
         "mode": "模式",
@@ -828,7 +832,11 @@
             "title": "Shadowsocks 2022",
             "desc": "简单、到处都支持，但容易被识别，适合作为路由器和老客户端的备用。"
           }
-        }
+        },
+        "hyDecoy": "访问者打开时显示面板的伪装网站（伪装）",
+        "hyUdpNote": "Hysteria2 走 UDP {port}，云服务器安全组也要放行 UDP {port}。",
+        "hyDecoyMissing": "已创建，但没有设置伪装网站：{msg}",
+        "openFirewall": "在本服务器防火墙（ufw）放行新入站的端口"
       }
     },
     "clients": {
@@ -2875,18 +2883,27 @@
       "decoyModeDesc_photo": "深色风格的摄影师作品展示页。",
       "decoyModeDesc_maintenance": "一个简单的“网站维护中”提示页。",
       "frontSaved": "已保存，面板正在重启",
-      "frontTitle": "在 443 端口发布（网址不带端口）",
-      "frontDesc": "面板同时在 {port} 端口提供服务：伪装网站是 https://你的域名/，像普通网站一样不带端口；面板地址是 https://你的域名/秘密路径/。使用面板证书，保存后面板会自动重启。",
+      "frontTitle": "发布为网站（443 = 网址不带端口）",
+      "frontDesc": "面板同时在 {port} 端口提供服务：伪装网站就是你的域名，像普通网站一样；面板藏在秘密路径后面。用 443 时网址不带端口，用其他端口时网址要带上端口。使用面板证书，保存后面板会自动重启。",
       "frontNoCert": "面板还没有证书，请先用 x-ui 菜单（SSL 证书）申请。",
       "frontConflict": "本机入站“{name}”正在使用 {port} 端口，请先把它换到其他端口。",
-      "frontFailed": "上次启动时没能打开 443 端口：{msg}",
+      "frontFailed": "上次启动时没能打开网站端口：{msg}",
       "frontRunning": "已上线：{url}",
-      "frontPanelURL": "不带端口的面板地址：{url}",
+      "frontPanelURL": "网站端口上的面板地址：{url}",
       "frontRestarting": "面板正在重启，几秒后自动刷新本页。",
       "frontEnable": "在 {port} 端口发布网站",
-      "frontOnly": "对外关闭面板端口 {port}（面板只能通过 443 访问）",
-      "frontOnlyNote": "只在主控上使用；443 正常运行后才能开启。万一进不去，在服务器上执行：x-ui setting -resetPanelAccess && x-ui restart",
-      "frontOnlyVia443": "请先用不带端口的地址打开面板（{url}），确认能进入后再在那里关闭面板端口。"
+      "frontOnly": "对外关闭面板端口 {port}（面板只能通过网站端口访问）",
+      "frontOnlyNote": "只在主控上使用；网站端口正常运行后才能开启。万一进不去，在服务器上执行：x-ui setting -resetPanelAccess && x-ui restart",
+      "frontOnlyVia443": "请先用网站端口的地址打开面板（{url}），确认能进入后再在那里关闭面板端口。",
+      "frontPort": "网站端口",
+      "frontPortApply": "把网站改到这个端口",
+      "frontPortHint": "用 443 网址不带端口；Hysteria2 这类 UDP 入站可以和它用同一个端口号。",
+      "firewallTitle": "防火墙端口",
+      "firewallDesc": "开启 ufw 防火墙时，每个入站端口都要放行，Hysteria2、TUIC 要放行 UDP。x-ui 菜单里的防火墙只放行了 443 的 TCP，所以 443 上的 Hysteria2 收不到流量。",
+      "firewallInactive": "本服务器没有开启 ufw；这里只有云服务商的防火墙（安全组）可能拦截端口。",
+      "firewallAllowAll": "一键放行全部入站端口",
+      "firewallCloud": "云服务器的安全组（阿里云、腾讯云、AWS 等）是另一道防火墙，需要在服务商后台同样放行这些端口，Hysteria2 要放行 UDP。",
+      "firewallOpened": "已在 ufw 放行端口"
     }
   },
   "tgbot": {

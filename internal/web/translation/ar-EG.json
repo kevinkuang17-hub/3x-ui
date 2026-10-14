@@ -735,7 +735,11 @@
         "autoSystemDnsToGateway": "DNS النظام إلى البوابة",
         "autoSystemDnsToGatewayTooltip": "على لينكس بس: بيوجّه systemd-resolved لبوابة TUN عشان استعلامات النظام تعدّي من Xray. محتاج بوابة، والـTUN مش هيشتغل لو ده فشل.",
         "autoSystemWfpBlockLeak": "منع التسريب (WFP)",
-        "autoSystemWfpBlockLeakTooltip": "على ويندوز بس، مع Auto system routes: ‏dns بيخلّي DNS جوّه الـTUN (محتاج سيرفرات DNS)، وmisconfigtun بيمنع نسخة IP مفيش مسار بيوديها للـTUN."
+        "autoSystemWfpBlockLeakTooltip": "على ويندوز بس، مع Auto system routes: ‏dns بيخلّي DNS جوّه الـTUN (محتاج سيرفرات DNS)، وmisconfigtun بيمنع نسخة IP مفيش مسار بيوديها للـTUN.",
+        "masqueradeSite": "Website",
+        "masqueradeUseDecoy": "Use the panel's decoy website",
+        "masqueradeDecoyHint": "Opening this address over HTTP/3 without the password shows the decoy from the Protect page. For browsers on TCP, publish the website on the Protect page too (443 = no port).",
+        "masqueradeDecoyApplied": "Decoy website set as the masquerade"
       },
       "info": {
         "mode": "الوضع",
@@ -828,7 +832,11 @@
             "title": "Shadowsocks 2022",
             "desc": "Simple and supported everywhere, but easy to spot. Keep it as a backup for routers and old clients."
           }
-        }
+        },
+        "hyDecoy": "Show the panel's decoy website to visitors (masquerade)",
+        "hyUdpNote": "Hysteria2 uses UDP {port}: open UDP {port} in the cloud security group as well.",
+        "hyDecoyMissing": "Created without a website: {msg}",
+        "openFirewall": "Open the new ports in this server's firewall (ufw)"
       }
     },
     "clients": {
@@ -2875,18 +2883,27 @@
       "decoyModeDesc_photo": "Dark photo gallery page for a photographer.",
       "decoyModeDesc_maintenance": "A short \"under maintenance\" notice.",
       "frontSaved": "Saved; the panel is restarting",
-      "frontTitle": "Publish on port 443 (address without a port)",
-      "frontDesc": "Serves this panel on port {port} too, so the decoy is at https://your-domain/ like any website, and the panel at https://your-domain/secret-path/. Uses the panel certificate; needs a panel restart.",
+      "frontTitle": "Publish as a website (443 = address without a port)",
+      "frontDesc": "Serves this panel on port {port} too, so the decoy is a normal website at your domain and the panel sits behind its secret path. On 443 the address has no port; on another port it carries that port. Uses the panel certificate; needs a panel restart.",
       "frontNoCert": "The panel has no certificate yet; set one up with the x-ui menu (SSL) first.",
       "frontConflict": "Port {port} is used by the inbound \"{name}\" on this server; move that inbound first.",
-      "frontFailed": "Port 443 could not be opened at the last start: {msg}",
+      "frontFailed": "The website port could not be opened at the last start: {msg}",
       "frontRunning": "Live at {url}",
-      "frontPanelURL": "Panel without a port: {url}",
+      "frontPanelURL": "Panel on the website port: {url}",
       "frontRestarting": "The panel is restarting; this page reloads in a few seconds.",
       "frontEnable": "Serve the website on port {port}",
-      "frontOnly": "Close the panel port {port} to the outside (panel only via port 443)",
-      "frontOnlyNote": "Only on the master. Can be switched on once port 443 is running. If you get locked out, run on the server: x-ui setting -resetPanelAccess && x-ui restart",
-      "frontOnlyVia443": "Open the panel at {url} first and close the panel port from there, so you know that address works."
+      "frontOnly": "Close the panel port {port} to the outside (panel only via the website port)",
+      "frontOnlyNote": "Only on the master. Can be switched on once the website port is running. If you get locked out, run on the server: x-ui setting -resetPanelAccess && x-ui restart",
+      "frontOnlyVia443": "Open the panel at {url} first and close the panel port from there, so you know that address works.",
+      "frontPort": "Website port",
+      "frontPortApply": "Move the website to this port",
+      "frontPortHint": "443 keeps the address without a port. A UDP inbound such as Hysteria2 can share the same number.",
+      "firewallTitle": "Firewall ports",
+      "firewallDesc": "When ufw is on, every inbound port must be opened in it, with UDP for Hysteria2 and TUIC. The x-ui menu's firewall only opens 443 for TCP, which leaves a Hysteria2 inbound on 443 without traffic.",
+      "firewallInactive": "ufw is not active on this server; only the cloud provider's firewall can block ports here.",
+      "firewallAllowAll": "Open all inbound ports",
+      "firewallCloud": "Your VPS provider's security group (Aliyun, Tencent, AWS, …) is a separate firewall: open the same ports there, UDP included for Hysteria2.",
+      "firewallOpened": "Ports opened in ufw"
     }
   },
   "tgbot": {

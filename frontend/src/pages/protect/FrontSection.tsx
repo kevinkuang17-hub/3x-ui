@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Space, Switch, Typography } from 'antd';
+import { Alert, Button, InputNumber, Space, Switch, Typography } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -33,10 +33,23 @@ export function useFront() {
   });
 }
 
-// publicSiteURL is the decoy's address as visitors see it: no port once it runs on 443.
+// siteOrigin is the website's address: no port on 443, like any other site.
+export function siteOrigin(port: number): string {
+  const host = window.location.hostname;
+  return port === 443 ? `https://${host}` : `https://${host}:${port}`;
+}
+
+// publicSiteURL is the decoy's address as visitors see it once the website runs.
 export function publicSiteURL(front: FrontView | undefined): string {
-  if (front?.running.listening) return `https://${window.location.hostname}/`;
+  if (front?.running.listening) return `${siteOrigin(front.port)}/`;
   return '/';
+}
+
+// onFrontPort tells whether this page itself was opened through the website port.
+function onFrontPort(port: number): boolean {
+  if (window.location.protocol !== 'https:') return false;
+  const here = window.location.port || '443';
+  return here === String(port);
 }
 
 // FrontSection moves the decoy to port 443 and can close the panel's own port.
@@ -45,27 +58,30 @@ export default function FrontSection() {
   const query = useFront();
   const front = query.data;
   const [restarting, setRestarting] = useState(false);
+  const [portDraft, setPortDraft] = useState<number | null>(null);
   const save = useMutation({
-    mutationFn: (body: { enabled: boolean; frontOnly: boolean }) =>
+    mutationFn: (body: { enabled: boolean; frontOnly: boolean; port: number }) =>
       HttpUtil.post(`${API}/front`, body, { headers: { 'Content-Type': 'application/json' } }),
     onSuccess: (msg, body) => {
       if (!msg?.success) return;
       setRestarting(true);
       const base = (window.X_UI_BASE_PATH || '/').replace(/\/+$/, '');
       const host = window.location.hostname;
-      // After the restart the panel answers on 443 only when its port was closed, and on its own
-      // port only once the 443 site is off.
+      // After the restart the panel answers on the website port only when its port was closed, and
+      // on its own port only once the website is off.
       let next = window.location.href;
-      if (body.enabled && body.frontOnly) next = `https://${host}${base}/panel/protect`;
-      else if (!body.enabled && front && window.location.port === '')
+      if (body.enabled && body.frontOnly) next = `${siteOrigin(body.port)}${base}/panel/protect`;
+      else if (!body.enabled && front && onFrontPort(front.port))
         next = `https://${host}:${front.panelPort}${base}/panel/protect`;
       window.setTimeout(() => window.location.assign(next), 8000);
     },
   });
   if (!front) return null;
   const base = (window.X_UI_BASE_PATH || '/').replace(/\/+$/, '');
-  const panelURL = `https://${window.location.hostname}${base}/`;
-  const on443 = window.location.protocol === 'https:' && ['', '443'].includes(window.location.port);
+  const panelURL = `${siteOrigin(front.port)}${base}/`;
+  const onFront = onFrontPort(front.port);
+  const port = portDraft ?? front.port;
+  const portChanged = port !== front.port;
   return (
     <div style={{ marginBottom: 16 }}>
       <Typography.Text strong>
@@ -103,7 +119,7 @@ export default function FrontSection() {
           type="success"
           showIcon
           style={{ marginBottom: 8 }}
-          title={t('pages.protect.frontRunning', { url: `https://${window.location.hostname}/` })}
+          title={t('pages.protect.frontRunning', { url: `${siteOrigin(front.port)}/` })}
           description={t('pages.protect.frontPanelURL', { url: panelURL })}
         />
       )}
@@ -121,20 +137,48 @@ export default function FrontSection() {
             checked={front.enabled}
             disabled={!front.hasCert || (!front.enabled && !!front.conflict)}
             loading={save.isPending}
-            onChange={(on) => save.mutate({ enabled: on, frontOnly: on && front.frontOnly })}
+            onChange={(on) => save.mutate({ enabled: on, frontOnly: on && front.frontOnly, port })}
           />
-          <span>{t('pages.protect.frontEnable', { port: front.port })}</span>
+          <span>{t('pages.protect.frontEnable', { port })}</span>
+        </Space>
+        <Space wrap>
+          <span>{t('pages.protect.frontPort')}</span>
+          <InputNumber
+            min={1}
+            max={65535}
+            value={port}
+            disabled={front.frontOnly}
+            onChange={(v) => setPortDraft(v ?? front.port)}
+          />
+          {portChanged && front.enabled && (
+            <Button
+              size="small"
+              type="primary"
+              loading={save.isPending}
+              onClick={() => save.mutate({ enabled: true, frontOnly: false, port })}
+            >
+              {t('pages.protect.frontPortApply')}
+            </Button>
+          )}
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {t('pages.protect.frontPortHint')}
+          </Typography.Text>
         </Space>
         <Space wrap>
           <Switch
             checked={front.frontOnly}
-            disabled={!front.enabled || !front.running.listening || (!front.frontOnly && !on443)}
+            disabled={
+              !front.enabled ||
+              !front.running.listening ||
+              portChanged ||
+              (!front.frontOnly && !onFront)
+            }
             loading={save.isPending}
-            onChange={(on) => save.mutate({ enabled: true, frontOnly: on })}
+            onChange={(on) => save.mutate({ enabled: true, frontOnly: on, port: front.port })}
           />
           <span>{t('pages.protect.frontOnly', { port: front.panelPort })}</span>
         </Space>
-        {front.running.listening && !front.frontOnly && !on443 && (
+        {front.running.listening && !front.frontOnly && !onFront && (
           <Typography.Text type="warning" style={{ fontSize: 12 }}>
             {t('pages.protect.frontOnlyVia443', { url: panelURL })}
           </Typography.Text>
@@ -145,12 +189,7 @@ export default function FrontSection() {
       </Space>
       {front.running.listening && (
         <div style={{ marginTop: 8 }}>
-          <Button
-            size="small"
-            href={`https://${window.location.hostname}/`}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Button size="small" href={`${siteOrigin(front.port)}/`} target="_blank" rel="noreferrer">
             {t('pages.protect.decoyOpen')}
           </Button>
         </div>

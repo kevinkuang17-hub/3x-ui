@@ -1,15 +1,28 @@
 import { useTranslation } from 'react-i18next';
-import { Form, Input, InputNumber, Select, Switch } from 'antd';
+import { Button, Form, Input, InputNumber, Select, Switch, message } from 'antd';
+import { GlobalOutlined } from '@ant-design/icons';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { HeaderMapEditor } from '@/components/form';
 import { FormField } from '@/components/form/rhf';
+import { decoyMasquerade } from '@/lib/xray/hysteria-masquerade';
 
 const MASQ_PATH = ['streamSettings', 'hysteriaSettings', 'masquerade'];
 
 export default function HysteriaFields() {
   const { t } = useTranslation();
   const { control, setValue } = useFormContext();
+  const [messageApi, messageContextHolder] = message.useMessage();
+  const applyDecoy = async () => {
+    try {
+      setValue('streamSettings.hysteriaSettings.masquerade', await decoyMasquerade(), {
+        shouldDirty: true,
+      });
+      messageApi.success(t('pages.inbounds.form.masqueradeDecoyApplied'));
+    } catch (err) {
+      messageApi.error(err instanceof Error ? err.message : String(err));
+    }
+  };
   const masq = useWatch({ control, name: 'streamSettings.hysteriaSettings.masquerade' }) as
     | { type?: string }
     | undefined;
@@ -32,6 +45,15 @@ export default function HysteriaFields() {
         <InputNumber min={2} max={600} style={{ width: '100%' }} />
       </FormField>
 
+      {messageContextHolder}
+      <Form.Item
+        label={t('pages.inbounds.form.masqueradeSite')}
+        extra={t('pages.inbounds.form.masqueradeDecoyHint')}
+      >
+        <Button size="small" icon={<GlobalOutlined />} onClick={() => void applyDecoy()}>
+          {t('pages.inbounds.form.masqueradeUseDecoy')}
+        </Button>
+      </Form.Item>
       <Form.Item label={t('pages.inbounds.form.masquerade')}>
         <Switch
           checked={!!masq}

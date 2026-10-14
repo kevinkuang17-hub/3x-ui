@@ -820,6 +820,7 @@ export interface InboundRecommendation {
   certState: string;
   domain: string;
   domainIps: string[];
+  firewall: string;
   keyFile: string;
   nodeId?: number | null;
   pointsHere: boolean;

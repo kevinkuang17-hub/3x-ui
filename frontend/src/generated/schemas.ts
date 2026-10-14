@@ -3553,6 +3553,11 @@ export const SCHEMAS: Record<string, unknown> = {
         },
         "type": "array"
       },
+      "firewall": {
+        "description": "Firewall is \"ufw\" when ufw filters this server, so new inbound ports must be opened in it.",
+        "example": "ufw",
+        "type": "string"
+      },
       "keyFile": {
         "example": "/root/cert/hk.example.com/privkey.pem",
         "type": "string"
@@ -3596,6 +3601,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "certState",
       "domain",
       "domainIps",
+      "firewall",
       "keyFile",
       "pointsHere",
       "recommended",
