@@ -837,6 +837,58 @@
         "hyUdpNote": "Hysteria2 uses UDP {port}: open UDP {port} in the cloud security group as well.",
         "hyDecoyMissing": "Created without a website: {msg}",
         "openFirewall": "Open the new ports in this server's firewall (ufw)"
+      },
+      "diagnose": {
+        "action": "Diagnose",
+        "all": "Diagnose all",
+        "title": "Inbound diagnosis",
+        "again": "Run again",
+        "running": "Checking ports, firewall, address, certificate and a real connection… (10–60 s)",
+        "summaryBad": "{count} of {total} inbounds have problems",
+        "summaryGood": "All {total} inbounds work",
+        "okDelay": "Works · {delay} ms",
+        "bad": "Has problems",
+        "note": "The test connects from this panel's server. If it works here but users in China still cannot connect, the IP or port is usually blocked, or the ISP throttles UDP: switch to Reality, change the port, or change the server IP.",
+        "fixAction": {
+          "enable": "Enable inbound",
+          "firewall": "Open ports in the firewall",
+          "clients": "Add clients"
+        },
+        "find": {
+          "disabled": "The inbound is disabled",
+          "nodeOffline": "Node {node} is offline",
+          "xrayDown": "Xray is not running: {error}",
+          "noClient": "The inbound has no enabled client",
+          "noClientConfig": "No client config to test with: {error}",
+          "portCheckFailed": "Could not check {proto} {port} on the server: {error}",
+          "notListening": "Nothing listens on {proto} {port}",
+          "firewallBlocked": "The firewall (ufw) blocks {proto} {port}",
+          "portOpen": "{proto} {port} is listening and open in the firewall",
+          "dnsNone": "{address} does not resolve",
+          "reachable": "{address}:{port} answers from outside",
+          "unreachable": "{address}:{port} cannot be reached from outside ({error})",
+          "certExpired": "The certificate expired on {date}",
+          "certMismatch": "The certificate does not cover {address}",
+          "e2eOk": "A real client connection works ({delay} ms)",
+          "e2eFailed": "A real client connection fails: {error}",
+          "e2eFailedOnly": "A real client connection fails: {error}"
+        },
+        "advice": {
+          "disabled": "Clients cannot use a disabled inbound. Enable it.",
+          "nodeOffline": "The master cannot reach the node panel: check that the server is on and x-ui runs on it (x-ui status), then wait a minute.",
+          "xrayDown": "Xray failed to start, so no inbound on that server works. Open the Xray log on the dashboard; a recently edited inbound or routing rule is the usual cause.",
+          "noClient": "Add or attach a client to this inbound, otherwise nobody can log in.",
+          "noClientConfig": "This protocol cannot be tested automatically; check it with a client app.",
+          "portCheckFailed": "The node may run an older version: run x-ui update on it.",
+          "notListening": "Xray did not open this port. Another program probably uses it (the panel, the website, nginx), or the inbound settings are invalid: pick another port or look at the Xray log.",
+          "firewallBlocked": "ufw drops this traffic. Open the port (Hysteria2 and TUIC need UDP).",
+          "dnsNone": "The domain has no DNS record. Add an A record pointing to the server's IP.",
+          "unreachable": "The server listens and its firewall allows it, so something in between drops it: usually the cloud provider's security group (open the port there, UDP for Hysteria2), or the IP is blocked.",
+          "certExpired": "Renew the certificate: x-ui menu → SSL certificate, then restart.",
+          "certMismatch": "The certificate is for another domain. Issue one for this domain, or set the inbound's SNI to the certificate's domain.",
+          "e2eFailed": "Fix the problems above first; this usually follows from them.",
+          "e2eFailedOnly": "The server answers but refuses the connection: the inbound settings do not match what clients get (e.g. Reality target unreachable, wrong SNI, mismatched obfs password). Edit the inbound or recreate it with the one-click dialog."
+        }
       }
     },
     "clients": {

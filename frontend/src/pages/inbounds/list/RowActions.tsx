@@ -12,6 +12,7 @@ import {
   TagsOutlined,
   UsergroupAddOutlined,
   UsergroupDeleteOutlined,
+  MedicineBoxOutlined,
 } from '@ant-design/icons';
 
 import { isInboundMultiUser } from './helpers';
@@ -69,6 +70,11 @@ export function buildRowActionsMenu({
     label: t('pages.inbounds.resetTraffic'),
   });
   items.push({ key: 'clone', icon: <BlockOutlined />, label: t('pages.inbounds.clone') });
+  items.push({
+    key: 'diagnose',
+    icon: <MedicineBoxOutlined />,
+    label: t('pages.inbounds.diagnose.action'),
+  });
   if (isInboundMultiUser(record)) {
     items.push({
       key: 'attachExisting',

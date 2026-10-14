@@ -1,0 +1,44 @@
+.diag-card.is-bad {
+  border-color: var(--ant-color-error-border, #ffccc7);
+}
+
+.diag-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diag-finding {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.diag-icon {
+  line-height: 22px;
+}
+
+.diag-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.diag-advice {
+  margin: 0 !important;
+  font-size: 12px;
+}
+
+.diag-ok {
+  color: var(--ant-color-success, #52c41a);
+}
+
+.diag-warn {
+  color: var(--ant-color-warning, #faad14);
+}
+
+.diag-error {
+  color: var(--ant-color-error, #ff4d4f);
+}

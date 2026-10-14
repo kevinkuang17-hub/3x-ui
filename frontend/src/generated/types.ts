@@ -616,6 +616,13 @@ export interface FallbackParentInfo {
   path?: string;
 }
 
+export interface Finding {
+  fix?: string;
+  key: string;
+  level: string;
+  params?: Record<string, unknown>;
+}
+
 export interface GeoCategory {
   attributes: string[];
   code: string;
@@ -1002,6 +1009,14 @@ export interface PeerActivity {
   up: number;
 }
 
+export interface PortCheck {
+  allowed: boolean;
+  bound?: boolean | null;
+  firewall: string;
+  port: number;
+  proto: string;
+}
+
 export interface ProbeResultUI {
   cpuPct: number;
   error: string;
@@ -1037,6 +1052,18 @@ export interface RealityScanResult {
   tls13: boolean;
   tlsVersion: string;
   x25519: boolean;
+}
+
+export interface Report {
+  address: string;
+  delayMs: number;
+  findings: Finding[];
+  inboundId: number;
+  nodeId?: number | null;
+  ok: boolean;
+  port: number;
+  protocol: string;
+  remark: string;
 }
 
 export interface RuleSetPick {

@@ -13,6 +13,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/wirecodec"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service/diagnose"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
@@ -27,11 +28,12 @@ type InboundController struct {
 	xrayService     service.XrayService
 	fallbackService service.FallbackService
 	recommend       service.InboundRecommendService
+	diagnose        *diagnose.Service
 }
 
 // NewInboundController creates a new InboundController and sets up its routes.
 func NewInboundController(g *gin.RouterGroup) *InboundController {
-	a := &InboundController{}
+	a := &InboundController{diagnose: diagnose.NewService()}
 	a.initRouter(g)
 	return a
 }
@@ -84,6 +86,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.GET("/get/:id", a.getInbound)
 	g.GET("/:id/fallbacks", a.getFallbacks)
 	g.GET("/recommend", a.recommendInbound)
+	g.POST("/diagnose", a.diagnoseInbounds)
 
 	g.POST("/add", a.addInbound)
 	g.POST("/del/:id", a.delInbound)
@@ -525,4 +528,20 @@ func (a *InboundController) recommendInbound(c *gin.Context) {
 	defer cancel()
 	rec, err := a.recommend.Recommend(ctx, nodeID)
 	jsonObj(c, rec, err)
+}
+
+// diagnoseInbounds checks why inbounds cannot be used: the hosting server's port and firewall, the
+// address from outside, the certificate and a real client connection. No ids means all inbounds.
+func (a *InboundController) diagnoseInbounds(c *gin.Context) {
+	var body struct {
+		Ids []int `json:"ids"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Minute)
+	defer cancel()
+	reports, err := a.diagnose.Diagnose(ctx, resolveHost(c), body.Ids)
+	jsonObj(c, reports, err)
 }

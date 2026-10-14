@@ -4,8 +4,8 @@ on:
   push:
     branches: ["dev/**"]
 env:
-  PKGS: "./internal/web/service/ ./internal/web/job/ ./internal/sub/ ./internal/web/controller/"
-  RUN: "ConfigHistory|NodeCost|Plan|NodeJoin|NodeDns|Apple|Render|Probe|LineHealth|App|PanelUsers|OperatorAllowed|Passkey"
+  PKGS: "./internal/web/service/ ./internal/web/service/diagnose/ ./internal/sub/ ./internal/web/controller/ ./internal/web/"
+  RUN: "Assess|OutboundEndpoint|Ufw|CheckPort|Firewall|RouteRegistry"
 jobs:
   test:
     runs-on: ubuntu-latest

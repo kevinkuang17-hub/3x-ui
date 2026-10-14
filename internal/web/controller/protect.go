@@ -45,6 +45,7 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.GET("/decoy/page", a.decoyPage)
 	g.GET("/firewall", a.firewall)
 	g.POST("/firewall/allow", a.allowFirewall)
+	g.POST("/portcheck", a.portCheck)
 	g.GET("/front", a.front)
 	g.POST("/front", a.saveFront)
 	g.GET("/cf", a.cfInfo)
@@ -190,6 +191,20 @@ func (a *ProtectController) allowFirewall(c *gin.Context) {
 	jsonMsgObj(c, I18nWeb(c, "pages.protect.firewallOpened"), done, err)
 }
 
+// portCheck reports whether a port is bound here and let in by ufw; a master asks its nodes this.
+func (a *ProtectController) portCheck(c *gin.Context) {
+	var body struct {
+		Port  int    `json:"port"`
+		Proto string `json:"proto"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	pc, err := a.protect.CheckPort(body.Port, body.Proto)
+	jsonObj(c, pc, err)
+}
+
 func (a *ProtectController) uploadDecoy(c *gin.Context) {
 	fh, err := c.FormFile("file")
 	if err != nil {
@@ -327,6 +342,7 @@ var nodeProtectActions = map[string]struct{ method, path string }{
 	"speedupRevert": {http.MethodPost, "speedup/revert"},
 	"lock":          {http.MethodPost, "access/lockToCaller"},
 	"unlock":        {http.MethodPost, "access"},
+	"firewallAllow": {http.MethodPost, "firewall/allow"},
 }
 
 func (a *ProtectController) nodeAction(c *gin.Context) {
@@ -337,8 +353,12 @@ func (a *ProtectController) nodeAction(c *gin.Context) {
 		return
 	}
 	var body any
-	if c.Param("action") == "unlock" {
+	switch c.Param("action") {
+	case "unlock":
 		body = map[string]string{"allowIps": ""}
+	case "firewallAllow":
+		// No rules: the node opens the ports of all its own inbounds.
+		body = map[string]any{"rules": []any{}}
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
