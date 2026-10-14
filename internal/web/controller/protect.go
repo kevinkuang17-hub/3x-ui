@@ -52,6 +52,7 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.POST("/realitySelf/apply", a.realitySelfApply)
 	g.GET("/cert/issue", a.certIssueStatus)
 	g.POST("/cert/issue", a.certIssueStart)
+	g.GET("/cert/installed", a.certInstalled)
 	g.GET("/front", a.front)
 	g.POST("/front", a.saveFront)
 	g.GET("/cf", a.cfInfo)
@@ -244,17 +245,23 @@ func (a *ProtectController) certIssueStart(c *gin.Context) {
 	var body struct {
 		Domain   string `json:"domain"`
 		UsePanel bool   `json:"usePanel"`
+		CfToken  string `json:"cfToken"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
-	err := a.certs.Start(body.Domain, body.UsePanel, func() { _ = a.panel.RestartPanel(3 * time.Second) })
+	err := a.certs.Start(body.Domain, body.CfToken, body.UsePanel, func() { _ = a.panel.RestartPanel(3 * time.Second) })
 	jsonMsgObj(c, I18nWeb(c, "pages.inbounds.quick.certIssueStarted"), a.certs.Status(), err)
 }
 
 func (a *ProtectController) certIssueStatus(c *gin.Context) {
 	jsonObj(c, a.certs.Status(), nil)
+}
+
+// certInstalled is the certificate a request installed here; a master reads it from its nodes.
+func (a *ProtectController) certInstalled(c *gin.Context) {
+	jsonObj(c, a.certs.Installed(), nil)
 }
 
 // realitySelfApply moves the REALITY inbound to 443 in front of the website.
@@ -414,6 +421,8 @@ var nodeProtectActions = map[string]struct{ method, path string }{
 	"lock":          {http.MethodPost, "access/lockToCaller"},
 	"unlock":        {http.MethodPost, "access"},
 	"firewallAllow": {http.MethodPost, "firewall/allow"},
+	"certIssue":     {http.MethodPost, "cert/issue"},
+	"certStatus":    {http.MethodGet, "cert/issue"},
 }
 
 func (a *ProtectController) nodeAction(c *gin.Context) {
@@ -430,6 +439,15 @@ func (a *ProtectController) nodeAction(c *gin.Context) {
 	case "firewallAllow":
 		// No rules: the node opens the ports of all its own inbounds.
 		body = map[string]any{"rules": []any{}}
+	case "certIssue":
+		// The node panel keeps its own certificate, which the master may pin; the master's
+		// Cloudflare token travels with the request since a node seldom has one.
+		var req struct {
+			Domain string `json:"domain"`
+		}
+		_ = c.ShouldBindJSON(&req)
+		token, _ := a.settings.GetCfApiToken()
+		body = map[string]any{"domain": req.Domain, "usePanel": false, "cfToken": token}
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()

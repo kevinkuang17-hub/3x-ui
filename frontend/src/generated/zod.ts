@@ -24,6 +24,15 @@ export type trafficLocalApplyAction = z.infer<typeof trafficLocalApplyActionSche
 export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
+export const AcmeCertSchema = z.object({
+  certFile: z.string(),
+  certNotAfter: z.number().int(),
+  certState: z.string(),
+  domain: z.string(),
+  keyFile: z.string(),
+});
+export type AcmeCert = z.infer<typeof AcmeCertSchema>;
+
 export const AllSettingSchema = z.object({
   cfApiToken: z.string(),
   cfAutoDns: z.boolean(),

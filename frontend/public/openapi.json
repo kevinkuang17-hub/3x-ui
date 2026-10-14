@@ -26,6 +26,40 @@
       }
     },
     "schemas": {
+      "AcmeCert": {
+        "description": "AcmeCert is the certificate this server got through the panel, as the server itself sees it.",
+        "properties": {
+          "certFile": {
+            "example": "/root/cert/hk.example.com/fullchain.pem",
+            "type": "string"
+          },
+          "certNotAfter": {
+            "example": 1767225600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "certState": {
+            "example": "ok",
+            "type": "string"
+          },
+          "domain": {
+            "example": "hk.example.com",
+            "type": "string"
+          },
+          "keyFile": {
+            "example": "/root/cert/hk.example.com/privkey.pem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "certFile",
+          "certNotAfter",
+          "certState",
+          "domain",
+          "keyFile"
+        ],
+        "type": "object"
+      },
       "AllSetting": {
         "properties": {
           "cfApiToken": {
@@ -17757,7 +17791,8 @@
               },
               "example": {
                 "domain": "hk.example.com",
-                "usePanel": false
+                "usePanel": false,
+                "cfToken": ""
               }
             }
           }
@@ -17837,6 +17872,48 @@
                     "panel": true,
                     "running": false,
                     "step": "issue"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/cert/installed": {
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "The certificate a request from the panel installed on this server, checked on disk; a master reads it from its nodes for one-click inbounds.",
+        "operationId": "get_panel_api_protect_cert_installed",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AcmeCert"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+                    "certNotAfter": 1767225600000,
+                    "certState": "ok",
+                    "domain": "hk.example.com",
+                    "keyFile": "/root/cert/hk.example.com/privkey.pem"
                   }
                 }
               }
@@ -18085,7 +18162,7 @@
         "tags": [
           "Protect & speed"
         ],
-        "summary": "Run speedupApply, speedupRevert, lock (allow only this master) or unlock on a node.",
+        "summary": "Run speedupApply, speedupRevert, lock (allow only this master), unlock, firewallAllow, certIssue (body {domain}: request a certificate on the node with this master's Cloudflare token) or certStatus on a node.",
         "operationId": "post_panel_api_protect_nodes_id_action",
         "parameters": [
           {
@@ -18101,7 +18178,7 @@
             "name": "action",
             "in": "path",
             "required": true,
-            "description": "speedupApply, speedupRevert, lock or unlock.",
+            "description": "speedupApply, speedupRevert, lock, unlock, firewallAllow, certIssue or certStatus.",
             "schema": {
               "type": "string"
             }

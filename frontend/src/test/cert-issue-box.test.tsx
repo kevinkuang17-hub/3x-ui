@@ -57,3 +57,23 @@ describe('CertIssueBox', () => {
     expect(onIssued).not.toHaveBeenCalled();
   });
 });
+
+describe('CertIssueBox on a node', () => {
+  it('asks the node through the master and never offers to change the node panel certificate', async () => {
+    const onIssued = vi.fn();
+    postSpy.mockImplementation(async (url: string) => {
+      if (url === '/panel/api/protect/nodes/4/certIssue') return new Msg(true, '', running);
+      return new Msg(true, '', { ...running, running: false, done: true, step: 'done' });
+    });
+    renderWithProviders(<CertIssueBox domain="hk.example.com" nodeId={4} onIssued={onIssued} />);
+    expect(screen.queryByText('Also use it for the panel (HTTPS)')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Request certificate/ }));
+
+    await waitFor(() => expect(onIssued).toHaveBeenCalledTimes(1), { timeout: 6000 });
+    expect(postSpy.mock.calls.map((c) => [c[0], c[1]])).toEqual([
+      ['/panel/api/protect/nodes/4/certIssue', { domain: 'hk.example.com' }],
+      ['/panel/api/protect/nodes/4/certStatus', {}],
+    ]);
+    expect(getSpy).not.toHaveBeenCalled();
+  });
+});

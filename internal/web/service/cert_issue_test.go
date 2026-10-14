@@ -3,13 +3,16 @@ package service
 import (
 	"context"
 	"errors"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 type acmeCall struct {
@@ -60,10 +63,10 @@ func TestCertIssueRefusesWithoutDomainOrToken(t *testing.T) {
 	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
 	stubAcme(t, 0)
 	s := &CertIssueService{}
-	if err := s.Start("not a domain", false, nil); err == nil || !strings.Contains(err.Error(), "not a domain name") {
+	if err := s.Start("not a domain", "", false, nil); err == nil || !strings.Contains(err.Error(), "not a domain name") {
 		t.Fatalf("bad domain: err = %v", err)
 	}
-	if err := s.Start("hk.example.com", false, nil); err == nil || !strings.Contains(err.Error(), "Cloudflare API token") {
+	if err := s.Start("hk.example.com", "", false, nil); err == nil || !strings.Contains(err.Error(), "Cloudflare API token") {
 		t.Fatalf("no token: err = %v", err)
 	}
 }
@@ -79,7 +82,7 @@ func TestCertIssueInstallsAndFeedsRecommendation(t *testing.T) {
 	}
 	restarted := false
 	s := &CertIssueService{}
-	if err := s.Start("HK.example.com", false, func() { restarted = true }); err != nil {
+	if err := s.Start("HK.example.com", "", false, func() { restarted = true }); err != nil {
 		t.Fatal(err)
 	}
 	st := waitIssue(t, s)
@@ -119,7 +122,7 @@ func TestCertIssueForPanelSetsPanelCertAndRestarts(t *testing.T) {
 	}
 	restarted := false
 	s := &CertIssueService{}
-	if err := s.Start("hk.example.com", true, func() { restarted = true }); err != nil {
+	if err := s.Start("hk.example.com", "", true, func() { restarted = true }); err != nil {
 		t.Fatal(err)
 	}
 	st := waitIssue(t, s)
@@ -137,7 +140,7 @@ func TestCertIssueFailureKeepsSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := &CertIssueService{}
-	if err := s.Start("hk.example.com", true, nil); err != nil {
+	if err := s.Start("hk.example.com", "", true, nil); err != nil {
 		t.Fatal(err)
 	}
 	st := waitIssue(t, s)
@@ -149,5 +152,62 @@ func TestCertIssueFailureKeepsSettings(t *testing.T) {
 	}
 	if d, _ := settings.getString("acmeDomain"); d != "" {
 		t.Fatalf("acmeDomain = %q after a failed request", d)
+	}
+}
+
+// A node keeps its pinned panel certificate, so the one-click dialog must find the certificate
+// requested on the node through the node itself, or TLS presets stay blocked there.
+func TestRecommendNodeUsesCertificateRequestedOnNode(t *testing.T) {
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
+	node := &model.Node{Name: "HK A", Address: "127.0.0.1", Port: 2053, Enable: true, ApiToken: "t"}
+	if err := database.GetDB().Create(node).Error; err != nil {
+		t.Fatal(err)
+	}
+	stubRecommendNet(t, map[string][]string{"127.0.0.1": {"127.0.0.1"}, "hk.example.com": {"127.0.0.1"}}, "127.0.0.1")
+	old := recommendNodeAcme
+	t.Cleanup(func() { recommendNodeAcme = old })
+	certFile, keyFile := "/root/cert/hk.example.com/fullchain.pem", "/root/cert/hk.example.com/privkey.pem"
+	state := CertStateOK
+	recommendNodeAcme = func(_ NodeService, id int) (*AcmeCert, error) {
+		if id != node.Id {
+			t.Fatalf("asked node %d", id)
+		}
+		return &AcmeCert{Domain: "hk.example.com", CertFile: certFile, KeyFile: keyFile, CertState: state}, nil
+	}
+	got, err := (&InboundRecommendService{}).Recommend(context.Background(), &node.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Domain != "hk.example.com" || got.CertState != CertStateOK || got.CertFile != certFile || !got.PointsHere {
+		t.Fatalf("domain/state/file/points = %q/%q/%q/%v", got.Domain, got.CertState, got.CertFile, got.PointsHere)
+	}
+
+	state = CertStateExpired
+	got, err = (&InboundRecommendService{}).Recommend(context.Background(), &node.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.CertFile != "" || got.CertState == CertStateOK {
+		t.Fatalf("an expired node certificate must not unlock TLS presets: %+v", got)
+	}
+}
+
+func TestCertInstalledReportsDiskState(t *testing.T) {
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
+	stubAcme(t, 0)
+	s := &CertIssueService{}
+	if got := s.Installed(); got.CertState != CertStateMissing || got.Domain != "" {
+		t.Fatalf("nothing requested yet: %+v", got)
+	}
+	if err := (&SettingService{}).setString("acmeDomain", "hk.example.com"); err != nil {
+		t.Fatal(err)
+	}
+	certFile, _ := AcmeCertPaths("hk.example.com")
+	if err := os.MkdirAll(filepath.Dir(certFile), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeTestCert(t, filepath.Dir(certFile), []string{"hk.example.com"}, time.Now().Add(-time.Hour))
+	if got := s.Installed(); got.CertState != CertStateExpired || got.CertFile != certFile {
+		t.Fatalf("expired file on disk: %+v", got)
 	}
 }

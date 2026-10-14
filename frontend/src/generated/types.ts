@@ -8,6 +8,14 @@ export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
+export interface AcmeCert {
+  certFile: string;
+  certNotAfter: number;
+  certState: string;
+  domain: string;
+  keyFile: string;
+}
+
 export interface AllSetting {
   cfApiToken: string;
   cfAutoDns: boolean;

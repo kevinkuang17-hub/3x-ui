@@ -3028,8 +3028,15 @@ export const sections: readonly Section[] = [
         path: '/panel/api/protect/cert/issue',
         summary:
           "Requests a Let's Encrypt certificate for the domain through acme.sh with a Cloudflare DNS challenge (the panel's Cloudflare API token), installs it under /root/cert/<domain>/ and lets acme.sh renew it. usePanel also makes it the panel's HTTPS certificate and restarts the panel. Runs in the background; poll GET for the outcome.",
-        body: '{\n  "domain": "hk.example.com",\n  "usePanel": false\n}',
+        body: '{\n  "domain": "hk.example.com",\n  "usePanel": false,\n  "cfToken": ""\n}',
         responseSchema: 'CertIssueStatus',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/cert/installed',
+        summary:
+          'The certificate a request from the panel installed on this server, checked on disk; a master reads it from its nodes for one-click inbounds.',
+        responseSchema: 'AcmeCert',
       },
       {
         method: 'GET',
@@ -3079,14 +3086,14 @@ export const sections: readonly Section[] = [
         method: 'POST',
         path: '/panel/api/protect/nodes/:id/:action',
         summary:
-          'Run speedupApply, speedupRevert, lock (allow only this master) or unlock on a node.',
+          "Run speedupApply, speedupRevert, lock (allow only this master), unlock, firewallAllow, certIssue (body {domain}: request a certificate on the node with this master's Cloudflare token) or certStatus on a node.",
         params: [
           { name: 'id', in: 'path', type: 'number', desc: 'Node id.' },
           {
             name: 'action',
             in: 'path',
             type: 'string',
-            desc: 'speedupApply, speedupRevert, lock or unlock.',
+            desc: 'speedupApply, speedupRevert, lock, unlock, firewallAllow, certIssue or certStatus.',
           },
         ],
       },

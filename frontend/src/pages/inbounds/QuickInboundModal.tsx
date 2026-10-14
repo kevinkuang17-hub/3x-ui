@@ -556,8 +556,13 @@ export default function QuickInboundModal({
                 {certLine()}
               </Descriptions.Item>
             </Descriptions>
-            {server === LOCAL && !facts.certOk && (
-              <CertIssueBox domain={rec.domain} onIssued={() => setRecReload((n) => n + 1)} />
+            {!facts.certOk && (
+              <CertIssueBox
+                key={server}
+                domain={rec.domain}
+                nodeId={nodeId}
+                onIssued={() => setRecReload((n) => n + 1)}
+              />
             )}
 
             <div className="quick-inbound-presets">

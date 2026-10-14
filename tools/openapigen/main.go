@@ -113,6 +113,7 @@ func run(root, outDir string) error {
 				"PortCheck",
 				"RealitySelfPlan",
 				"CertIssueStatus",
+				"AcmeCert",
 				"GeodataTokenIssue",
 				"AmneziaWGLogs",
 				"PeerActivity",
