@@ -34,6 +34,7 @@ import {
 import { formValuesToWirePayload } from '@/lib/xray/inbound-form-adapter';
 import { decoyMasquerade } from '@/lib/xray/hysteria-masquerade';
 import { allowFirewall, type FirewallRule } from '@/pages/protect/FirewallCard';
+import { waitForWebsite } from '@/pages/protect/RealitySelfCard';
 import { InboundFormSchema, type InboundFormValues } from '@/schemas/forms/inbound-form';
 import type { InboundRecommendation, RealityScanResult } from '@/generated/types';
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
@@ -107,6 +108,7 @@ export default function QuickInboundModal({
   const [clientsChoice, setClientsChoice] = useState<string>(ALL_CLIENTS);
   const [hyDecoy, setHyDecoy] = useState(true);
   const [openFirewall, setOpenFirewall] = useState(true);
+  const [useSelf, setUseSelf] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { data: clients = [] } = useClientRecords(open);
 
@@ -179,6 +181,10 @@ export default function QuickInboundModal({
   const needsReality = checked.some(usesReality);
   // When the website already runs behind REALITY, new REALITY inbounds front it too, no scan needed.
   const selfTarget = rec?.realityTarget && rec.domain ? rec.realityTarget : '';
+  // Not yet behind REALITY: the dialog can set that up right after creating the inbound.
+  const selfEligible =
+    !selfTarget && server === LOCAL && !!rec?.decoyReady && !!rec.domain && rec.certState === 'ok';
+  const selfSetup = selfEligible && useSelf && checked.includes('reality-vision');
   useEffect(() => {
     if (open && needsReality && !selfTarget && !scanned && !scanning) void scanReality();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -298,6 +304,7 @@ export default function QuickInboundModal({
     setSubmitting(true);
     try {
       const createdIds: number[] = [];
+      let visionId = 0;
       const opened: FirewallRule[] = [];
       const failed: string[] = [];
       for (const row of rows) {
@@ -317,10 +324,14 @@ export default function QuickInboundModal({
         const id = (msg?.obj as { id?: number } | null)?.id;
         if (msg?.success && id) {
           createdIds.push(id);
+          if (row.id === 'reality-vision') visionId = id;
           const transport = QUICK_PRESETS.find((p) => p.id === row.id)!.transport;
           if (transport !== 'udp') opened.push({ port: row.port, proto: 'tcp' });
           if (transport !== 'tcp') opened.push({ port: row.port, proto: 'udp' });
         } else failed.push(row.remark);
+      }
+      if (selfSetup && visionId) {
+        if (await frontWithReality(visionId)) opened.push({ port: 443, proto: 'tcp' });
       }
       if (opened.length > 0 && firewallOn && openFirewall) await allowFirewall(opened);
       const emails = selectedEmails();
@@ -348,6 +359,31 @@ export default function QuickInboundModal({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // frontWithReality runs the Protect page's "REALITY with your own website" on the new inbound:
+  // website to a loopback port, panel restart, then the inbound to 443 with the domain as SNI.
+  const frontWithReality = async (inboundId: number): Promise<boolean> => {
+    messageApi.info(t('pages.inbounds.quick.selfRunning'));
+    const prep = await HttpUtil.post<{ domain: string; internalPort: number }>(
+      '/panel/api/protect/realitySelf/prepare',
+      { inboundId },
+      JSON_HEADERS,
+    );
+    if (!prep?.success || !prep.obj) return false;
+    if (!(await waitForWebsite(prep.obj.internalPort))) {
+      messageApi.error(t('pages.protect.realitySelfTimeout'));
+      return false;
+    }
+    const applied = await HttpUtil.post(
+      '/panel/api/protect/realitySelf/apply',
+      { inboundId },
+      JSON_HEADERS,
+    );
+    if (applied?.success) {
+      messageApi.success(t('pages.protect.realitySelfDone', { domain: prep.obj.domain }));
+    }
+    return !!applied?.success;
   };
 
   const advanced = async () => {
@@ -582,6 +618,19 @@ export default function QuickInboundModal({
               <Checkbox checked={openFirewall} onChange={(e) => setOpenFirewall(e.target.checked)}>
                 {t('pages.inbounds.quick.openFirewall')}
               </Checkbox>
+            )}
+
+            {needsReality && selfEligible && (
+              <div>
+                <Checkbox checked={useSelf} onChange={(e) => setUseSelf(e.target.checked)}>
+                  {t('pages.inbounds.quick.useSelf', { domain: rec.domain })}
+                </Checkbox>
+                {useSelf && checked.includes('reality-vision') && (
+                  <Typography.Text type="secondary" className="quick-inbound-desc">
+                    {t('pages.inbounds.quick.useSelfNote')}
+                  </Typography.Text>
+                )}
+              </div>
             )}
 
             {needsReality && (

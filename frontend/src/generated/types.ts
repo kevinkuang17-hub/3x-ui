@@ -825,6 +825,7 @@ export interface InboundRecommendation {
   certFile: string;
   certNotAfter: number;
   certState: string;
+  decoyReady: boolean;
   domain: string;
   domainIps: string[];
   firewall: string;

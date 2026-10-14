@@ -3570,6 +3570,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "ok",
         "type": "string"
       },
+      "decoyReady": {
+        "description": "DecoyReady says a decoy website is deployed here, so REALITY can be put in front of it.",
+        "example": true,
+        "type": "boolean"
+      },
       "domain": {
         "example": "hk.example.com",
         "type": "string"
@@ -3631,6 +3636,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "certFile",
       "certNotAfter",
       "certState",
+      "decoyReady",
       "domain",
       "domainIps",
       "firewall",

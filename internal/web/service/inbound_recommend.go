@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/decoy"
 )
 
 const (
@@ -52,6 +53,8 @@ type InboundRecommendation struct {
 	Firewall string `json:"firewall" example:"ufw"`
 	// RealityTarget is the loopback website REALITY should front, when it runs behind REALITY.
 	RealityTarget string `json:"realityTarget" example:"127.0.0.1:24873"`
+	// DecoyReady says a decoy website is deployed here, so REALITY can be put in front of it.
+	DecoyReady bool `json:"decoyReady" example:"true"`
 }
 
 type InboundRecommendService struct {
@@ -247,6 +250,9 @@ func (s *InboundRecommendService) recommendLocal(ctx context.Context) *InboundRe
 	}
 	if fw := recommendFirewall(); fw.Active {
 		rec.Firewall = fw.Tool
+	}
+	if mode, _ := s.settings.getString("decoyMode"); mode != "" && mode != decoy.ModeOff {
+		rec.DecoyReady = true
 	}
 	if protect := (&ProtectService{}); protect.FrontLoopback() && CurrentFrontStatus().Listening {
 		rec.RealityTarget = CurrentFrontStatus().Addr

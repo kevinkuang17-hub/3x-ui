@@ -875,6 +875,7 @@ export const InboundRecommendationSchema = z.object({
   certFile: z.string(),
   certNotAfter: z.number().int(),
   certState: z.string(),
+  decoyReady: z.boolean(),
   domain: z.string(),
   domainIps: z.array(z.string()),
   firewall: z.string(),

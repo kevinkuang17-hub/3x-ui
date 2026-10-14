@@ -918,6 +918,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "certFile": "/root/cert/hk.example.com/fullchain.pem",
     "certNotAfter": 1767225600000,
     "certState": "ok",
+    "decoyReady": true,
     "domain": "hk.example.com",
     "domainIps": [
       ""

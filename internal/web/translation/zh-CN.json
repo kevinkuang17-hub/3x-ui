@@ -837,7 +837,10 @@
         "hyUdpNote": "Hysteria2 走 UDP {port}，云服务器安全组也要放行 UDP {port}。",
         "hyDecoyMissing": "已创建，但没有设置伪装网站：{msg}",
         "openFirewall": "在本服务器防火墙（ufw）放行新入站的端口",
-        "targetSelf": "自己的网站（{domain}）"
+        "targetSelf": "自己的网站（{domain}）",
+        "useSelf": "Reality 使用自己的网站（{domain}）——推荐",
+        "useSelfNote": "创建后会把 Reality 入站改到 TCP 443，SNI 用你的域名，伪装网站挪到它后面；面板会重启一次。",
+        "selfRunning": "正在把 Reality 放到你的网站前面，面板会重启，请稍候……"
       },
       "diagnose": {
         "action": "诊断",

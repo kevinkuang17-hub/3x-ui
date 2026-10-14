@@ -197,4 +197,33 @@ describe('QuickInboundModal', () => {
       false,
     );
   });
+
+  it('puts the new REALITY inbound in front of the decoy website when asked', async () => {
+    mockServer(recommendation({ decoyReady: true }));
+    const base = getSpy.getMockImplementation()!;
+    getSpy.mockImplementation(async (url: string, ...rest: unknown[]) => {
+      if (url === '/panel/api/protect/front')
+        return new Msg(true, '', {
+          loopback: true,
+          running: { listening: true, frontOnly: false, error: '', addr: '127.0.0.1:24873' },
+        });
+      return base(url, ...(rest as []));
+    });
+    const basePost = postSpy.getMockImplementation()!;
+    postSpy.mockImplementation(async (url: string, ...rest: unknown[]) => {
+      if (url === '/panel/api/protect/realitySelf/prepare')
+        return new Msg(true, '', { domain: 'hk.example.com', internalPort: 24873 });
+      return basePost(url, ...(rest as []));
+    });
+    const { onCreated } = renderModal();
+    fireEvent.click(await createButton());
+
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1), { timeout: 6000 });
+    const visionId =
+      41 + added().findIndex((b) => b.stream.security === 'reality' && b.stream.network === 'tcp');
+    const prep = postSpy.mock.calls.find((c) => c[0] === '/panel/api/protect/realitySelf/prepare');
+    const apply = postSpy.mock.calls.find((c) => c[0] === '/panel/api/protect/realitySelf/apply');
+    expect(prep?.[1]).toEqual({ inboundId: visionId });
+    expect(apply?.[1]).toEqual({ inboundId: visionId });
+  }, 10000);
 });
