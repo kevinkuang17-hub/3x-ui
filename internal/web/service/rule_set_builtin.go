@@ -66,4 +66,7 @@ var builtinRuleSets = []builtinRuleSet{
 		"claudeusercontent.com", "gemini.google.com", "generativelanguage.googleapis.com", "perplexity.ai",
 		"poe.com", "x.ai", "grok.com", "copilot.microsoft.com", "midjourney.com",
 	}},
+	{Key: "ads", Name: "广告与跟踪拦截", Category: "拦截", Policy: "REJECT", Version: 1, Rules: []string{
+		"GEOSITE,category-ads-all",
+	}},
 }

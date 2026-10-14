@@ -832,6 +832,18 @@
           "ss2022": {
             "title": "Shadowsocks 2022",
             "desc": "Simple and supported everywhere, but easy to spot. Keep it as a backup for routers and old clients."
+          },
+          "grpc-tls": {
+            "title": "VLESS + gRPC + TLS",
+            "desc": "Looks like an ordinary gRPC API over HTTP/2. Works direct, or through Cloudflare once gRPC is switched on there; uses your domain and certificate."
+          },
+          "xhttp-tls-enc": {
+            "title": "VLESS + XHTTP + TLS + Encryption",
+            "desc": "XHTTP on your real certificate with VLESS Encryption (post-quantum ML-KEM-768) inside, so the traffic stays private even if TLS is stripped by a CDN. Needs Xray 25.9+ or a recent Mihomo client."
+          },
+          "trojan-ws-cdn": {
+            "title": "Trojan + WS + TLS (CDN)",
+            "desc": "The CDN path for clients and routers without VLESS: goes through Cloudflare when the domain is proxied."
           }
         },
         "hyDecoy": "Show the panel's decoy website to visitors (masquerade)",
@@ -841,7 +853,24 @@
         "targetSelf": "your own website ({domain})",
         "useSelf": "REALITY uses your own website ({domain}) — recommended",
         "useSelfNote": "After creating, the REALITY inbound moves to TCP 443 with your domain as SNI and the decoy website behind it; the panel restarts once.",
-        "selfRunning": "Putting REALITY in front of your website; the panel restarts, please wait…"
+        "selfRunning": "Putting REALITY in front of your website; the panel restarts, please wait…",
+        "hyHop": "Port hopping across UDP {range}",
+        "hyHopNote": "Clients switch between these ports every few seconds, which is harder to throttle. The server forwards them to {port} by itself (iptables); if your provider has a security group, open UDP {range} there too.",
+        "vlessEncFailed": "Could not generate a VLESS Encryption key: the Xray binary on the panel may be too old.",
+        "certIssueStarted": "Certificate request started",
+        "certIssueTitle": "Get a free certificate (Let's Encrypt via Cloudflare DNS)",
+        "certIssueDesc": "Uses the Cloudflare API token from Settings → Cloudflare (permission Zone · DNS · Edit). Port 80 does not need to be open; it takes one to two minutes and renews itself.",
+        "certIssuePanel": "Also use it for the panel (HTTPS)",
+        "certIssuePanelNote": "The panel restarts on HTTPS; open it afterwards at {url}",
+        "certIssueStart": "Request certificate",
+        "certIssueStep": {
+          "install": "Installing acme.sh…",
+          "issue": "Waiting for Let's Encrypt to check the DNS record (1–2 minutes)…",
+          "installCert": "Installing the certificate…",
+          "done": "Done"
+        },
+        "certIssueDone": "Certificate for {domain} installed; the TLS presets can use it now.",
+        "certIssueDonePanel": "Certificate installed. The panel is restarting on HTTPS: open {url}"
       },
       "diagnose": {
         "action": "Diagnose",

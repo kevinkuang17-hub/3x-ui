@@ -3025,6 +3025,21 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/protect/cert/issue',
+        summary:
+          "Requests a Let's Encrypt certificate for the domain through acme.sh with a Cloudflare DNS challenge (the panel's Cloudflare API token), installs it under /root/cert/<domain>/ and lets acme.sh renew it. usePanel also makes it the panel's HTTPS certificate and restarts the panel. Runs in the background; poll GET for the outcome.",
+        body: '{\n  "domain": "hk.example.com",\n  "usePanel": false\n}',
+        responseSchema: 'CertIssueStatus',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/protect/cert/issue',
+        summary:
+          'Progress and outcome of the last certificate request, with the tail of the acme.sh log.',
+        responseSchema: 'CertIssueStatus',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/protect/portcheck',
         summary:
           'Whether a port is bound on this server and let in by ufw (masters ask their nodes this while diagnosing).',

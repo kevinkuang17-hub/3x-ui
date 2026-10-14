@@ -424,6 +424,17 @@ export const EXAMPLES: Record<string, unknown> = {
     "scope": "admin",
     "token": "new-token-string"
   },
+  "CertIssueStatus": {
+    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+    "domain": "hk.example.com",
+    "done": true,
+    "error": "",
+    "keyFile": "/root/cert/hk.example.com/privkey.pem",
+    "log": "Cert success.",
+    "panel": true,
+    "running": false,
+    "step": "issue"
+  },
   "Client": {
     "adTag": "0123456789abcdef0123456789abcdef",
     "allowedIPs": [

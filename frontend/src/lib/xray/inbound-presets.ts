@@ -10,9 +10,11 @@ import {
   type HysteriaMasquerade,
   HysteriaStreamSettingsSchema,
 } from '@/schemas/protocols/stream/hysteria';
+import { GrpcStreamSettingsSchema } from '@/schemas/protocols/stream/grpc';
 import { TcpStreamSettingsSchema } from '@/schemas/protocols/stream/tcp';
 import { WsStreamSettingsSchema } from '@/schemas/protocols/stream/ws';
 import { XHttpStreamSettingsSchema } from '@/schemas/protocols/stream/xhttp';
+import { QuicParamsSchema } from '@/schemas/protocols/stream/finalmask';
 import { SniffingSchema } from '@/schemas/primitives/sniffing';
 import type { InboundFormValues, ShareAddrStrategy } from '@/schemas/forms/inbound-form';
 import { RandomUtil } from '@/utils';
@@ -22,7 +24,10 @@ export type QuickPresetId =
   | 'reality-vision'
   | 'xhttp-reality'
   | 'ws-cdn'
+  | 'grpc-tls'
+  | 'xhttp-tls-enc'
   | 'trojan-tls'
+  | 'trojan-ws-cdn'
   | 'hysteria2'
   | 'ss2022';
 
@@ -36,6 +41,8 @@ export interface QuickPreset {
   transport: QuickTransport;
   // Short name appended to the server name in the generated remark.
   label: string;
+  // Meant to run through Cloudflare, so it must sit on a port Cloudflare proxies.
+  cdn?: boolean;
 }
 
 // Listed in the order ports are handed out, so the main protocols get 443 first.
@@ -63,6 +70,23 @@ export const QUICK_PRESETS: readonly QuickPreset[] = [
     security: 'tls',
     transport: 'tcp',
     label: 'CDN',
+    cdn: true,
+  },
+  {
+    id: 'grpc-tls',
+    protocol: 'vless',
+    network: 'grpc',
+    security: 'tls',
+    transport: 'tcp',
+    label: 'gRPC',
+  },
+  {
+    id: 'xhttp-tls-enc',
+    protocol: 'vless',
+    network: 'xhttp',
+    security: 'tls',
+    transport: 'tcp',
+    label: 'XHTTP TLS',
   },
   {
     id: 'xhttp-reality',
@@ -79,6 +103,15 @@ export const QUICK_PRESETS: readonly QuickPreset[] = [
     security: 'tls',
     transport: 'tcp',
     label: 'Trojan',
+  },
+  {
+    id: 'trojan-ws-cdn',
+    protocol: 'trojan',
+    network: 'ws',
+    security: 'tls',
+    transport: 'tcp',
+    label: 'Trojan CDN',
+    cdn: true,
   },
   {
     id: 'hysteria2',
@@ -122,7 +155,7 @@ export type PresetWarning = '' | 'needsDirectDns' | 'noCdnDetected';
 
 export function presetWarning(preset: QuickPreset, facts: QuickServerFacts): PresetWarning {
   if (preset.security !== 'tls' || presetBlocked(preset, facts)) return '';
-  if (preset.id === 'ws-cdn') return facts.behindProxy ? '' : 'noCdnDetected';
+  if (preset.cdn) return facts.behindProxy ? '' : 'noCdnDetected';
   return facts.pointsHere ? '' : 'needsDirectDns';
 }
 
@@ -201,10 +234,7 @@ export function assignPorts(
     } else if (preset.transport === 'both') {
       port = pick(pools.tcp, (p) => !usedTcp.has(p) && !usedUdp.has(p));
     } else {
-      port = pick(
-        pools.tcp,
-        (p) => !usedTcp.has(p) && (preset.id !== 'ws-cdn' || CDN_PORTS.includes(p)),
-      );
+      port = pick(pools.tcp, (p) => !usedTcp.has(p) && (!preset.cdn || CDN_PORTS.includes(p)));
     }
     if (port) {
       if (preset.transport !== 'udp') usedTcp.add(port);
@@ -213,6 +243,61 @@ export function assignPorts(
     out.set(preset.id, port);
   }
   return out;
+}
+
+const HOP_WIDTH = 1000;
+const HOP_STARTS: readonly number[] = [20000, 30000, 40000, 50000, 21000, 31000, 41000, 51000];
+
+function hopRanges(stream: unknown): [number, number][] {
+  const s = coerceInboundJsonField(stream) as {
+    finalmask?: { quicParams?: { udpHop?: { ports?: unknown } } };
+  };
+  const spec = s.finalmask?.quicParams?.udpHop?.ports;
+  if (typeof spec !== 'string') return [];
+  return spec.split(',').flatMap((part): [number, number][] => {
+    const [lo, hi = lo] = part.trim().split('-').map(Number);
+    return Number.isInteger(lo) && Number.isInteger(hi) ? [[lo, hi]] : [];
+  });
+}
+
+// A block of UDP ports for Hysteria2 hopping that no inbound on that server listens on or already
+// hops across, and that does not swallow the Hysteria2 port itself; '' when none is free.
+export function pickHopRange(
+  nodeId: number | null,
+  hyPort: number,
+  inbounds: readonly ExistingInbound[],
+): string {
+  const mine = inbounds.filter((ib) => (ib.nodeId ?? null) === nodeId);
+  const busy: [number, number][] = [
+    [hyPort, hyPort],
+    ...mine.map((ib): [number, number] => [ib.port, ib.port]),
+    ...mine.flatMap((ib) => hopRanges(ib.streamSettings)),
+  ];
+  for (const lo of HOP_STARTS) {
+    const hi = lo + HOP_WIDTH - 1;
+    if (!busy.some(([a, b]) => a <= hi && lo <= b)) return `${lo}-${hi}`;
+  }
+  return '';
+}
+
+export interface RealityCandidate {
+  target: string;
+  serverNames: string[];
+  h2?: boolean;
+}
+
+export interface RealityTargets {
+  vision: RealityCandidate;
+  xhttp: RealityCandidate;
+}
+
+// XHTTP needs a target that speaks HTTP/2; Vision takes a different site when there is one, so two
+// REALITY inbounds on one server do not borrow the same certificate.
+export function pickRealityTargets(usable: readonly RealityCandidate[]): RealityTargets | null {
+  if (usable.length === 0) return null;
+  const xhttp = usable.find((r) => r.h2) ?? usable[0];
+  const vision = usable.find((r) => r.target !== xhttp.target) ?? xhttp;
+  return { vision, xhttp };
 }
 
 export interface QuickInboundInput {
@@ -231,6 +316,11 @@ export interface QuickInboundInput {
   masquerade?: HysteriaMasquerade;
   // REALITY in front of the panel's own website: the target gets the visitor's address (PROXY v1).
   realityXver?: number;
+  // Hysteria2 only: the UDP range clients hop across, e.g. "20000-20999".
+  hopPorts?: string;
+  // VLESS Encryption pair from `xray vlessenc`, for the presets that use it.
+  vlessDecryption?: string;
+  vlessEncryption?: string;
 }
 
 function withCert(tls: Record<string, unknown>, input: QuickInboundInput): Record<string, unknown> {
@@ -275,9 +365,13 @@ function streamFor(preset: QuickPreset, input: QuickInboundInput): Record<string
         finalmask: {
           tcp: [],
           udp: [{ type: 'salamander', settings: { password: RandomUtil.randomLowerAndNum(16) } }],
+          ...(input.hopPorts
+            ? { quicParams: QuicParamsSchema.parse({ udpHop: { ports: input.hopPorts } }) }
+            : {}),
         },
       };
-    case 'ws-cdn': {
+    case 'ws-cdn':
+    case 'trojan-ws-cdn': {
       // Xray serves WebSocket over HTTP/1.1 only, so the handshake must not offer h2.
       const tls = withCert(createTlsSettingsWithDefaultCert(), input);
       tls.alpn = ['http/1.1'];
@@ -288,6 +382,22 @@ function streamFor(preset: QuickPreset, input: QuickInboundInput): Record<string
         tlsSettings: tls,
       };
     }
+    case 'grpc-tls':
+      return {
+        network: 'grpc',
+        security: 'tls',
+        grpcSettings: GrpcStreamSettingsSchema.parse({
+          serviceName: RandomUtil.randomLowerAndNum(12),
+        }),
+        tlsSettings: withCert(createTlsSettingsWithDefaultCert(), input),
+      };
+    case 'xhttp-tls-enc':
+      return {
+        network: 'xhttp',
+        security: 'tls',
+        xhttpSettings: XHttpStreamSettingsSchema.parse({ path: randomPath(), host: input.domain }),
+        tlsSettings: withCert(createTlsSettingsWithDefaultCert(), input),
+      };
     case 'xhttp-reality':
       return {
         network: 'xhttp',
@@ -320,13 +430,28 @@ function shareAddress(
   return { strategy: input.nodeId != null ? 'node' : 'listen', addr: '' };
 }
 
+// Presets whose inbound carries a VLESS Encryption key pair.
+export const usesVlessEncryption = (id: QuickPresetId) => id === 'xhttp-tls-enc';
+
+function settingsFor(preset: QuickPreset, input: QuickInboundInput) {
+  const settings = createDefaultInboundSettings(preset.protocol) ?? undefined;
+  if (settings && usesVlessEncryption(preset.id) && input.vlessDecryption) {
+    return {
+      ...settings,
+      decryption: input.vlessDecryption,
+      encryption: input.vlessEncryption ?? 'none',
+    };
+  }
+  return settings;
+}
+
 export function buildQuickInbound(input: QuickInboundInput): InboundFormValues {
   const preset = presetById(input.preset);
   const share = shareAddress(preset, input);
   return rawInboundToFormValues({
     remark: input.remark,
     protocol: preset.protocol,
-    settings: createDefaultInboundSettings(preset.protocol) ?? undefined,
+    settings: settingsFor(preset, input),
     streamSettings: streamFor(preset, input),
     sniffing: SniffingSchema.parse({}),
     port: input.port,

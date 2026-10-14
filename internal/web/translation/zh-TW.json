@@ -832,6 +832,18 @@
           "ss2022": {
             "title": "Shadowsocks 2022",
             "desc": "簡單、到處都支援，但容易被識別，適合作為路由器和舊用戶端的備用。"
+          },
+          "grpc-tls": {
+            "title": "VLESS + gRPC + TLS",
+            "desc": "看起來像普通的 gRPC 介面（HTTP/2）。可以直連，在 Cloudflare 開啟 gRPC 後也能走 CDN；使用你的網域和憑證。"
+          },
+          "xhttp-tls-enc": {
+            "title": "VLESS + XHTTP + TLS + 加密",
+            "desc": "XHTTP 用你的真實憑證，內部再加 VLESS 加密（抗量子 ML-KEM-768），即使經過 CDN 解開 TLS 內容也不會洩露。需要 Xray 25.9 以上或較新的 Mihomo 用戶端。"
+          },
+          "trojan-ws-cdn": {
+            "title": "Trojan + WS + TLS（CDN）",
+            "desc": "給不支援 VLESS 的用戶端和路由器的 CDN 線路：網域開啟 Cloudflare 代理時走 CDN。"
           }
         },
         "hyDecoy": "訪問者打開時顯示面板的偽裝網站（偽裝）",
@@ -841,7 +853,24 @@
         "targetSelf": "自己的網站（{domain}）",
         "useSelf": "Reality 使用自己的網站（{domain}）——推薦",
         "useSelfNote": "建立後會把 Reality 入站改到 TCP 443，SNI 用你的網域，偽裝網站挪到它後面；面板會重啟一次。",
-        "selfRunning": "正在把 Reality 放到你的網站前面，面板會重啟，請稍候……"
+        "selfRunning": "正在把 Reality 放到你的網站前面，面板會重啟，請稍候……",
+        "hyHop": "埠跳躍（UDP {range}）",
+        "hyHopNote": "用戶端每隔幾秒換一個埠連線，更不容易被限速。伺服器會自動把這些埠轉到 {port}（iptables）；如果雲服務商有安全組，也要在安全組放行 UDP {range}。",
+        "vlessEncFailed": "無法產生 VLESS 加密金鑰：面板上的 Xray 版本可能太舊。",
+        "certIssueStarted": "已開始申請憑證",
+        "certIssueTitle": "申請免費憑證（Let's Encrypt，經 Cloudflare DNS 驗證）",
+        "certIssueDesc": "使用 面板設定 → Cloudflare 裡的 API 權杖（權限「區域 · DNS · 編輯」）。不需要開放 80 埠，大約一兩分鐘，之後會自動續期。",
+        "certIssuePanel": "同時用於面板（HTTPS）",
+        "certIssuePanelNote": "面板會重新啟動並改用 HTTPS，之後請用 {url} 開啟",
+        "certIssueStart": "申請憑證",
+        "certIssueStep": {
+          "install": "正在安裝 acme.sh…",
+          "issue": "正在等待 Let's Encrypt 驗證 DNS 記錄（約 1–2 分鐘）…",
+          "installCert": "正在安裝憑證…",
+          "done": "完成"
+        },
+        "certIssueDone": "{domain} 的憑證已安裝，現在可以選擇 TLS 類入站了。",
+        "certIssueDonePanel": "憑證已安裝，面板正在以 HTTPS 重新啟動，請開啟 {url}"
       },
       "diagnose": {
         "action": "診斷",

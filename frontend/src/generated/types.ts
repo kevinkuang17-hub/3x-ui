@@ -422,6 +422,18 @@ export interface ApiTokenView {
   token?: string;
 }
 
+export interface CertIssueStatus {
+  certFile: string;
+  domain: string;
+  done: boolean;
+  error: string;
+  keyFile: string;
+  log: string;
+  panel: boolean;
+  running: boolean;
+  step: string;
+}
+
 export interface Client {
   adTag?: string;
   allowedIPs?: string[];

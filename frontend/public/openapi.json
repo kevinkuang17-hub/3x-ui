@@ -1753,6 +1753,59 @@
         ],
         "type": "object"
       },
+      "CertIssueStatus": {
+        "description": "CertIssueStatus is the progress of a certificate request through acme.sh and Cloudflare DNS.",
+        "properties": {
+          "certFile": {
+            "example": "/root/cert/hk.example.com/fullchain.pem",
+            "type": "string"
+          },
+          "domain": {
+            "example": "hk.example.com",
+            "type": "string"
+          },
+          "done": {
+            "example": true,
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "keyFile": {
+            "example": "/root/cert/hk.example.com/privkey.pem",
+            "type": "string"
+          },
+          "log": {
+            "example": "Cert success.",
+            "type": "string"
+          },
+          "panel": {
+            "description": "Panel is true when the certificate was also set as the panel's HTTPS certificate.",
+            "example": true,
+            "type": "boolean"
+          },
+          "running": {
+            "example": false,
+            "type": "boolean"
+          },
+          "step": {
+            "example": "issue",
+            "type": "string"
+          }
+        },
+        "required": [
+          "certFile",
+          "domain",
+          "done",
+          "error",
+          "keyFile",
+          "log",
+          "panel",
+          "running",
+          "step"
+        ],
+        "type": "object"
+      },
       "Client": {
         "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
         "properties": {
@@ -17678,6 +17731,110 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/cert/issue": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Requests a Let's Encrypt certificate for the domain through acme.sh with a Cloudflare DNS challenge (the panel's Cloudflare API token), installs it under /root/cert/<domain>/ and lets acme.sh renew it. usePanel also makes it the panel's HTTPS certificate and restarts the panel. Runs in the background; poll GET for the outcome.",
+        "operationId": "post_panel_api_protect_cert_issue",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "domain": "hk.example.com",
+                "usePanel": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/CertIssueStatus"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+                    "domain": "hk.example.com",
+                    "done": true,
+                    "error": "",
+                    "keyFile": "/root/cert/hk.example.com/privkey.pem",
+                    "log": "Cert success.",
+                    "panel": true,
+                    "running": false,
+                    "step": "issue"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Progress and outcome of the last certificate request, with the tail of the acme.sh log.",
+        "operationId": "get_panel_api_protect_cert_issue",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/CertIssueStatus"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+                    "domain": "hk.example.com",
+                    "done": true,
+                    "error": "",
+                    "keyFile": "/root/cert/hk.example.com/privkey.pem",
+                    "log": "Cert success.",
+                    "panel": true,
+                    "running": false,
+                    "step": "issue"
                   }
                 }
               }

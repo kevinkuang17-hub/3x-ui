@@ -29,6 +29,7 @@ type ProtectController struct {
 	nodeService service.NodeService
 	settings    service.SettingService
 	xray        service.XrayService
+	certs       service.CertIssueService
 }
 
 func NewProtectController(g *gin.RouterGroup) *ProtectController {
@@ -49,6 +50,8 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.POST("/portcheck", a.portCheck)
 	g.POST("/realitySelf/prepare", a.realitySelfPrepare)
 	g.POST("/realitySelf/apply", a.realitySelfApply)
+	g.GET("/cert/issue", a.certIssueStatus)
+	g.POST("/cert/issue", a.certIssueStart)
 	g.GET("/front", a.front)
 	g.POST("/front", a.saveFront)
 	g.GET("/cf", a.cfInfo)
@@ -234,6 +237,24 @@ func (a *ProtectController) realitySelfPrepare(c *gin.Context) {
 		return
 	}
 	jsonMsgObj(c, I18nWeb(c, "pages.protect.frontSaved"), plan, a.panel.RestartPanel(2*time.Second))
+}
+
+// certIssueStart requests a Let's Encrypt certificate over Cloudflare DNS in the background.
+func (a *ProtectController) certIssueStart(c *gin.Context) {
+	var body struct {
+		Domain   string `json:"domain"`
+		UsePanel bool   `json:"usePanel"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	err := a.certs.Start(body.Domain, body.UsePanel, func() { _ = a.panel.RestartPanel(3 * time.Second) })
+	jsonMsgObj(c, I18nWeb(c, "pages.inbounds.quick.certIssueStarted"), a.certs.Status(), err)
+}
+
+func (a *ProtectController) certIssueStatus(c *gin.Context) {
+	jsonObj(c, a.certs.Status(), nil)
 }
 
 // realitySelfApply moves the REALITY inbound to 443 in front of the website.

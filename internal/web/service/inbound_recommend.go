@@ -213,12 +213,17 @@ func (s *InboundRecommendService) recommendLocal(ctx context.Context) *InboundRe
 	subDomain, _ := s.settings.GetSubDomain()
 	subCert, _ := s.settings.GetSubCertFile()
 	subKey, _ := s.settings.GetSubKeyFile()
+	acmeDomain, _ := s.settings.getString("acmeDomain")
+	acmeCert, acmeKey := "", ""
+	if acmeDomain != "" {
+		acmeCert, acmeKey = AcmeCertPaths(acmeDomain)
+	}
 	now := time.Now()
 
 	type candidate struct{ domain, cert, key string }
-	rec := &InboundRecommendation{CertState: CertStateMissing, Domain: firstNonEmpty(webDomain, subDomain)}
+	rec := &InboundRecommendation{CertState: CertStateMissing, Domain: firstNonEmpty(webDomain, subDomain, acmeDomain)}
 	var fallback *InboundRecommendation
-	for _, c := range []candidate{{webDomain, webCert, webKey}, {subDomain, subCert, subKey}} {
+	for _, c := range []candidate{{webDomain, webCert, webKey}, {subDomain, subCert, subKey}, {acmeDomain, acmeCert, acmeKey}} {
 		if c.cert == "" {
 			continue
 		}

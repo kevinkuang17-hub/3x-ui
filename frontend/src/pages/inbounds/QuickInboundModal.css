@@ -54,3 +54,17 @@
     width: 100%;
   }
 }
+
+.quick-inbound-cert {
+  padding: 10px 12px;
+  border: 1px dashed var(--ant-color-border, #d9d9d9);
+  border-radius: 8px;
+}
+
+.quick-inbound-log {
+  max-height: 160px;
+  overflow: auto;
+  margin: 0;
+  font-size: 11px;
+  white-space: pre-wrap;
+}
