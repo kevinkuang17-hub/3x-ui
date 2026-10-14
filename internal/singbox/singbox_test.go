@@ -16,10 +16,14 @@ import (
 
 func TestBuildRoutesEachUserToItsRelay(t *testing.T) {
 	insts := []Instance{
-		{Id: 9, Tag: "inbound-8443", Protocol: Naive, Port: 8443, ServerName: "hk.example.com",
-			CertFile: "/c.pem", KeyFile: "/k.pem", Users: []User{{"bob", "pb"}}},
-		{Id: 2, Tag: "inbound-443", Protocol: AnyTLS, Listen: "0.0.0.0", Port: 443, ServerName: "hk.example.com",
-			CertFile: "/c.pem", KeyFile: "/k.pem", Users: []User{{"alice", "pa"}, {"carol", "pc"}}},
+		{
+			Id: 9, Tag: "inbound-8443", Protocol: Naive, Port: 8443, ServerName: "hk.example.com",
+			CertFile: "/c.pem", KeyFile: "/k.pem", Users: []User{{"bob", "pb"}},
+		},
+		{
+			Id: 2, Tag: "inbound-443", Protocol: AnyTLS, Listen: "0.0.0.0", Port: 443, ServerName: "hk.example.com",
+			CertFile: "/c.pem", KeyFile: "/k.pem", Users: []User{{"alice", "pa"}, {"carol", "pc"}},
+		},
 	}
 	raw, err := Build(insts, "relay-secret")
 	if err != nil {

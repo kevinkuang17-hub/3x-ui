@@ -130,7 +130,7 @@ func (m *Manager) startLocked(path string) error {
 			logger.Warning("sing-box: ended", n, "process(es) left by a previous panel run")
 		}
 	}
-	cmd := exec.Command(BinaryPath(), "run", "-c", path)
+	cmd := exec.CommandContext(context.Background(), BinaryPath(), "run", "-c", path)
 	m.output = &lastLines{}
 	cmd.Stdout, cmd.Stderr = m.output, m.output
 	if err := cmd.Start(); err != nil {

@@ -21,12 +21,18 @@ func TestSidecarLinks(t *testing.T) {
 		in   *model.Inbound
 		want string
 	}{
-		{"AnyTLS sends the certificate name as sni", sidecarInbound(model.AnyTLS, "hk.example.com"),
-			"anytls://p%2Fw@203.0.113.5:443/?sni=hk.example.com#HK%20A-ivy%40hk"},
-		{"AnyTLS on a bare IP sends no sni", sidecarInbound(model.AnyTLS, ""),
-			"anytls://p%2Fw@203.0.113.5:443/#HK%20A-ivy%40hk"},
-		{"NaiveProxy dials the certificate domain as the email", sidecarInbound(model.Naive, "hk.example.com"),
-			"naive+https://ivy%40hk:p%2Fw@hk.example.com:443#HK%20A-ivy%40hk"},
+		{
+			"AnyTLS sends the certificate name as sni", sidecarInbound(model.AnyTLS, "hk.example.com"),
+			"anytls://p%2Fw@203.0.113.5:443/?sni=hk.example.com#HK%20A-ivy%40hk",
+		},
+		{
+			"AnyTLS on a bare IP sends no sni", sidecarInbound(model.AnyTLS, ""),
+			"anytls://p%2Fw@203.0.113.5:443/#HK%20A-ivy%40hk",
+		},
+		{
+			"NaiveProxy dials the certificate domain as the email", sidecarInbound(model.Naive, "hk.example.com"),
+			"naive+https://ivy%40hk:p%2Fw@hk.example.com:443#HK%20A-ivy%40hk",
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
