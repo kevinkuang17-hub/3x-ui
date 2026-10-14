@@ -105,7 +105,8 @@
     "support": "Поддержка",
     "qrTitle": "Сканируйте. Импортируйте. Подключайтесь.",
     "qrHint": "Отсканируйте в клиентском приложении. Никому не показывайте этот код.",
-    "saveQr": "Сохранить QR"
+    "saveQr": "Сохранить QR",
+    "surgeNoNodes": "Surge cannot use any line of this subscription (Surge has no VLESS/REALITY); ask for a Hysteria2 or Trojan line."
   },
   "menu": {
     "theme": "Тема",

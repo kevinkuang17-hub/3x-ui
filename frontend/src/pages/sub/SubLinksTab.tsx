@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button, QRCode, Tag } from 'antd';
+import { Button, QRCode, Tag, Typography } from 'antd';
 import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
 
 import SubQrButton from './SubQrButton';
@@ -8,7 +8,16 @@ interface SubLinksTabProps {
   subUrl: string;
   subJsonUrl: string;
   subClashUrl: string;
-  appleUrls?: { surge: string; loon: string; qx: string; shadowrocket: string; singbox: string };
+  appleUrls?: {
+    surge: string;
+    loon: string;
+    qx: string;
+    shadowrocket: string;
+    singbox: string;
+    stash?: string;
+  };
+  // The subscription has no line Surge can use (it has no VLESS).
+  surgeNoNodes?: boolean;
   onCopy: (value: string) => void;
 }
 
@@ -19,6 +28,7 @@ export default function SubLinksTab({
   subJsonUrl,
   subClashUrl,
   appleUrls,
+  surgeNoNodes,
   onCopy,
 }: SubLinksTabProps) {
   const { t } = useTranslation();
@@ -33,6 +43,13 @@ export default function SubLinksTab({
       downloadable: true,
     },
     { kind: 'CLASH', color: 'gold', url: subClashUrl, title: 'Clash / Mihomo', downloadable: true },
+    {
+      kind: 'STASH',
+      color: 'orange',
+      url: appleUrls?.stash ?? '',
+      title: 'Stash',
+      downloadable: false,
+    },
     {
       kind: 'SURGE',
       color: 'blue',
@@ -78,6 +95,11 @@ export default function SubLinksTab({
             <div className="sub-row-url" dir="ltr" title={row.url}>
               {row.url}
             </div>
+            {row.kind === 'SURGE' && surgeNoNodes && (
+              <Typography.Text type="warning" className="sub-row-note">
+                {t('subscription.surgeNoNodes')}
+              </Typography.Text>
+            )}
           </div>
           <div className="sub-row-actions">
             {row.downloadable && (

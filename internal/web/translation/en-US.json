@@ -105,7 +105,8 @@
     "support": "Support",
     "qrTitle": "Scan. Import. Connect.",
     "qrHint": "Scan with your client app. Keep this code private.",
-    "saveQr": "Save QR"
+    "saveQr": "Save QR",
+    "surgeNoNodes": "Surge cannot use any line of this subscription (Surge has no VLESS/REALITY); ask for a Hysteria2 or Trojan line."
   },
   "menu": {
     "theme": "Theme",
