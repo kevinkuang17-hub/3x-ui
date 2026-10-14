@@ -1425,3 +1425,30 @@ func FriendlyProbeError(msg string) string {
 	}
 	return msg
 }
+
+// AcmeCert asks a node for the certificate the panel requested there over Cloudflare DNS.
+func (s *NodeService) AcmeCert(id int) (*AcmeCert, error) {
+	n, err := s.GetById(id)
+	if err != nil || n == nil {
+		return nil, fmt.Errorf("node not found")
+	}
+	mgr := runtime.GetManager()
+	if mgr == nil {
+		return nil, fmt.Errorf("runtime manager unavailable")
+	}
+	remote, err := mgr.RemoteFor(n)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	raw, err := remote.ProtectCall(ctx, http.MethodGet, "cert/installed", nil)
+	if err != nil {
+		return nil, err
+	}
+	var cert AcmeCert
+	if err := json.Unmarshal(raw, &cert); err != nil {
+		return nil, err
+	}
+	return &cert, nil
+}

@@ -30,6 +30,26 @@ type CertIssueStatus struct {
 	Panel bool `json:"panel" example:"true"`
 }
 
+// AcmeCert is the certificate this server got through the panel, as the server itself sees it.
+type AcmeCert struct {
+	Domain       string `json:"domain" example:"hk.example.com"`
+	CertFile     string `json:"certFile" example:"/root/cert/hk.example.com/fullchain.pem"`
+	KeyFile      string `json:"keyFile" example:"/root/cert/hk.example.com/privkey.pem"`
+	CertState    string `json:"certState" example:"ok"`
+	CertNotAfter int64  `json:"certNotAfter" example:"1767225600000"`
+}
+
+// Installed reports the certificate the last successful request installed, checked on disk.
+func (s *CertIssueService) Installed() AcmeCert {
+	domain, _ := s.settings.getString("acmeDomain")
+	if domain == "" {
+		return AcmeCert{CertState: CertStateMissing}
+	}
+	certFile, keyFile := AcmeCertPaths(domain)
+	check := checkCertFile(certFile, keyFile, domain, time.Now())
+	return AcmeCert{Domain: domain, CertFile: certFile, KeyFile: keyFile, CertState: check.state, CertNotAfter: check.notAfter}
+}
+
 // CertIssueService obtains a Let's Encrypt certificate with a DNS challenge on Cloudflare, so
 // neither port 80 nor a reachable panel is needed; acme.sh's own cron renews it.
 type CertIssueService struct {
@@ -78,9 +98,9 @@ func (s *CertIssueService) Status() CertIssueStatus {
 	return certIssue.st
 }
 
-// Start begins issuing in the background; Status reports the outcome. onPanelCert runs after the
-// certificate became the panel's own, since the panel only loads it on start.
-func (s *CertIssueService) Start(domain string, usePanel bool, onPanelCert func()) error {
+// Start begins issuing in the background; Status reports the outcome. A master passes its own
+// Cloudflare token for a node as cfToken. onPanelCert runs once the panel certificate changed.
+func (s *CertIssueService) Start(domain, cfToken string, usePanel bool, onPanelCert func()) error {
 	domain = strings.ToLower(strings.TrimSpace(domain))
 	if runtime.GOOS != "linux" {
 		return common.NewError("certificates can only be requested from the panel on Linux")
@@ -88,7 +108,10 @@ func (s *CertIssueService) Start(domain string, usePanel bool, onPanelCert func(
 	if !certDomainPattern.MatchString(domain) {
 		return common.NewErrorf("not a domain name: %q", domain)
 	}
-	token, _ := s.settings.GetCfApiToken()
+	token := cfToken
+	if strings.TrimSpace(token) == "" {
+		token, _ = s.settings.GetCfApiToken()
+	}
 	if strings.TrimSpace(token) == "" {
 		return common.NewError("set a Cloudflare API token (Zone DNS edit) in the panel settings first")
 	}

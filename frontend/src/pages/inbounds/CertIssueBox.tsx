@@ -10,20 +10,33 @@ const POLL_MS = 3000;
 
 interface CertIssueBoxProps {
   domain: string;
+  // A node requests the certificate itself, with the master's Cloudflare token.
+  nodeId?: number | null;
   // Called once the certificate is installed, so the caller can look at the server again.
   onIssued: () => void;
 }
 
-async function fetchStatus(): Promise<CertIssueStatus | null> {
-  const msg = await HttpUtil.get<CertIssueStatus>('/panel/api/protect/cert/issue', undefined, {
-    silent: true,
-  });
+async function fetchStatus(nodeId: number | null): Promise<CertIssueStatus | null> {
+  const msg =
+    nodeId == null
+      ? await HttpUtil.get<CertIssueStatus>('/panel/api/protect/cert/issue', undefined, {
+          silent: true,
+        })
+      : await HttpUtil.post<CertIssueStatus>(
+          `/panel/api/protect/nodes/${nodeId}/certStatus`,
+          {},
+          { ...JSON_HEADERS, silent: true },
+        );
   return msg?.success ? (msg.obj ?? null) : null;
 }
 
 // Gets a Let's Encrypt certificate through Cloudflare DNS, so a server without one can still take
 // the TLS presets; nothing listens on port 80 for it.
-export default function CertIssueBox({ domain: initialDomain, onIssued }: CertIssueBoxProps) {
+export default function CertIssueBox({
+  domain: initialDomain,
+  nodeId = null,
+  onIssued,
+}: CertIssueBoxProps) {
   const { t } = useTranslation();
   const [domain, setDomain] = useState(initialDomain);
   const [usePanel, setUsePanel] = useState(false);
@@ -39,7 +52,7 @@ export default function CertIssueBox({ domain: initialDomain, onIssued }: CertIs
   );
 
   const poll = async () => {
-    const st = await fetchStatus();
+    const st = await fetchStatus(nodeId);
     if (st) setStatus(st);
     if (st?.running) {
       timer.current = setTimeout(() => void poll(), POLL_MS);
@@ -51,11 +64,18 @@ export default function CertIssueBox({ domain: initialDomain, onIssued }: CertIs
   const start = async () => {
     setStarting(true);
     try {
-      const msg = await HttpUtil.post<CertIssueStatus>(
-        '/panel/api/protect/cert/issue',
-        { domain: domain.trim(), usePanel },
-        { ...JSON_HEADERS, silentSuccess: true },
-      );
+      const msg =
+        nodeId == null
+          ? await HttpUtil.post<CertIssueStatus>(
+              '/panel/api/protect/cert/issue',
+              { domain: domain.trim(), usePanel },
+              { ...JSON_HEADERS, silentSuccess: true },
+            )
+          : await HttpUtil.post<CertIssueStatus>(
+              `/panel/api/protect/nodes/${nodeId}/certIssue`,
+              { domain: domain.trim() },
+              { ...JSON_HEADERS, silentSuccess: true },
+            );
       if (msg?.success) {
         setStatus(msg.obj ?? null);
         timer.current = setTimeout(() => void poll(), POLL_MS);
@@ -82,13 +102,15 @@ export default function CertIssueBox({ domain: initialDomain, onIssued }: CertIs
           placeholder="hk.example.com"
           onChange={(e) => setDomain(e.target.value)}
         />
-        <Checkbox
-          checked={usePanel}
-          disabled={running}
-          onChange={(e) => setUsePanel(e.target.checked)}
-        >
-          {t('pages.inbounds.quick.certIssuePanel')}
-        </Checkbox>
+        {nodeId == null && (
+          <Checkbox
+            checked={usePanel}
+            disabled={running}
+            onChange={(e) => setUsePanel(e.target.checked)}
+          >
+            {t('pages.inbounds.quick.certIssuePanel')}
+          </Checkbox>
+        )}
         <Button
           size="small"
           type="primary"

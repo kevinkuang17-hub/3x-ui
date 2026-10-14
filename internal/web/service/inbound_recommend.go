@@ -267,6 +267,11 @@ func (s *InboundRecommendService) recommendLocal(ctx context.Context) *InboundRe
 	return rec
 }
 
+// recommendNodeAcme reads a node's panel-requested certificate; tests replace it.
+var recommendNodeAcme = func(nodes NodeService, nodeID int) (*AcmeCert, error) {
+	return nodes.AcmeCert(nodeID)
+}
+
 func (s *InboundRecommendService) recommendNode(ctx context.Context, nodeID int) (*InboundRecommendation, error) {
 	n, err := s.nodes.GetById(nodeID)
 	if err != nil || n == nil {
@@ -290,6 +295,13 @@ func (s *InboundRecommendService) recommendNode(ctx context.Context, nodeID int)
 			}
 			check := checkCert(leaf, rec.Domain, time.Now())
 			rec.CertState, rec.CertNotAfter = check.state, check.notAfter
+		}
+	}
+	// Without a usable panel certificate, a certificate requested on the node from here will do.
+	if rec.CertState != CertStateOK {
+		if acme, err := recommendNodeAcme(s.nodes, nodeID); err == nil && acme.CertState == CertStateOK {
+			rec.Domain, rec.CertFile, rec.KeyFile = acme.Domain, acme.CertFile, acme.KeyFile
+			rec.CertState, rec.CertNotAfter = CertStateOK, acme.CertNotAfter
 		}
 	}
 	rec.ServerIPs, _ = recommendLookupHost(ctx, n.Address)
