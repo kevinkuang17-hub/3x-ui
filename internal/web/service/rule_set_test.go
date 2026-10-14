@@ -179,3 +179,17 @@ func TestSaveTemplateDrivesTemplateRouting(t *testing.T) {
 		t.Fatal("a template URL with credentials must be rejected")
 	}
 }
+
+// A built-in line the parser rejects is silently dropped from every subscription that picks it.
+func TestBuiltinRuleSetLinesParse(t *testing.T) {
+	for _, b := range builtinRuleSets {
+		if _, ok := basicPolicy(b.Policy); !ok {
+			t.Errorf("%s: policy %q", b.Key, b.Policy)
+		}
+		for _, line := range b.Rules {
+			if _, err := ruleSetMatch(line); err != nil {
+				t.Errorf("%s: %v", b.Key, err)
+			}
+		}
+	}
+}

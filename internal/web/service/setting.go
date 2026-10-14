@@ -197,6 +197,7 @@ var defaultValueMap = map[string]string{
 	"decoyFront":                  "false",
 	"decoyFrontPort":              "443",
 	"decoyFrontLoopback":          "false",
+	"acmeDomain":                  "",
 	"panelFrontOnly":              "false",
 	"subLineHealth":               "false",
 	"crmWebhookEnable":            "false",

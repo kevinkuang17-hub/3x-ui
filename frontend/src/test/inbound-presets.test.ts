@@ -7,6 +7,8 @@ import {
   assignPorts,
   buildQuickInbound,
   findDuplicate,
+  pickHopRange,
+  pickRealityTargets,
   presetById,
   uniqueRemark,
   type QuickInboundInput,
@@ -45,7 +47,15 @@ describe('buildQuickInbound', () => {
   });
 
   it('puts TLS presets on the panel certificate and names the domain in links', () => {
-    for (const id of ['tls-vision', 'trojan-tls', 'ws-cdn', 'hysteria2'] as const) {
+    for (const id of [
+      'tls-vision',
+      'trojan-tls',
+      'ws-cdn',
+      'trojan-ws-cdn',
+      'grpc-tls',
+      'xhttp-tls-enc',
+      'hysteria2',
+    ] as const) {
       const { payload, stream } = wireOf(id);
       expect(stream.tlsSettings.serverName).toBe('hk.example.com');
       expect(stream.tlsSettings.certificates[0].certificateFile).toBe(base.certFile);
@@ -86,6 +96,38 @@ describe('buildQuickInbound', () => {
     expect(stream.hysteriaSettings.masquerade.content).toBe('<html>Star Tech</html>');
     expect(stream.hysteriaSettings.masquerade.statusCode).toBe(200);
     expect(wireOf('hysteria2').stream.hysteriaSettings.masquerade).toBeUndefined();
+  });
+
+  it('keeps the Hysteria2 hop range in quicParams.udpHop, where links read it as mport', () => {
+    const { stream } = wireOf('hysteria2', { hopPorts: '20000-20999' });
+    expect(stream.finalmask.quicParams.udpHop).toEqual({ ports: '20000-20999', interval: '5-10' });
+    expect(stream.finalmask.udp.map((m: { type: string }) => m.type)).toEqual(['salamander']);
+    expect(wireOf('hysteria2').stream.finalmask.quicParams).toBeUndefined();
+  });
+
+  it('builds Trojan over WebSocket for Cloudflare like the VLESS CDN preset', () => {
+    const { payload, stream } = wireOf('trojan-ws-cdn');
+    expect(payload.protocol).toBe('trojan');
+    expect(stream.tlsSettings.alpn).toEqual(['http/1.1']);
+    expect(stream.wsSettings.path).toMatch(/^\/[a-z0-9]{10}$/);
+    expect(stream.wsSettings.host).toBe('hk.example.com');
+  });
+
+  it('builds gRPC over TLS with a random service name', () => {
+    const { stream } = wireOf('grpc-tls');
+    expect(stream.grpcSettings.serviceName).toMatch(/^[a-z0-9]{12}$/);
+  });
+
+  it('puts the VLESS Encryption pair on the XHTTP TLS preset only', () => {
+    const enc = {
+      vlessDecryption: 'mlkem768x25519plus.native.600s.dec',
+      vlessEncryption: 'mlkem768x25519plus.native.0rtt.enc',
+    };
+    const { settings, stream } = wireOf('xhttp-tls-enc', enc);
+    expect(settings.decryption).toBe(enc.vlessDecryption);
+    expect(settings.encryption).toBe(enc.vlessEncryption);
+    expect(stream.xhttpSettings.path).toMatch(/^\/[a-z0-9]{10}$/);
+    expect(wireOf('tls-vision', enc).settings.decryption).toBe('none');
   });
 
   it('builds Shadowsocks 2022 on TCP and UDP with a server key', () => {
@@ -148,6 +190,16 @@ describe('assignPorts', () => {
     expect(ports.get('ss2022')).toBe(31000);
   });
 
+  it('keeps both CDN presets on Cloudflare ports', () => {
+    const ports = assignPorts(['ws-cdn', 'trojan-ws-cdn', 'grpc-tls'], {
+      tcp: [443, 31000, 2053],
+      udp: [],
+    });
+    expect(ports.get('ws-cdn')).toBe(443);
+    expect(ports.get('grpc-tls')).toBe(31000);
+    expect(ports.get('trojan-ws-cdn')).toBe(2053);
+  });
+
   it('reports 0 when no Cloudflare port is left for the CDN preset', () => {
     expect(assignPorts(['ws-cdn'], { tcp: [31000], udp: [] }).get('ws-cdn')).toBe(0);
   });
@@ -159,5 +211,46 @@ describe('uniqueRemark', () => {
     expect(uniqueRemark('US A', 'Reality', new Set(['US A Reality', 'US A Reality 2']))).toBe(
       'US A Reality 3',
     );
+  });
+});
+
+describe('pickHopRange', () => {
+  const hy = (id: number, port: number, ports: string, nodeId: number | null = null) => ({
+    id,
+    remark: `r${id}`,
+    port,
+    protocol: 'hysteria',
+    nodeId,
+    streamSettings: { finalmask: { quicParams: { udpHop: { ports } } } },
+  });
+
+  it('takes the first free block on the same server', () => {
+    expect(pickHopRange(null, 443, [])).toBe('20000-20999');
+  });
+
+  it('skips blocks holding an inbound port, an existing hop range or the Hysteria2 port', () => {
+    const inbounds = [
+      { id: 1, remark: 'a', port: 20443, protocol: 'vless', nodeId: null },
+      hy(2, 8443, '30000-30999'),
+      hy(3, 9443, '40000-40999', 7),
+    ];
+    expect(pickHopRange(null, 40500, inbounds)).toBe('50000-50999');
+    expect(pickHopRange(7, 443, inbounds)).toBe('20000-20999');
+  });
+});
+
+describe('pickRealityTargets', () => {
+  const site = (target: string, h2: boolean) => ({ target, serverNames: [target], h2 });
+
+  it('gives XHTTP an HTTP/2 site and Vision a different one', () => {
+    const got = pickRealityTargets([site('a.com:443', false), site('b.com:443', true)]);
+    expect(got?.xhttp.target).toBe('b.com:443');
+    expect(got?.vision.target).toBe('a.com:443');
+  });
+
+  it('shares the only site when the scan found one', () => {
+    const got = pickRealityTargets([site('a.com:443', true)]);
+    expect([got?.vision.target, got?.xhttp.target]).toEqual(['a.com:443', 'a.com:443']);
+    expect(pickRealityTargets([])).toBeNull();
   });
 });

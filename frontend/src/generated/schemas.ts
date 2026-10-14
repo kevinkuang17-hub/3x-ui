@@ -1727,6 +1727,59 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "CertIssueStatus": {
+    "description": "CertIssueStatus is the progress of a certificate request through acme.sh and Cloudflare DNS.",
+    "properties": {
+      "certFile": {
+        "example": "/root/cert/hk.example.com/fullchain.pem",
+        "type": "string"
+      },
+      "domain": {
+        "example": "hk.example.com",
+        "type": "string"
+      },
+      "done": {
+        "example": true,
+        "type": "boolean"
+      },
+      "error": {
+        "type": "string"
+      },
+      "keyFile": {
+        "example": "/root/cert/hk.example.com/privkey.pem",
+        "type": "string"
+      },
+      "log": {
+        "example": "Cert success.",
+        "type": "string"
+      },
+      "panel": {
+        "description": "Panel is true when the certificate was also set as the panel's HTTPS certificate.",
+        "example": true,
+        "type": "boolean"
+      },
+      "running": {
+        "example": false,
+        "type": "boolean"
+      },
+      "step": {
+        "example": "issue",
+        "type": "string"
+      }
+    },
+    "required": [
+      "certFile",
+      "domain",
+      "done",
+      "error",
+      "keyFile",
+      "log",
+      "panel",
+      "running",
+      "step"
+    ],
+    "type": "object"
+  },
   "Client": {
     "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
     "properties": {

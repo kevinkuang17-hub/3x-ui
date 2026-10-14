@@ -443,6 +443,19 @@ export const ApiTokenViewSchema = z.object({
 });
 export type ApiTokenView = z.infer<typeof ApiTokenViewSchema>;
 
+export const CertIssueStatusSchema = z.object({
+  certFile: z.string(),
+  domain: z.string(),
+  done: z.boolean(),
+  error: z.string(),
+  keyFile: z.string(),
+  log: z.string(),
+  panel: z.boolean(),
+  running: z.boolean(),
+  step: z.string(),
+});
+export type CertIssueStatus = z.infer<typeof CertIssueStatusSchema>;
+
 export const ClientSchema = z.object({
   adTag: z.string().optional(),
   allowedIPs: z.array(z.string()).optional(),

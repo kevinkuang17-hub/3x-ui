@@ -22,6 +22,10 @@ import {
   QUICK_PRESETS,
   assignPorts,
   buildQuickInbound,
+  pickHopRange,
+  pickRealityTargets,
+  usesVlessEncryption,
+  type RealityTargets,
   findDuplicate,
   presetBlocked,
   presetWarning,
@@ -40,6 +44,8 @@ import type { InboundRecommendation, RealityScanResult } from '@/generated/types
 import type { NodeRecord } from '@/api/queries/useNodesQuery';
 import { useClientRecords } from '@/api/queries/useClientOptions';
 
+import CertIssueBox from './CertIssueBox';
+
 import './QuickInboundModal.css';
 
 const LOCAL = 0;
@@ -55,11 +61,6 @@ interface QuickInboundModalProps {
   onClose: () => void;
   onCreated: () => void;
   onAdvanced: (values: InboundFormValues) => void;
-}
-
-interface RealityTarget {
-  target: string;
-  serverNames: string[];
 }
 
 interface Row {
@@ -102,14 +103,16 @@ export default function QuickInboundModal({
   const [checked, setChecked] = useState<QuickPresetId[]>([]);
   const [remarkEdits, setRemarkEdits] = useState<Partial<Record<QuickPresetId, string>>>({});
   const [portEdits, setPortEdits] = useState<Partial<Record<QuickPresetId, number>>>({});
-  const [reality, setReality] = useState<RealityTarget | null>(null);
+  const [reality, setReality] = useState<RealityTargets | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [clientsChoice, setClientsChoice] = useState<string>(ALL_CLIENTS);
   const [hyDecoy, setHyDecoy] = useState(true);
+  const [hyHop, setHyHop] = useState(true);
   const [openFirewall, setOpenFirewall] = useState(true);
   const [useSelf, setUseSelf] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [recReload, setRecReload] = useState(0);
   const { data: clients = [] } = useClientRecords(open);
 
   const onlineNodes = useMemo(
@@ -156,7 +159,7 @@ export default function QuickInboundModal({
       cancelled = true;
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [open, server]);
+  }, [open, server, recReload]);
 
   const scanReality = async () => {
     setScanning(true);
@@ -169,9 +172,11 @@ export default function QuickInboundModal({
       const usable = (Array.isArray(msg?.obj) ? msg.obj : []).filter(
         (r) => r.feasible && !r.privateTarget && (r.serverNames?.length ?? 0) > 0,
       );
-      // XHTTP over REALITY needs a target that speaks HTTP/2.
-      const best = usable.find((r) => r.h2) ?? usable[0];
-      setReality(best ? { target: best.target, serverNames: best.serverNames ?? [] } : null);
+      setReality(
+        pickRealityTargets(
+          usable.map((r) => ({ target: r.target, serverNames: r.serverNames ?? [], h2: r.h2 })),
+        ),
+      );
     } finally {
       setScanned(true);
       setScanning(false);
@@ -261,6 +266,17 @@ export default function QuickInboundModal({
     return clients.filter((c) => (c.group ?? '').trim() === group).map((c) => c.email);
   };
 
+  // ML-KEM-768 is the post-quantum pair; X25519 is the fallback for older Xray binaries.
+  const newVlessEncryption = async () => {
+    const msg = await HttpUtil.get<{
+      auths?: { id?: string; decryption: string; encryption: string }[];
+    }>('/panel/api/server/getNewVlessEnc');
+    const auths = msg?.success ? (msg.obj?.auths ?? []) : [];
+    return auths.find((a) => a.id === 'mlkem768') ?? auths.find((a) => a.id === 'x25519');
+  };
+
+  const hopRangeFor = (port: number) => pickHopRange(nodeId, port, inbounds);
+
   const buildValues = async (row: Row): Promise<InboundFormValues | null> => {
     if (!rec) return null;
     let masquerade;
@@ -273,6 +289,15 @@ export default function QuickInboundModal({
             msg: err instanceof Error ? err.message : String(err),
           }),
         );
+      }
+    }
+    const realityFor = row.id === 'xhttp-reality' ? reality?.xhttp : reality?.vision;
+    let vlessEnc: { decryption: string; encryption: string } | undefined;
+    if (usesVlessEncryption(row.id)) {
+      vlessEnc = await newVlessEncryption();
+      if (!vlessEnc) {
+        messageApi.error(t('pages.inbounds.quick.vlessEncFailed'));
+        return null;
       }
     }
     let keys = { privateKey: '', publicKey: '' };
@@ -291,12 +316,15 @@ export default function QuickInboundModal({
       domain: rec.domain,
       certFile: rec.certFile,
       keyFile: rec.keyFile,
-      realityTarget: selfTarget || (reality?.target ?? ''),
-      realityServerNames: selfTarget ? [rec.domain] : (reality?.serverNames ?? []),
+      realityTarget: selfTarget || (realityFor?.target ?? ''),
+      realityServerNames: selfTarget ? [rec.domain] : (realityFor?.serverNames ?? []),
       realityXver: selfTarget ? 1 : undefined,
       realityPrivateKey: keys.privateKey,
       realityPublicKey: keys.publicKey,
       masquerade,
+      vlessDecryption: vlessEnc?.decryption,
+      vlessEncryption: vlessEnc?.encryption,
+      hopPorts: row.id === 'hysteria2' && hyHop ? hopRangeFor(row.port) : undefined,
     });
   };
 
@@ -528,6 +556,9 @@ export default function QuickInboundModal({
                 {certLine()}
               </Descriptions.Item>
             </Descriptions>
+            {server === LOCAL && !facts.certOk && (
+              <CertIssueBox domain={rec.domain} onIssued={() => setRecReload((n) => n + 1)} />
+            )}
 
             <div className="quick-inbound-presets">
               {QUICK_PRESETS.map((preset) => {
@@ -577,6 +608,21 @@ export default function QuickInboundModal({
                         <Typography.Text type="secondary" className="quick-inbound-desc">
                           {t('pages.inbounds.quick.hyUdpNote', { port: row.port })}
                         </Typography.Text>
+                        {hopRangeFor(row.port) && (
+                          <>
+                            <Checkbox checked={hyHop} onChange={(e) => setHyHop(e.target.checked)}>
+                              {t('pages.inbounds.quick.hyHop', { range: hopRangeFor(row.port) })}
+                            </Checkbox>
+                            {hyHop && (
+                              <Typography.Text type="secondary" className="quick-inbound-desc">
+                                {t('pages.inbounds.quick.hyHopNote', {
+                                  range: hopRangeFor(row.port),
+                                  port: row.port,
+                                })}
+                              </Typography.Text>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
                     {row && warning && (
@@ -645,7 +691,17 @@ export default function QuickInboundModal({
                     {t('pages.inbounds.quick.targetSelf', { domain: rec.domain })}
                   </Typography.Text>
                 ) : reality ? (
-                  <Typography.Text code>{reality.serverNames[0] || reality.target}</Typography.Text>
+                  <Space size={4} wrap>
+                    {[
+                      ...new Set(
+                        [reality.vision, reality.xhttp].map((r) => r.serverNames[0] || r.target),
+                      ),
+                    ].map((name) => (
+                      <Typography.Text key={name} code>
+                        {name}
+                      </Typography.Text>
+                    ))}
+                  </Space>
                 ) : (
                   <Typography.Text type="warning">
                     {t('pages.inbounds.quick.targetNone')}
