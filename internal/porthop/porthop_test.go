@@ -18,13 +18,18 @@ func TestRedirects(t *testing.T) {
 		want []Redirect
 	}{
 		{"range", []Inbound{{443, hop("20000-21000")}}, []Redirect{{20000, 21000, 443}}},
-		{"list with the listening port left out", []Inbound{{20500, hop("443,20000-21000")}},
-			[]Redirect{{443, 443, 20500}, {20000, 20499, 20500}, {20501, 21000, 20500}}},
+		{
+			"list with the listening port left out",
+			[]Inbound{{20500, hop("443,20000-21000")}},
+			[]Redirect{{443, 443, 20500}, {20000, 20499, 20500}, {20501, 21000, 20500}},
+		},
 		{"no hop", []Inbound{{443, `{"network":"hysteria"}`}}, nil},
 		{"bad spec ignored", []Inbound{{443, hop("30000-20000")}}, nil},
-		{"second inbound cannot claim a taken range",
+		{
+			"second inbound cannot claim a taken range",
 			[]Inbound{{443, hop("20000-21000")}, {8443, hop("20500-22000")}},
-			[]Redirect{{20000, 21000, 443}}},
+			[]Redirect{{20000, 21000, 443}},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
