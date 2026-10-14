@@ -837,7 +837,10 @@
         "hyUdpNote": "Hysteria2 uses UDP {port}: open UDP {port} in the cloud security group as well.",
         "hyDecoyMissing": "Created without a website: {msg}",
         "openFirewall": "Open the new ports in this server's firewall (ufw)",
-        "targetSelf": "your own website ({domain})"
+        "targetSelf": "your own website ({domain})",
+        "useSelf": "REALITY uses your own website ({domain}) — recommended",
+        "useSelfNote": "After creating, the REALITY inbound moves to TCP 443 with your domain as SNI and the decoy website behind it; the panel restarts once.",
+        "selfRunning": "Putting REALITY in front of your website; the panel restarts, please wait…"
       },
       "diagnose": {
         "action": "Diagnose",
