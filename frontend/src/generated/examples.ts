@@ -664,6 +664,12 @@ export const EXAMPLES: Record<string, unknown> = {
     "masterId": 0,
     "path": ""
   },
+  "Finding": {
+    "fix": "firewall",
+    "key": "firewallBlocked",
+    "level": "error",
+    "params": {}
+  },
   "GeoCategory": {
     "attributes": [
       "ads",
@@ -1097,6 +1103,13 @@ export const EXAMPLES: Record<string, unknown> = {
     "tag": "inbound-51820",
     "up": 1048576
   },
+  "PortCheck": {
+    "allowed": true,
+    "bound": null,
+    "firewall": "ufw",
+    "port": 443,
+    "proto": "udp"
+  },
   "ProbeResultUI": {
     "cpuPct": 12.5,
     "error": "",
@@ -1133,6 +1146,24 @@ export const EXAMPLES: Record<string, unknown> = {
     "tls13": true,
     "tlsVersion": "1.3",
     "x25519": true
+  },
+  "Report": {
+    "address": "us.example.com",
+    "delayMs": 0,
+    "findings": [
+      {
+        "fix": "firewall",
+        "key": "firewallBlocked",
+        "level": "error",
+        "params": {}
+      }
+    ],
+    "inboundId": 7,
+    "nodeId": 2,
+    "ok": false,
+    "port": 443,
+    "protocol": "hysteria",
+    "remark": "US A Hy2"
   },
   "RuleSetPick": {
     "id": 0,

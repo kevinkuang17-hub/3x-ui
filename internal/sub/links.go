@@ -1,6 +1,9 @@
 package sub
 
 import (
+	"errors"
+	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -67,4 +70,32 @@ func splitLinkLines(raw string) []string {
 		}
 	}
 	return out
+}
+
+// ErrNoEnabledClient means the inbound has no client a subscriber could connect with.
+var ErrNoEnabledClient = errors.New("no enabled client on this inbound")
+
+// ClientOutbound is the Xray outbound the inbound's first enabled client gets in a JSON
+// subscription, so a test through it uses the inbound exactly the way a client app does.
+func (p *LinkProvider) ClientOutbound(host string, inbound *model.Inbound) (map[string]any, string, error) {
+	svc := p.build(host)
+	svc.projectThroughFallbackMaster(inbound)
+	clients, err := svc.clientsForLinkExport(inbound)
+	if err != nil {
+		return nil, "", err
+	}
+	idx := slices.IndexFunc(clients, func(c model.Client) bool { return c.Enable })
+	if idx < 0 {
+		return nil, "", ErrNoEnabledClient
+	}
+	client := clients[idx]
+	mux, _ := p.settingService.GetSubJsonMux()
+	mask, _ := p.settingService.GetSubJsonFinalMask()
+	js := NewSubJsonService(mux, "", mask, "", svc)
+	for _, cfg := range js.getConfig(svc, inbound, client, host) {
+		if ob := extractProxyOutbound(cfg); ob != nil {
+			return ob, client.Email, nil
+		}
+	}
+	return nil, client.Email, fmt.Errorf("%s inbounds have no Xray client config to test with", inbound.Protocol)
 }

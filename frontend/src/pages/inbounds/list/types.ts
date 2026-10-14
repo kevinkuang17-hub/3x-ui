@@ -61,7 +61,8 @@ export type RowAction =
   | 'delete'
   | 'resetTraffic'
   | 'delAllClients'
-  | 'clone';
+  | 'clone'
+  | 'diagnose';
 
 export type GeneralAction = 'import' | 'export' | 'subs' | 'resetInbounds';
 
@@ -81,6 +82,7 @@ export interface InboundListProps {
   hosts: HostRecord[];
   onAddInbound: () => void;
   onQuickAddInbound: () => void;
+  onDiagnoseAll: () => void;
   onGeneralAction: (key: GeneralAction) => void;
   onRowAction: (action: { key: RowAction; dbInbound: DBInboundRecord }) => void;
   onBulkDelete: (ids: number[]) => Promise<boolean>;

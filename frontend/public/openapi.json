@@ -2647,6 +2647,33 @@
         ],
         "type": "object"
       },
+      "Finding": {
+        "description": "Finding is one check result; Key names its text (pages.inbounds.diagnose.find.<key>).",
+        "properties": {
+          "fix": {
+            "description": "Fix is the one-click repair the panel offers: enable, firewall or clients.",
+            "example": "firewall",
+            "type": "string"
+          },
+          "key": {
+            "example": "firewallBlocked",
+            "type": "string"
+          },
+          "level": {
+            "example": "error",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "key",
+          "level"
+        ],
+        "type": "object"
+      },
       "GeoCategory": {
         "description": "GeoCategory is one code inside a database, such as geosite's \"google\".",
         "properties": {
@@ -4431,6 +4458,39 @@
         ],
         "type": "object"
       },
+      "PortCheck": {
+        "description": "PortCheck is what the server hosting an inbound sees of its port: whether something is bound to\nit (Xray, when the inbound is up) and whether ufw lets the traffic in.",
+        "properties": {
+          "allowed": {
+            "example": true,
+            "type": "boolean"
+          },
+          "bound": {
+            "description": "Bound is nil when binding failed for another reason than \"in use\" (e.g. no permission).",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "firewall": {
+            "example": "ufw",
+            "type": "string"
+          },
+          "port": {
+            "example": 443,
+            "type": "integer"
+          },
+          "proto": {
+            "example": "udp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "allowed",
+          "firewall",
+          "port",
+          "proto"
+        ],
+        "type": "object"
+      },
       "ProbeResultUI": {
         "properties": {
           "cpuPct": {
@@ -4600,6 +4660,62 @@
           "tls13",
           "tlsVersion",
           "x25519"
+        ],
+        "type": "object"
+      },
+      "Report": {
+        "description": "Report is the diagnosis of one inbound; Ok means a real client connection through it worked.",
+        "properties": {
+          "address": {
+            "example": "us.example.com",
+            "type": "string"
+          },
+          "delayMs": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array"
+          },
+          "inboundId": {
+            "example": 7,
+            "type": "integer"
+          },
+          "nodeId": {
+            "example": 2,
+            "nullable": true,
+            "type": "integer"
+          },
+          "ok": {
+            "example": false,
+            "type": "boolean"
+          },
+          "port": {
+            "example": 443,
+            "type": "integer"
+          },
+          "protocol": {
+            "example": "hysteria",
+            "type": "string"
+          },
+          "remark": {
+            "example": "US A Hy2",
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "delayMs",
+          "findings",
+          "inboundId",
+          "ok",
+          "port",
+          "protocol",
+          "remark"
         ],
         "type": "object"
       },
@@ -5797,6 +5913,79 @@
                       0
                     ]
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/inbounds/diagnose": {
+      "post": {
+        "tags": [
+          "Inbounds"
+        ],
+        "summary": "Diagnose why inbounds cannot be used (ids empty = all): whether the hosting server binds the port and its ufw lets it in (TCP/UDP), whether the address resolves and answers from outside, the TLS certificate, and a real client connection through the inbound from this panel. Each report lists findings (key, level ok/warn/error, params, fix enable/firewall/clients).",
+        "operationId": "post_panel_api_inbounds_diagnose",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ids": [
+                  7
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Report"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "address": "us.example.com",
+                      "delayMs": 0,
+                      "findings": [
+                        {
+                          "fix": "firewall",
+                          "key": "firewallBlocked",
+                          "level": "error",
+                          "params": {}
+                        }
+                      ],
+                      "inboundId": 7,
+                      "nodeId": 2,
+                      "ok": false,
+                      "port": 443,
+                      "protocol": "hysteria",
+                      "remark": "US A Hy2"
+                    }
+                  ]
                 }
               }
             }
@@ -17361,6 +17550,62 @@
                       "type": "string"
                     },
                     "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/portcheck": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Whether a port is bound on this server and let in by ufw (masters ask their nodes this while diagnosing).",
+        "operationId": "post_panel_api_protect_portcheck",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "port": 443,
+                "proto": "udp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/PortCheck"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "allowed": true,
+                    "bound": null,
+                    "firewall": "ufw",
+                    "port": 443,
+                    "proto": "udp"
                   }
                 }
               }

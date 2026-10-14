@@ -110,6 +110,7 @@ func run(root, outDir string) error {
 				"ClientRoutingView",
 				"DnsConfig",
 				"RuleSetPick",
+				"PortCheck",
 				"GeodataTokenIssue",
 				"AmneziaWGLogs",
 				"PeerActivity",
@@ -119,6 +120,10 @@ func run(root, outDir string) error {
 		{
 			Path:        resolveRel(root, "internal/web/service/panel"),
 			StructAllow: setOf("ApiTokenView", "PanelUpdateStatus", "Sponsor", "SponsorList"),
+		},
+		{
+			Path:        resolveRel(root, "internal/web/service/diagnose"),
+			StructAllow: setOf("Report", "Finding"),
 		},
 		{
 			Path:        resolveRel(root, "internal/amneziawg"),

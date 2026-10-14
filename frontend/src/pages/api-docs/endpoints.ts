@@ -315,6 +315,15 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/inbounds/diagnose',
+        summary:
+          'Diagnose why inbounds cannot be used (ids empty = all): whether the hosting server binds the port and its ufw lets it in (TCP/UDP), whether the address resolves and answers from outside, the TLS certificate, and a real client connection through the inbound from this panel. Each report lists findings (key, level ok/warn/error, params, fix enable/firewall/clients).',
+        body: '{\n  "ids": [7]\n}',
+        responseSchema: 'Report',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
         path: '/panel/api/inbounds/add',
         summary:
           'Create a new inbound. Send the full inbound payload (protocol, port, settings, streamSettings, sniffing, remark, expiryTime, total, enable). settings, streamSettings, and sniffing may be sent as nested JSON objects (preferred) or as JSON-encoded strings (legacy).',
@@ -2998,6 +3007,14 @@ export const sections: readonly Section[] = [
         summary:
           'Open ports in ufw: the given rules, or every enabled local inbound port (with its tcp/udp protocol) when rules is empty. Returns the rules opened.',
         body: '{\n  "rules": [{ "port": 443, "proto": "udp" }]\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/portcheck',
+        summary:
+          'Whether a port is bound on this server and let in by ufw (masters ask their nodes this while diagnosing).',
+        body: '{\n  "port": 443,\n  "proto": "udp"\n}',
+        responseSchema: 'PortCheck',
       },
       {
         method: 'POST',

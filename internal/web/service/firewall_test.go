@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"net"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -73,5 +74,61 @@ func TestAllowPortsRunsUfwOnlyWhenActive(t *testing.T) {
 	}
 	if _, err := svc.AllowPorts([]FirewallRule{{443, "sctp"}}); err == nil {
 		t.Fatal("only tcp and udp rules may reach ufw")
+	}
+}
+
+func TestUfwAllows(t *testing.T) {
+	status := `Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+443/tcp                    ALLOW IN    Anywhere
+2053                       ALLOW IN    Anywhere
+20000:30000/udp            ALLOW IN    Anywhere
+443/tcp (v6)               ALLOW IN    Anywhere (v6)
+`
+	cases := []struct {
+		port  int
+		proto string
+		want  bool
+	}{
+		{443, "tcp", true},
+		{443, "udp", false}, // the case that leaves Hysteria2 on 443 without traffic
+		{2053, "udp", true},
+		{25000, "udp", true},
+		{25000, "tcp", false},
+		{8443, "tcp", false},
+	}
+	for _, tc := range cases {
+		if got := ufwAllows(status, tc.port, tc.proto); got != tc.want {
+			t.Errorf("ufwAllows(%d/%s) = %v, want %v", tc.port, tc.proto, got, tc.want)
+		}
+	}
+	open := strings.Replace(status, "Default: deny (incoming)", "Default: allow (incoming)", 1)
+	if !ufwAllows(open, 8443, "udp") {
+		t.Error("an incoming default of allow lets every port in")
+	}
+}
+
+// A port Xray holds reads as bound; one nobody holds means the inbound never came up.
+func TestCheckPortSeesBoundPorts(t *testing.T) {
+	fakeUfw(t, "Status: inactive\n")
+	l, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := l.Addr().(*net.TCPAddr).Port
+	svc := &ProtectService{}
+	pc, err := svc.CheckPort(port, "tcp")
+	if err != nil || pc.Bound == nil || !*pc.Bound || !pc.Allowed || pc.Firewall != "" {
+		t.Fatalf("held port: %+v, %v", pc, err)
+	}
+	_ = l.Close()
+	if pc, _ = svc.CheckPort(port, "tcp"); pc.Bound == nil || *pc.Bound {
+		t.Fatalf("released port must read as free: %+v", pc)
 	}
 }

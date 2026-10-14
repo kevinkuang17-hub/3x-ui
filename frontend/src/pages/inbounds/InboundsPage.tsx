@@ -52,6 +52,7 @@ import { LazyMount } from '@/components/utility';
 const InboundFormModal = lazy(() => import('./form/InboundFormModal'));
 const CloneInboundModal = lazy(() => import('./CloneInboundModal'));
 const QuickInboundModal = lazy(() => import('./QuickInboundModal'));
+const DiagnoseModal = lazy(() => import('./DiagnoseModal'));
 const InboundInfoModal = lazy(() => import('./info/InboundInfoModal'));
 const AttachClientsModal = lazy(() => import('./clients/AttachClientsModal'));
 const AttachExistingClientsModal = lazy(() => import('./clients/AttachExistingClientsModal'));
@@ -71,7 +72,8 @@ type RowAction =
   | 'attachExisting'
   | 'detachClients'
   | 'addToGroup'
-  | 'clone';
+  | 'clone'
+  | 'diagnose';
 
 type GeneralAction = 'import' | 'export' | 'subs' | 'resetInbounds';
 
@@ -178,6 +180,7 @@ export default function InboundsPage() {
   const [groupSource, setGroupSource] = useState<DBInbound | null>(null);
 
   const [quickOpen, setQuickOpen] = useState(false);
+  const [diagnoseIds, setDiagnoseIds] = useState<number[] | null>(null);
   const [formPreset, setFormPreset] = useState<InboundFormValues | null>(null);
   const [cloneOpen, setCloneOpen] = useState(false);
   const [cloneSource, setCloneSource] = useState<DBInbound | null>(null);
@@ -469,6 +472,7 @@ export default function InboundsPage() {
   }, []);
 
   const onQuickAddInbound = useCallback(() => setQuickOpen(true), []);
+  const onDiagnoseAll = useCallback(() => setDiagnoseIds([]), []);
 
   const openPresetForm = useCallback((values: InboundFormValues) => {
     setFormMode('add');
@@ -703,6 +707,9 @@ export default function InboundsPage() {
         case 'clone':
           confirmClone(target);
           break;
+        case 'diagnose':
+          setDiagnoseIds([target.id]);
+          break;
         default:
           messageApi.info(`Action "${key}" — coming in a later 5f subphase`);
       }
@@ -810,6 +817,7 @@ export default function InboundsPage() {
                       hosts={hosts}
                       onAddInbound={onAddInbound}
                       onQuickAddInbound={onQuickAddInbound}
+                      onDiagnoseAll={onDiagnoseAll}
                       onGeneralAction={onGeneralAction}
                       onRowAction={({ key, dbInbound }) =>
                         onRowAction({ key, dbInbound: dbInbound as unknown as DBInbound })
@@ -883,6 +891,14 @@ export default function InboundsPage() {
             onClose={() => setGroupOpen(false)}
             onAdded={refresh}
             source={groupSource}
+          />
+        </LazyMount>
+        <LazyMount when={diagnoseIds !== null}>
+          <DiagnoseModal
+            open={diagnoseIds !== null}
+            ids={diagnoseIds ?? []}
+            onClose={() => setDiagnoseIds(null)}
+            onChanged={refresh}
           />
         </LazyMount>
         <LazyMount when={quickOpen}>

@@ -2621,6 +2621,33 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "Finding": {
+    "description": "Finding is one check result; Key names its text (pages.inbounds.diagnose.find.\u003ckey\u003e).",
+    "properties": {
+      "fix": {
+        "description": "Fix is the one-click repair the panel offers: enable, firewall or clients.",
+        "example": "firewall",
+        "type": "string"
+      },
+      "key": {
+        "example": "firewallBlocked",
+        "type": "string"
+      },
+      "level": {
+        "example": "error",
+        "type": "string"
+      },
+      "params": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "required": [
+      "key",
+      "level"
+    ],
+    "type": "object"
+  },
   "GeoCategory": {
     "description": "GeoCategory is one code inside a database, such as geosite's \"google\".",
     "properties": {
@@ -4405,6 +4432,39 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "PortCheck": {
+    "description": "PortCheck is what the server hosting an inbound sees of its port: whether something is bound to\nit (Xray, when the inbound is up) and whether ufw lets the traffic in.",
+    "properties": {
+      "allowed": {
+        "example": true,
+        "type": "boolean"
+      },
+      "bound": {
+        "description": "Bound is nil when binding failed for another reason than \"in use\" (e.g. no permission).",
+        "nullable": true,
+        "type": "boolean"
+      },
+      "firewall": {
+        "example": "ufw",
+        "type": "string"
+      },
+      "port": {
+        "example": 443,
+        "type": "integer"
+      },
+      "proto": {
+        "example": "udp",
+        "type": "string"
+      }
+    },
+    "required": [
+      "allowed",
+      "firewall",
+      "port",
+      "proto"
+    ],
+    "type": "object"
+  },
   "ProbeResultUI": {
     "properties": {
       "cpuPct": {
@@ -4574,6 +4634,62 @@ export const SCHEMAS: Record<string, unknown> = {
       "tls13",
       "tlsVersion",
       "x25519"
+    ],
+    "type": "object"
+  },
+  "Report": {
+    "description": "Report is the diagnosis of one inbound; Ok means a real client connection through it worked.",
+    "properties": {
+      "address": {
+        "example": "us.example.com",
+        "type": "string"
+      },
+      "delayMs": {
+        "example": 0,
+        "format": "int64",
+        "type": "integer"
+      },
+      "findings": {
+        "items": {
+          "$ref": "#/components/schemas/Finding"
+        },
+        "type": "array"
+      },
+      "inboundId": {
+        "example": 7,
+        "type": "integer"
+      },
+      "nodeId": {
+        "example": 2,
+        "nullable": true,
+        "type": "integer"
+      },
+      "ok": {
+        "example": false,
+        "type": "boolean"
+      },
+      "port": {
+        "example": 443,
+        "type": "integer"
+      },
+      "protocol": {
+        "example": "hysteria",
+        "type": "string"
+      },
+      "remark": {
+        "example": "US A Hy2",
+        "type": "string"
+      }
+    },
+    "required": [
+      "address",
+      "delayMs",
+      "findings",
+      "inboundId",
+      "ok",
+      "port",
+      "protocol",
+      "remark"
     ],
     "type": "object"
   },

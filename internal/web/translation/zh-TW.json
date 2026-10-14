@@ -837,6 +837,58 @@
         "hyUdpNote": "Hysteria2 走 UDP {port}，雲服務器安全組也要放行 UDP {port}。",
         "hyDecoyMissing": "已創建，但沒有設置偽裝網站：{msg}",
         "openFirewall": "在本服務器防火牆（ufw）放行新入站的端口"
+      },
+      "diagnose": {
+        "action": "診斷",
+        "all": "一鍵診斷",
+        "title": "入站診斷",
+        "again": "重新檢測",
+        "running": "正在檢測端口、防火牆、地址、證書和真實連接……（约 10–60 秒）",
+        "summaryBad": "{total} 個入站中有 {count} 個有问题",
+        "summaryGood": "全部 {total} 個入站都正常",
+        "okDelay": "正常 · {delay} ms",
+        "bad": "有问题",
+        "note": "測試是从本面板所在服務器發起的。如果這里显示正常、但国内用戶仍連不上，通常是 IP 或端口被牆，或運營商限制了 UDP：可以改用 Reality 協議、換端口，或更換服務器 IP。",
+        "fixAction": {
+          "enable": "啟用入站",
+          "firewall": "一鍵放行防火牆端口",
+          "clients": "去添加客戶端"
+        },
+        "find": {
+          "disabled": "入站已停用",
+          "nodeOffline": "節點 {node} 离線",
+          "xrayDown": "Xray 沒有運行：{error}",
+          "noClient": "入站沒有可用的客戶端",
+          "noClientConfig": "无法生成測試用的客戶端配置：{error}",
+          "portCheckFailed": "无法檢查服務器上的 {proto} {port}：{error}",
+          "notListening": "{proto} {port} 沒有在监听",
+          "firewallBlocked": "防火牆（ufw）拦截了 {proto} {port}",
+          "portOpen": "{proto} {port} 正在监听，防火牆已放行",
+          "dnsNone": "{address} 无法解析",
+          "reachable": "从外部可以連通 {address}:{port}",
+          "unreachable": "从外部連不上 {address}:{port}（{error}）",
+          "certExpired": "證書已于 {date} 過期",
+          "certMismatch": "證書不包含 {address}",
+          "e2eOk": "真實客戶端連接正常（{delay} ms）",
+          "e2eFailed": "真實客戶端連接失敗：{error}",
+          "e2eFailedOnly": "真實客戶端連接失敗：{error}"
+        },
+        "advice": {
+          "disabled": "停用的入站客戶端无法使用，啟用即可。",
+          "nodeOffline": "主控連不上節點面板：確認節點服務器開機、x-ui 在運行（x-ui status），稍等一分鐘再試。",
+          "xrayDown": "Xray 啟動失敗，這台服務器上所有入站都不能用。到首页查看 Xray 日志，通常是刚修改的入站或分流规則有问题。",
+          "noClient": "给這個入站添加或附加客戶端，否則沒人能登錄。",
+          "noClientConfig": "這种協議无法自動測試，請用客戶端软件實际試一下。",
+          "portCheckFailed": "節點可能是旧版本：在節點上执行 x-ui update。",
+          "notListening": "Xray 沒有打開這個端口：多半是端口被其他程序占用（面板、伪装网站、nginx），或入站配置有误。換個端口，或查看 Xray 日志。",
+          "firewallBlocked": "ufw 拦截了這個端口的流量，放行即可（Hysteria2、TUIC 需要放行 UDP）。",
+          "dnsNone": "域名沒有解析记錄：添加一条 A 记錄指向服務器 IP。",
+          "unreachable": "服務器在监听、本機防火牆也放行了，说明中间被拦了：通常是云服務商的安全组沒放行（到服務商后台放行，Hysteria2 要放行 UDP），或 IP 被封。",
+          "certExpired": "續簽證書：x-ui 菜單 → SSL 證書，然后重啟。",
+          "certMismatch": "證書是別的域名的：给這個域名申請證書，或把入站的 SNI 改成證書上的域名。",
+          "e2eFailed": "先解决上面的问题，這一项通常是它们導致的。",
+          "e2eFailedOnly": "服務器有响應但拒绝了連接：入站配置和客戶端拿到的不一致（如 Reality 伪装目标不可达、SNI 不对、混淆密碼不一致）。编辑入站，或用一鍵入站重新創建。"
+        }
       }
     },
     "clients": {

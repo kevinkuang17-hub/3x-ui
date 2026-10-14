@@ -18,6 +18,7 @@ import {
 import {
   PlusOutlined,
   ThunderboltOutlined,
+  MedicineBoxOutlined,
   MenuOutlined,
   MoreOutlined,
   ExportOutlined,
@@ -63,6 +64,7 @@ export default function InboundList({
   hosts,
   onAddInbound,
   onQuickAddInbound,
+  onDiagnoseAll,
   onGeneralAction,
   onRowAction,
   onBulkDelete,
@@ -234,6 +236,13 @@ export default function InboundList({
             aria-label={t('pages.inbounds.quick.open')}
           >
             {!isMobile && t('pages.inbounds.quick.open')}
+          </Button>
+          <Button
+            onClick={onDiagnoseAll}
+            icon={<MedicineBoxOutlined />}
+            aria-label={t('pages.inbounds.diagnose.all')}
+          >
+            {!isMobile && t('pages.inbounds.diagnose.all')}
           </Button>
           <Dropdown trigger={['click']} menu={generalActionsMenu}>
             <Button

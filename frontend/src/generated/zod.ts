@@ -650,6 +650,14 @@ export const FallbackParentInfoSchema = z.object({
 });
 export type FallbackParentInfo = z.infer<typeof FallbackParentInfoSchema>;
 
+export const FindingSchema = z.object({
+  fix: z.string().optional(),
+  key: z.string(),
+  level: z.string(),
+  params: z.record(z.string(), z.unknown()).optional(),
+});
+export type Finding = z.infer<typeof FindingSchema>;
+
 export const GeoCategorySchema = z.object({
   attributes: z.array(z.string()),
   code: z.string(),
@@ -1064,6 +1072,15 @@ export const PeerActivitySchema = z.object({
 });
 export type PeerActivity = z.infer<typeof PeerActivitySchema>;
 
+export const PortCheckSchema = z.object({
+  allowed: z.boolean(),
+  bound: z.boolean().nullable().optional(),
+  firewall: z.string(),
+  port: z.number().int(),
+  proto: z.string(),
+});
+export type PortCheck = z.infer<typeof PortCheckSchema>;
+
 export const ProbeResultUISchema = z.object({
   cpuPct: z.number(),
   error: z.string(),
@@ -1102,6 +1119,19 @@ export const RealityScanResultSchema = z.object({
   x25519: z.boolean(),
 });
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
+
+export const ReportSchema = z.object({
+  address: z.string(),
+  delayMs: z.number().int(),
+  findings: z.array(z.lazy(() => FindingSchema)),
+  inboundId: z.number().int(),
+  nodeId: z.number().int().nullable().optional(),
+  ok: z.boolean(),
+  port: z.number().int(),
+  protocol: z.string(),
+  remark: z.string(),
+});
+export type Report = z.infer<typeof ReportSchema>;
 
 export const RuleSetPickSchema = z.object({
   id: z.number().int(),
