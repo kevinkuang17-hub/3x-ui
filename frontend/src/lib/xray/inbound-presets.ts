@@ -229,6 +229,8 @@ export interface QuickInboundInput {
   realityPublicKey: string;
   // Hysteria2 only: what a browser gets over HTTP/3 without the password, e.g. the panel's decoy.
   masquerade?: HysteriaMasquerade;
+  // REALITY in front of the panel's own website: the target gets the visitor's address (PROXY v1).
+  realityXver?: number;
 }
 
 function withCert(tls: Record<string, unknown>, input: QuickInboundInput): Record<string, unknown> {
@@ -243,6 +245,7 @@ function realitySettings(input: QuickInboundInput): Record<string, unknown> {
   reality.target = input.realityTarget;
   reality.serverNames = input.realityServerNames;
   reality.privateKey = input.realityPrivateKey;
+  if (input.realityXver) reality.xver = input.realityXver;
   reality.shortIds = RandomUtil.randomShortIds()
     .split(',')
     .map((s) => s.trim())

@@ -174,4 +174,27 @@ describe('QuickInboundModal', () => {
       ],
     });
   });
+
+  it('fronts the panel website with REALITY when it already runs behind REALITY', async () => {
+    mockServer(
+      recommendation({
+        certState: 'missing',
+        certFile: '',
+        keyFile: '',
+        recommended: 'reality',
+        realityTarget: '127.0.0.1:24873',
+      }),
+    );
+    const { onCreated } = renderModal();
+    fireEvent.click(await createButton());
+
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    const vision = added().find((b) => b.stream.network === 'tcp')!;
+    expect(vision.stream.realitySettings.target).toBe('127.0.0.1:24873');
+    expect(vision.stream.realitySettings.serverNames).toEqual(['hk.example.com']);
+    expect(vision.stream.realitySettings.xver).toBe(1);
+    expect(postSpy.mock.calls.some((c) => c[0] === '/panel/api/server/scanRealityTargets')).toBe(
+      false,
+    );
+  });
 });

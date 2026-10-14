@@ -3624,6 +3624,11 @@
             "example": true,
             "type": "boolean"
           },
+          "realityTarget": {
+            "description": "RealityTarget is the loopback website REALITY should front, when it runs behind REALITY.",
+            "example": "127.0.0.1:24873",
+            "type": "string"
+          },
           "recommended": {
             "example": "tls",
             "type": "string"
@@ -3657,6 +3662,7 @@
           "firewall",
           "keyFile",
           "pointsHere",
+          "realityTarget",
           "recommended",
           "serverIps",
           "tcpPorts",
@@ -4660,6 +4666,24 @@
           "tls13",
           "tlsVersion",
           "x25519"
+        ],
+        "type": "object"
+      },
+      "RealitySelfPlan": {
+        "description": "RealitySelfPlan is what the first step decided; the panel restarts before the second step.",
+        "properties": {
+          "domain": {
+            "example": "us.example.com",
+            "type": "string"
+          },
+          "internalPort": {
+            "example": 24873,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "domain",
+          "internalPort"
         ],
         "type": "object"
       },
@@ -5902,6 +5926,7 @@
                     "keyFile": "/root/cert/hk.example.com/privkey.pem",
                     "nodeId": 3,
                     "pointsHere": true,
+                    "realityTarget": "127.0.0.1:24873",
                     "recommended": "tls",
                     "serverIps": [
                       ""
@@ -17363,7 +17388,8 @@
               "example": {
                 "enabled": true,
                 "frontOnly": false,
-                "port": 443
+                "port": 443,
+                "loopback": false
               }
             }
           }
@@ -17531,6 +17557,101 @@
                     "proto": "udp"
                   }
                 ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/realitySelf/prepare": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Step 1 of putting a local VLESS+REALITY inbound in front of the panel's own website: moves the website to a loopback port (TCP 443 must be free apart from that inbound), then restarts the panel. Returns the domain used as SNI and the internal port.",
+        "operationId": "post_panel_api_protect_realitySelf_prepare",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "inboundId": 7
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/RealitySelfPlan"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "domain": "us.example.com",
+                    "internalPort": 24873
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/protect/realitySelf/apply": {
+      "post": {
+        "tags": [
+          "Protect & speed"
+        ],
+        "summary": "Step 2, once the website runs on its loopback port: moves the inbound to TCP 443 with the server's domain as SNI, the website as REALITY target and xver 1 (visitor address passed on).",
+        "operationId": "post_panel_api_protect_realitySelf_apply",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "inboundId": 7
               }
             }
           }

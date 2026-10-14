@@ -28,6 +28,7 @@ type ProtectController struct {
 	dns         service.NodeDnsService
 	nodeService service.NodeService
 	settings    service.SettingService
+	xray        service.XrayService
 }
 
 func NewProtectController(g *gin.RouterGroup) *ProtectController {
@@ -46,6 +47,8 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.GET("/firewall", a.firewall)
 	g.POST("/firewall/allow", a.allowFirewall)
 	g.POST("/portcheck", a.portCheck)
+	g.POST("/realitySelf/prepare", a.realitySelfPrepare)
+	g.POST("/realitySelf/apply", a.realitySelfApply)
 	g.GET("/front", a.front)
 	g.POST("/front", a.saveFront)
 	g.GET("/cf", a.cfInfo)
@@ -116,6 +119,8 @@ func (a *ProtectController) saveFront(c *gin.Context) {
 		FrontOnly bool `json:"frontOnly"`
 		// Port is the website's TCP port; 0 keeps the current one.
 		Port int `json:"port"`
+		// Loopback false puts a website that sat behind REALITY back on a public port.
+		Loopback *bool `json:"loopback"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
@@ -125,6 +130,12 @@ func (a *ProtectController) saveFront(c *gin.Context) {
 	if addr, ok := c.Request.Context().Value(http.LocalAddrContextKey).(net.Addr); ok {
 		if _, port, err := net.SplitHostPort(addr.String()); err == nil {
 			viaFront = port == strconv.Itoa(a.protect.FrontPort())
+		}
+	}
+	if body.Loopback != nil && !*body.Loopback && a.protect.FrontLoopback() {
+		if err := a.protect.SetFrontLoopback(false); err != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+			return
 		}
 	}
 	if err := a.protect.SaveFront(body.Enabled, body.FrontOnly, viaFront, body.Port); err != nil {
@@ -203,6 +214,45 @@ func (a *ProtectController) portCheck(c *gin.Context) {
 	}
 	pc, err := a.protect.CheckPort(body.Port, body.Proto)
 	jsonObj(c, pc, err)
+}
+
+type realitySelfBody struct {
+	InboundId int `json:"inboundId"`
+}
+
+// realitySelfPrepare moves the website to a loopback port and restarts the panel; the page then
+// calls realitySelfApply once the website runs there.
+func (a *ProtectController) realitySelfPrepare(c *gin.Context) {
+	var body realitySelfBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	plan, err := a.protect.PrepareRealitySelf(body.InboundId)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonMsgObj(c, I18nWeb(c, "pages.protect.frontSaved"), plan, a.panel.RestartPanel(2*time.Second))
+}
+
+// realitySelfApply moves the REALITY inbound to 443 in front of the website.
+func (a *ProtectController) realitySelfApply(c *gin.Context) {
+	var body realitySelfBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	ib, needRestart, err := a.protect.ApplyRealitySelf(body.InboundId)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if needRestart {
+		a.xray.SetToNeedRestart()
+	}
+	jsonMsgObj(c, I18nWeb(c, "pages.protect.realitySelfDoneMsg"), gin.H{"id": ib.Id, "port": ib.Port}, nil)
+	notifyClientsChanged()
 }
 
 func (a *ProtectController) uploadDecoy(c *gin.Context) {

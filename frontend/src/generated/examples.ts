@@ -926,6 +926,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "keyFile": "/root/cert/hk.example.com/privkey.pem",
     "nodeId": 3,
     "pointsHere": true,
+    "realityTarget": "127.0.0.1:24873",
     "recommended": "tls",
     "serverIps": [
       ""
@@ -1146,6 +1147,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "tls13": true,
     "tlsVersion": "1.3",
     "x25519": true
+  },
+  "RealitySelfPlan": {
+    "domain": "us.example.com",
+    "internalPort": 24873
   },
   "Report": {
     "address": "us.example.com",

@@ -2979,7 +2979,7 @@ export const sections: readonly Section[] = [
         path: '/panel/api/protect/front',
         summary:
           'Switch the website (TCP port, 443 by default; 0 keeps the current one) and closing the panel port; the panel restarts. Closing is refused until the website runs, and the port cannot move while the panel port is closed.',
-        body: '{\n  "enabled": true,\n  "frontOnly": false,\n  "port": 443\n}',
+        body: '{\n  "enabled": true,\n  "frontOnly": false,\n  "port": 443,\n  "loopback": false\n}',
       },
       {
         method: 'POST',
@@ -3007,6 +3007,21 @@ export const sections: readonly Section[] = [
         summary:
           'Open ports in ufw: the given rules, or every enabled local inbound port (with its tcp/udp protocol) when rules is empty. Returns the rules opened.',
         body: '{\n  "rules": [{ "port": 443, "proto": "udp" }]\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/realitySelf/prepare',
+        summary:
+          "Step 1 of putting a local VLESS+REALITY inbound in front of the panel's own website: moves the website to a loopback port (TCP 443 must be free apart from that inbound), then restarts the panel. Returns the domain used as SNI and the internal port.",
+        body: '{\n  "inboundId": 7\n}',
+        responseSchema: 'RealitySelfPlan',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/realitySelf/apply',
+        summary:
+          "Step 2, once the website runs on its loopback port: moves the inbound to TCP 443 with the server's domain as SNI, the website as REALITY target and xver 1 (visitor address passed on).",
+        body: '{\n  "inboundId": 7\n}',
       },
       {
         method: 'POST',

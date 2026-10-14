@@ -3598,6 +3598,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": true,
         "type": "boolean"
       },
+      "realityTarget": {
+        "description": "RealityTarget is the loopback website REALITY should front, when it runs behind REALITY.",
+        "example": "127.0.0.1:24873",
+        "type": "string"
+      },
       "recommended": {
         "example": "tls",
         "type": "string"
@@ -3631,6 +3636,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "firewall",
       "keyFile",
       "pointsHere",
+      "realityTarget",
       "recommended",
       "serverIps",
       "tcpPorts",
@@ -4634,6 +4640,24 @@ export const SCHEMAS: Record<string, unknown> = {
       "tls13",
       "tlsVersion",
       "x25519"
+    ],
+    "type": "object"
+  },
+  "RealitySelfPlan": {
+    "description": "RealitySelfPlan is what the first step decided; the panel restarts before the second step.",
+    "properties": {
+      "domain": {
+        "example": "us.example.com",
+        "type": "string"
+      },
+      "internalPort": {
+        "example": 24873,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "domain",
+      "internalPort"
     ],
     "type": "object"
   },
