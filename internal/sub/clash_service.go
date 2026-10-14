@@ -569,6 +569,13 @@ func (s *SubClashService) buildProxy(subReq *SubService, inbound *model.Inbound,
 	if inbound.Protocol == model.AmneziaWG {
 		return s.buildAmneziaWGProxy(subReq, inbound, client, ep)
 	}
+	if inbound.Protocol == model.AnyTLS {
+		return s.buildAnyTLSProxy(subReq, inbound, client, stream, ep)
+	}
+	// Mihomo has no NaiveProxy outbound; an unknown type would fail the whole profile.
+	if inbound.Protocol == model.Naive {
+		return nil
+	}
 
 	network, _ := stream["network"].(string)
 
@@ -868,6 +875,34 @@ func (s *SubClashService) buildTuicProxy(subReq *SubService, inbound *model.Inbo
 	}
 	if alpn, ok := externalProxyALPN(ep["alpn"]); ok {
 		proxy["alpn"] = strings.Split(alpn, ",")
+	}
+	if ai, ok := ep["allowInsecure"].(bool); ok && ai {
+		proxy["skip-cert-verify"] = true
+	}
+	return proxy
+}
+
+func (s *SubClashService) buildAnyTLSProxy(subReq *SubService, inbound *model.Inbound, client model.Client, stream, ep map[string]any) map[string]any {
+	if client.Password == "" {
+		return nil
+	}
+	server := inbound.Listen
+	if server == "" || server == "0.0.0.0" || server == "::" {
+		server = subReq.resolveInboundAddress(inbound)
+	}
+	proxy := map[string]any{
+		"name":     subReq.endpointRemark(inbound, client.Email, ep, "anytls"),
+		"type":     "anytls",
+		"server":   server,
+		"port":     inbound.Port,
+		"password": client.Password,
+		"udp":      true,
+	}
+	if sni := sidecarSNI(stream, server); sni != "" {
+		proxy["sni"] = sni
+	}
+	if sni, ok := externalProxySNI(ep); ok {
+		proxy["sni"] = sni
 	}
 	if ai, ok := ep["allowInsecure"].(bool); ok && ai {
 		proxy["skip-cert-verify"] = true

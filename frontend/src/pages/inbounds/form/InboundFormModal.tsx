@@ -47,7 +47,9 @@ import { HysteriaStreamSettingsSchema } from '@/schemas/protocols/stream/hysteri
 import {
   createHysteriaTlsSettingsWithDefaultCert,
   createMasqueTlsSettingsWithDefaultCert,
+  createTlsSettingsWithDefaultCert,
 } from '@/lib/xray/inbound-tls-defaults';
+import { isSidecarProtocol } from '@/schemas/protocols/inbound/sidecar';
 import { MASQUE_DEFAULT_PATH } from '@/schemas/protocols/stream/masque';
 import { NODE_ELIGIBLE_PROTOCOLS } from '@/lib/xray/node-protocols';
 import { VLESS_AUTH_LABEL_KEYS, vlessEncryptionAuthKind } from '@/lib/xray/vless-encryption';
@@ -295,6 +297,7 @@ export default function InboundFormModal({
   const hasSelectableTransport =
     protocol !== Protocols.HYSTERIA &&
     protocol !== Protocols.MASQUE &&
+    !isSidecarProtocol(protocol) &&
     protocol !== Protocols.WIREGUARD &&
     protocol !== Protocols.TUNNEL &&
     protocol !== Protocols.TUIC;
@@ -568,6 +571,14 @@ export default function InboundFormModal({
           security: 'tls',
           masqueSettings: { path: MASQUE_DEFAULT_PATH },
           tlsSettings: createMasqueTlsSettingsWithDefaultCert(),
+        });
+      } else if (isSidecarProtocol(next)) {
+        // sing-box terminates TLS itself on plain TCP; only the certificate matters.
+        setV('streamSettings', {
+          network: 'tcp',
+          security: 'tls',
+          tcpSettings: {},
+          tlsSettings: createTlsSettingsWithDefaultCert(),
         });
       } else if (next === Protocols.WIREGUARD || next === Protocols.TUNNEL) {
         setV('streamSettings', { security: 'none' });
@@ -1011,7 +1022,8 @@ export default function InboundFormModal({
 
   const tlsOk = canEnableTls({ protocol, streamSettings: { network, security } });
   const realityOk = canEnableReality({ protocol, streamSettings: { network, security } });
-  const tlsOnly = protocol === Protocols.HYSTERIA || protocol === Protocols.MASQUE;
+  const tlsOnly =
+    protocol === Protocols.HYSTERIA || protocol === Protocols.MASQUE || isSidecarProtocol(protocol);
 
   const securityTab = (
     <>
@@ -1213,12 +1225,16 @@ export default function InboundFormModal({
                   : []),
                 ...(streamEnabled
                   ? [
-                      {
-                        key: 'stream',
-                        label: t('pages.inbounds.streamTab'),
-                        children: streamTab,
-                        forceRender: true,
-                      },
+                      ...(isSidecarProtocol(protocol)
+                        ? []
+                        : [
+                            {
+                              key: 'stream',
+                              label: t('pages.inbounds.streamTab'),
+                              children: streamTab,
+                              forceRender: true,
+                            },
+                          ]),
                       ...(protocol !== Protocols.WIREGUARD && protocol !== Protocols.TUNNEL
                         ? [
                             {

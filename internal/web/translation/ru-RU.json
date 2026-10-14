@@ -844,6 +844,14 @@
           "trojan-ws-cdn": {
             "title": "Trojan + WS + TLS (CDN)",
             "desc": "The CDN path for clients and routers without VLESS: goes through Cloudflare when the domain is proxied."
+          },
+          "anytls": {
+            "title": "AnyTLS",
+            "desc": "Real TLS on your certificate with padding that hides the TLS-in-TLS pattern. Served by sing-box (downloaded on first use); for Mihomo/Clash Meta, sing-box, Shadowrocket and NekoBox, not v2rayN or Happ."
+          },
+          "naive": {
+            "title": "NaiveProxy",
+            "desc": "Looks exactly like Chrome browsing an HTTPS site over HTTP/2. Served by sing-box; for Shadowrocket, NekoBox and the NaiveProxy client. Clash subscriptions leave it out (Mihomo has no NaiveProxy)."
           }
         },
         "hyDecoy": "Show the panel's decoy website to visitors (masquerade)",
@@ -905,7 +913,9 @@
           "certMismatch": "The certificate does not cover {address}",
           "e2eOk": "A real client connection works ({delay} ms)",
           "e2eFailed": "A real client connection fails: {error}",
-          "e2eFailedOnly": "A real client connection fails: {error}"
+          "e2eFailedOnly": "A real client connection fails: {error}",
+          "sidecarDown": "The sing-box sidecar that serves AnyTLS and NaiveProxy is not running: {error}",
+          "sidecarRunning": "sing-box is serving this inbound"
         },
         "advice": {
           "disabled": "Clients cannot use a disabled inbound. Enable it.",
@@ -921,7 +931,8 @@
           "certExpired": "Renew the certificate: x-ui menu → SSL certificate, then restart.",
           "certMismatch": "The certificate is for another domain. Issue one for this domain, or set the inbound's SNI to the certificate's domain.",
           "e2eFailed": "Fix the problems above first; this usually follows from them.",
-          "e2eFailedOnly": "The server answers but refuses the connection: the inbound settings do not match what clients get (e.g. Reality target unreachable, wrong SNI, mismatched obfs password). Edit the inbound or recreate it with the one-click dialog."
+          "e2eFailedOnly": "The server answers but refuses the connection: the inbound settings do not match what clients get (e.g. Reality target unreachable, wrong SNI, mismatched obfs password). Edit the inbound or recreate it with the one-click dialog.",
+          "sidecarDown": "The panel downloads sing-box from GitHub on first use. Check that this server can reach github.com and that the inbound has a certificate file; the panel log shows sing-box's own message."
         }
       }
     },

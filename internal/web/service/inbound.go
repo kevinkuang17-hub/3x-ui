@@ -658,6 +658,8 @@ func (s *InboundService) normalizeStreamSettings(inbound *model.Inbound) {
 		model.WireGuard:   true,
 		model.Tunnel:      true,
 		model.MASQUE:      true,
+		model.AnyTLS:      true,
+		model.Naive:       true,
 	}
 
 	if !protocolsWithStream[inbound.Protocol] {
@@ -1343,7 +1345,7 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 	// Secure client ID
 	for _, client := range clients {
 		switch inbound.Protocol {
-		case "trojan", "masque":
+		case "trojan", "masque", "anytls", "naive":
 			if client.Password == "" {
 				return inbound, false, common.NewError("empty client ID")
 			}
@@ -1421,6 +1423,18 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 			// so the ports it now derives were never in the guard's context.
 			if aErr := s.checkAmneziaWGForwardedPorts(tx, inbound.Settings); aErr != nil {
 				return aErr
+			}
+		}
+		if inbound.NodeID == nil && isSingboxProtocol(inbound.Protocol) {
+			if self := singboxSelfConflict(inbound, inbound.Id); self != "" {
+				return common.NewError(self)
+			}
+			conflict, cErr := checkSingboxRelayCollision(tx, inbound.Id)
+			if cErr != nil {
+				return cErr
+			}
+			if conflict != nil {
+				return common.NewError(conflict.String())
 			}
 		}
 		if inbound.NodeID == nil && inbound.Protocol == model.TUIC {
@@ -1869,7 +1883,7 @@ func (s *InboundService) validateUpdatedInboundClients(inbound *model.Inbound) e
 			if client.Auth == "" {
 				return common.NewError("empty client ID")
 			}
-		case model.MASQUE:
+		case model.MASQUE, model.AnyTLS, model.Naive:
 			if client.Password == "" {
 				return common.NewError("empty client ID")
 			}

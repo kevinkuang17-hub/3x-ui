@@ -29,6 +29,8 @@ export type QuickPresetId =
   | 'trojan-tls'
   | 'trojan-ws-cdn'
   | 'hysteria2'
+  | 'anytls'
+  | 'naive'
   | 'ss2022';
 
 export type QuickTransport = 'tcp' | 'udp' | 'both';
@@ -120,6 +122,22 @@ export const QUICK_PRESETS: readonly QuickPreset[] = [
     security: 'tls',
     transport: 'udp',
     label: 'Hy2',
+  },
+  {
+    id: 'anytls',
+    protocol: 'anytls',
+    network: 'tcp',
+    security: 'tls',
+    transport: 'tcp',
+    label: 'AnyTLS',
+  },
+  {
+    id: 'naive',
+    protocol: 'naive',
+    network: 'tcp',
+    security: 'tls',
+    transport: 'tcp',
+    label: 'Naive',
   },
   {
     id: 'ss2022',

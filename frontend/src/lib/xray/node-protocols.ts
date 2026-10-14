@@ -18,4 +18,6 @@ export const NODE_ELIGIBLE_PROTOCOLS: Readonly<Record<string, true>> = {
   [Protocols.AMNEZIAWG]: true,
   [Protocols.TUIC]: true,
   [Protocols.MASQUE]: true,
+  [Protocols.ANYTLS]: true,
+  [Protocols.NAIVE]: true,
 };

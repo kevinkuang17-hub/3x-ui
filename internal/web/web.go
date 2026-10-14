@@ -24,6 +24,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
 	"github.com/mhsanaei/3x-ui/v3/internal/panelaccess"
+	"github.com/mhsanaei/3x-ui/v3/internal/singbox"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/cronspec"
@@ -327,6 +328,7 @@ const (
 	cadenceAmneziaWG     = "@every 10s"
 	cadenceTuic          = "@every 10s"
 	cadencePortHop       = "@every 30s"
+	cadenceSingbox       = "@every 10s"
 	cadenceClientIPScan  = "@every 10s"
 	cadenceNodeHeartbeat = "@every 5s"
 	cadenceNodeTraffic   = "@every 5s"
@@ -379,6 +381,12 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 	tuicJob := job.NewTuicJob()
 	_, _ = s.cron.AddJob(cadenceTuic, tuicJob)
 	go tuicJob.Run()
+
+	// AnyTLS and NaiveProxy run in a sing-box sidecar; edits apply at once through the hook.
+	singboxJob := job.NewSingboxJob()
+	_, _ = s.cron.AddJob(cadenceSingbox, singboxJob)
+	service.SetSingboxSyncHook(singboxJob.Run)
+	go singboxJob.Run()
 
 	// Hysteria2 port hopping: redirect the advertised UDP range to the inbound's port.
 	portHopJob := job.NewPortHopJob()
@@ -839,6 +847,7 @@ func (s *Server) stop(stopXray bool, stopTgBot bool) error {
 			err2 = err
 		}
 		mtproto.GetManager().StopAll()
+		singbox.GetManager().Stop()
 		amneziawgnet.GetManager().StopAll()
 		amneziawgnet.GetOutboundManager().StopAll()
 	}

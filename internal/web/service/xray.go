@@ -16,6 +16,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/config"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/singbox"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/maskcompat"
@@ -199,6 +200,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	sidecars := 0
 	for _, inbound := range inbounds {
 		if !inbound.Enable {
 			continue
@@ -207,6 +209,17 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 			continue
 		}
 		if inbound.Protocol == model.MTProto || inbound.Protocol == model.AmneziaWG || inbound.Protocol == model.TUIC {
+			continue
+		}
+		if isSingboxProtocol(inbound.Protocol) {
+			relay, err := s.inboundService.singboxRelayInbound(inbound)
+			if err != nil {
+				return nil, err
+			}
+			if relay != nil {
+				xrayConfig.InboundConfigs = append(xrayConfig.InboundConfigs, *relay)
+			}
+			sidecars++
 			continue
 		}
 		settings := map[string]any{}
@@ -443,6 +456,10 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	// hop. Whether it goes anywhere beyond Xray's default routing is up to
 	// whatever rules the admin adds through the stock Routing page, exactly
 	// like routing any other protocol.
+	// The relays above just changed with the client list, so sing-box follows without a tick's delay.
+	if sidecars > 0 || singbox.GetManager().Status().Running {
+		TriggerSingboxSync()
+	}
 	injectAmneziawgnetSocks(xrayConfig, inbounds)
 	injectTuicSocks(xrayConfig, inbounds)
 

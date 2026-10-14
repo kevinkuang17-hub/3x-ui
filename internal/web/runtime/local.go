@@ -48,7 +48,23 @@ func (l *Local) withAPI(fn func(api *xray.XrayAPI) error) error {
 	return fn(&api)
 }
 
+// isSidecar marks inbounds served by sing-box: Xray only holds their loopback SOCKS5 relay, which
+// the next config sync rebuilds, and that sync also hands the change to sing-box.
+func isSidecar(p model.Protocol) bool {
+	return p == model.AnyTLS || p == model.Naive
+}
+
+func (l *Local) resyncSidecar() error {
+	if l.deps.SetNeedRestart != nil {
+		l.deps.SetNeedRestart()
+	}
+	return nil
+}
+
 func (l *Local) AddInbound(_ context.Context, ib *model.Inbound) error {
+	if isSidecar(ib.Protocol) {
+		return l.resyncSidecar()
+	}
 	if ib.Protocol == model.MTProto {
 		inst, ok := mtproto.InstanceFromInbound(ib)
 		if !ok {
@@ -106,6 +122,9 @@ func (l *Local) AddInbound(_ context.Context, ib *model.Inbound) error {
 }
 
 func (l *Local) DelInbound(_ context.Context, ib *model.Inbound) error {
+	if isSidecar(ib.Protocol) {
+		return l.resyncSidecar()
+	}
 	if ib.Protocol == model.MTProto {
 		mtproto.GetManager().Remove(ib.Id)
 		return nil
@@ -133,6 +152,16 @@ func (l *Local) DelInbound(_ context.Context, ib *model.Inbound) error {
 }
 
 func (l *Local) UpdateInbound(ctx context.Context, oldIb, newIb *model.Inbound) error {
+	if isSidecar(oldIb.Protocol) || isSidecar(newIb.Protocol) {
+		if !isSidecar(oldIb.Protocol) {
+			_ = l.DelInbound(ctx, oldIb)
+		}
+		if !isSidecar(newIb.Protocol) && newIb.Enable {
+			_ = l.resyncSidecar()
+			return l.AddInbound(ctx, newIb)
+		}
+		return l.resyncSidecar()
+	}
 	if oldIb.Protocol == model.MTProto || newIb.Protocol == model.MTProto {
 		return l.updateMtprotoInbound(ctx, oldIb, newIb)
 	}
@@ -273,6 +302,9 @@ func (l *Local) updateTuicInbound(ctx context.Context, oldIb, newIb *model.Inbou
 }
 
 func (l *Local) AddUser(_ context.Context, ib *model.Inbound, userMap map[string]any) error {
+	if isSidecar(ib.Protocol) {
+		return l.resyncSidecar()
+	}
 	if ib.Protocol == model.MTProto || ib.Protocol == model.AmneziaWG || ib.Protocol == model.TUIC {
 		return nil
 	}
@@ -282,6 +314,9 @@ func (l *Local) AddUser(_ context.Context, ib *model.Inbound, userMap map[string
 }
 
 func (l *Local) RemoveUser(_ context.Context, ib *model.Inbound, email string) error {
+	if isSidecar(ib.Protocol) {
+		return l.resyncSidecar()
+	}
 	if ib.Protocol == model.MTProto || ib.Protocol == model.AmneziaWG || ib.Protocol == model.TUIC {
 		return nil
 	}

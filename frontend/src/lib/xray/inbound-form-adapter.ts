@@ -9,6 +9,7 @@ import {
   AmneziawgClientSchema,
   HysteriaClientSchema,
   MasqueClientSchema,
+  SidecarClientSchema,
   MtprotoClientSchema,
   ShadowsocksClientSchema,
   TrojanClientSchema,
@@ -293,6 +294,9 @@ function clientSchemaForProtocol(protocol: string): z.ZodType | null {
       return TuicClientSchema;
     case 'masque':
       return MasqueClientSchema;
+    case 'anytls':
+    case 'naive':
+      return SidecarClientSchema;
     default:
       return null;
   }

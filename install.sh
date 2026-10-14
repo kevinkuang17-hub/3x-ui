@@ -1881,7 +1881,7 @@ install_x-ui() {
         while IFS= read -r -d '' f; do
             local rel="${f#"${custom_bin_backup}"/}"
             case "${rel}" in
-                config.json | mtproto | mtproto/* | tuic | tuic/* | tuic-server | tuic-server-*) continue ;;
+                config.json | mtproto | mtproto/* | tuic | tuic/* | tuic-server | tuic-server-* | singbox | singbox/*) continue ;;
             esac
             if [[ ! -e "bin/${rel}" ]]; then
                 mkdir -p "bin/$(dirname "${rel}")"

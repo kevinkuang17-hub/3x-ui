@@ -14,6 +14,7 @@ import type {
   ShadowsocksClient,
   ShadowsocksInboundSettings,
 } from '@/schemas/protocols/inbound/shadowsocks';
+import type { SidecarInboundSettings } from '@/schemas/protocols/inbound/sidecar';
 import type { TrojanClient, TrojanInboundSettings } from '@/schemas/protocols/inbound/trojan';
 import type { TuicClient, TuicInboundSettings } from '@/schemas/protocols/inbound/tuic';
 import type { TunInboundSettings } from '@/schemas/protocols/inbound/tun';
@@ -384,7 +385,8 @@ export type AnyInboundSettings =
   | MtprotoInboundSettings
   | AmneziawgInboundSettings
   | TuicInboundSettings
-  | MasqueInboundSettings;
+  | MasqueInboundSettings
+  | SidecarInboundSettings;
 
 export function createDefaultInboundSettings(protocol: string): AnyInboundSettings | null {
   switch (protocol) {
@@ -416,6 +418,9 @@ export function createDefaultInboundSettings(protocol: string): AnyInboundSettin
       return createDefaultTuicInboundSettings();
     case 'masque':
       return createDefaultMasqueInboundSettings();
+    case 'anytls':
+    case 'naive':
+      return { clients: [] };
     default:
       return null;
   }

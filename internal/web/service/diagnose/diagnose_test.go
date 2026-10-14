@@ -78,6 +78,17 @@ func TestAssess(t *testing.T) {
 			wantKey: "noClient", wantFix: FixClients,
 		},
 		{
+			// AnyTLS/NaiveProxy have no Xray client to test through; a dead sing-box is the cause.
+			name:    "sing-box sidecar not running",
+			f:       facts{enabled: true, sidecar: true, sidecarErr: "sing-box rejected the config", ports: []portFact{port("tcp", false, true)}},
+			wantKey: "sidecarDown",
+		},
+		{
+			name:    "working sidecar inbound without an end-to-end test",
+			f:       facts{enabled: true, sidecar: true, ports: []portFact{port("tcp", true, true)}, address: "us.example.com", addrPort: 443, tcpReach: boolPtr(true)},
+			wantKey: "sidecarRunning", ok: true,
+		},
+		{
 			name:    "working inbound",
 			f:       facts{enabled: true, ports: []portFact{port("tcp", true, true)}, address: "us.example.com", addrPort: 443, tcpReach: boolPtr(true), e2e: &outbound.TestOutboundResult{Success: true, Delay: 180}},
 			wantKey: "e2eOk", ok: true,
