@@ -3,6 +3,7 @@
 package diagnose
 
 import (
+	"cmp"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -16,6 +17,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/linehealth"
+	"github.com/mhsanaei/3x-ui/v3/internal/singbox"
 	"github.com/mhsanaei/3x-ui/v3/internal/sub"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -79,6 +81,9 @@ type facts struct {
 	certState   string
 	certDate    string
 	e2e         *outbound.TestOutboundResult
+	// sidecar marks AnyTLS/NaiveProxy, served by sing-box; sidecarErr is why it is not running.
+	sidecar    bool
+	sidecarErr string
 }
 
 func errorFinding(key string, params map[string]any, fix string) Finding {
@@ -97,6 +102,11 @@ func assess(f facts) ([]Finding, bool) {
 	var out []Finding
 	if f.xrayDown {
 		out = append(out, errorFinding("xrayDown", map[string]any{"error": f.xrayErr}, ""))
+	}
+	if f.sidecar && f.sidecarErr != "" {
+		out = append(out, errorFinding("sidecarDown", map[string]any{"error": f.sidecarErr}, ""))
+	} else if f.sidecar {
+		out = append(out, Finding{Key: "sidecarRunning", Level: LevelOK})
 	}
 	if f.noClient {
 		out = append(out, errorFinding("noClient", nil, FixClients))
@@ -140,7 +150,8 @@ func assess(f facts) ([]Finding, bool) {
 	case service.CertStateMismatch:
 		out = append(out, errorFinding("certMismatch", map[string]any{"address": f.address}, ""))
 	}
-	ok := false
+	// No Xray client exists for a sidecar protocol, so a clean run of the other checks is the verdict.
+	ok := f.sidecar && f.e2e == nil && !hasError(out) && f.tcpReach != nil && *f.tcpReach
 	switch {
 	case f.e2e == nil:
 	case f.e2e.Success:
@@ -267,14 +278,28 @@ func (s *Service) gather(ctx context.Context, host string, ib *model.Inbound, no
 	}
 
 	ob, _, err := s.links.ClientOutbound(host, ib)
+	f.sidecar = ib.Protocol == model.AnyTLS || ib.Protocol == model.Naive
 	switch {
 	case errors.Is(err, sub.ErrNoEnabledClient):
 		f.noClient = true
-	case err != nil:
+	case err != nil && !f.sidecar:
 		f.noClientCfg = err.Error()
 	}
 	if ob != nil {
 		f.address, f.addrPort = outboundEndpoint(ob)
+	}
+	sidecarSNI := ""
+	if f.sidecar {
+		if node == nil {
+			if st := singbox.GetManager().Status(); !st.Running {
+				f.sidecarErr = st.Error
+				if f.sidecarErr == "" {
+					f.sidecarErr = "sing-box is not running"
+				}
+			}
+		}
+		f.address, sidecarSNI = s.links.SidecarEndpoint(host, ib)
+		f.addrPort = ib.Port
 	}
 	if f.address != "" {
 		if net.ParseIP(f.address) == nil {
@@ -290,7 +315,9 @@ func (s *Service) gather(ctx context.Context, host string, ib *model.Inbound, no
 			if rerr != nil {
 				f.tcpErr = rerr.Error()
 			}
-			if reach && securityOf(ob) == "tls" {
+			if reach && f.sidecar {
+				f.certState, f.certDate = checkTLS(f.address, f.addrPort, cmp.Or(sidecarSNI, f.address))
+			} else if reach && securityOf(ob) == "tls" {
 				f.certState, f.certDate = checkTLS(f.address, f.addrPort, tlsServerName(ob, f.address))
 			}
 		}

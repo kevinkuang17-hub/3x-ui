@@ -315,6 +315,25 @@ func checkPortConflictTx(db *gorm.DB, inbound *model.Inbound, ignoreId int) (*po
 		if conflict != nil {
 			return conflict, nil
 		}
+		conflict, err = checkSingboxSocksConflict(db, inbound, ignoreId, newBits)
+		if err != nil {
+			return nil, err
+		}
+		if conflict != nil {
+			return conflict, nil
+		}
+	}
+	if inbound.NodeID == nil && isSingboxProtocol(inbound.Protocol) && ignoreId > 0 {
+		if self := singboxSelfConflict(inbound, ignoreId); self != "" {
+			return nil, common.NewError(self)
+		}
+		conflict, err := checkSingboxRelayCollision(db, ignoreId)
+		if err != nil {
+			return nil, err
+		}
+		if conflict != nil {
+			return conflict, nil
+		}
 	}
 
 	// The reverse direction, only meaningful once the id is known -- AddInbound

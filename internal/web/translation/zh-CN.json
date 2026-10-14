@@ -844,6 +844,14 @@
           "trojan-ws-cdn": {
             "title": "Trojan + WS + TLS（CDN）",
             "desc": "给不支持 VLESS 的客户端和路由器的 CDN 线路：域名开启 Cloudflare 代理时走 CDN。"
+          },
+          "anytls": {
+            "title": "AnyTLS",
+            "desc": "用你的证书走真实 TLS，并加入填充来隐藏「TLS 套 TLS」特征。由 sing-box 提供（首次使用自动下载）；适用于 Mihomo/Clash Meta、sing-box、Shadowrocket、NekoBox，v2rayN 和 Happ 不支持。"
+          },
+          "naive": {
+            "title": "NaiveProxy",
+            "desc": "流量和 Chrome 浏览 HTTPS 网站（HTTP/2）一模一样。由 sing-box 提供；适用于 Shadowrocket、NekoBox 和 NaiveProxy 客户端。Clash 订阅里不会出现（Mihomo 不支持 NaiveProxy）。"
           }
         },
         "hyDecoy": "访问者打开时显示面板的伪装网站（伪装）",
@@ -905,7 +913,9 @@
           "certMismatch": "证书不包含 {address}",
           "e2eOk": "真实客户端连接正常（{delay} ms）",
           "e2eFailed": "真实客户端连接失败：{error}",
-          "e2eFailedOnly": "真实客户端连接失败：{error}"
+          "e2eFailedOnly": "真实客户端连接失败：{error}",
+          "sidecarDown": "负责 AnyTLS / NaiveProxy 的 sing-box 没有运行：{error}",
+          "sidecarRunning": "sing-box 正在提供此入站"
         },
         "advice": {
           "disabled": "停用的入站客户端无法使用，启用即可。",
@@ -921,7 +931,8 @@
           "certExpired": "续签证书：x-ui 菜单 → SSL 证书，然后重启。",
           "certMismatch": "证书是别的域名的：给这个域名申请证书，或把入站的 SNI 改成证书上的域名。",
           "e2eFailed": "先解决上面的问题，这一项通常是它们导致的。",
-          "e2eFailedOnly": "服务器有响应但拒绝了连接：入站配置和客户端拿到的不一致（如 Reality 伪装目标不可达、SNI 不对、混淆密码不一致）。编辑入站，或用一键入站重新创建。"
+          "e2eFailedOnly": "服务器有响应但拒绝了连接：入站配置和客户端拿到的不一致（如 Reality 伪装目标不可达、SNI 不对、混淆密码不一致）。编辑入站，或用一键入站重新创建。",
+          "sidecarDown": "面板第一次使用时会从 GitHub 下载 sing-box。请确认服务器能访问 github.com，并且入站已设置证书文件；面板日志里有 sing-box 的具体报错。"
         }
       }
     },

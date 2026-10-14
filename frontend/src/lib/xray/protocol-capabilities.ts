@@ -18,6 +18,8 @@ const STREAM_PROTOCOLS = [
   'wireguard',
   'tunnel',
   'masque',
+  'anytls',
+  'naive',
 ];
 const VISION_FLOW = 'xtls-rprx-vision';
 const SS_2022_PREFIX = '2022';
@@ -37,7 +39,7 @@ export interface CapabilityShadowsocksSlice extends CapabilityProtocolSlice {
 }
 
 export function canEnableTls(values: CapabilityProtocolSlice): boolean {
-  if (values.protocol === 'hysteria' || values.protocol === 'masque') return true;
+  if (['hysteria', 'masque', 'anytls', 'naive'].includes(values.protocol)) return true;
   if (!TLS_ELIGIBLE_PROTOCOLS.includes(values.protocol)) return false;
   return TLS_NETWORKS.includes(values.streamSettings?.network ?? '');
 }
@@ -86,9 +88,7 @@ export function canEnableStream(values: { protocol: string }): boolean {
 // Xray, so the Xray sniffing block does not apply to either. Every other
 // inbound supports sniffing.
 export function canEnableSniffing(values: { protocol: string }): boolean {
-  return (
-    values.protocol !== 'mtproto' && values.protocol !== 'amneziawg' && values.protocol !== 'tuic'
-  );
+  return !['mtproto', 'amneziawg', 'tuic', 'anytls', 'naive'].includes(values.protocol);
 }
 
 // Vision seed applies only when XTLS Vision (TCP/TLS) flow is selected

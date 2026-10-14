@@ -99,3 +99,11 @@ func (p *LinkProvider) ClientOutbound(host string, inbound *model.Inbound) (map[
 	}
 	return nil, client.Email, fmt.Errorf("%s inbounds have no Xray client config to test with", inbound.Protocol)
 }
+
+// SidecarEndpoint is where clients of an AnyTLS or NaiveProxy inbound connect and the name they
+// verify; those protocols have no Xray client config to test through.
+func (p *LinkProvider) SidecarEndpoint(host string, inbound *model.Inbound) (address, serverName string) {
+	svc := p.build(host)
+	address = svc.resolveInboundAddress(inbound)
+	return address, sidecarSNI(unmarshalStreamSettings(inbound.StreamSettings), address)
+}

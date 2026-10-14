@@ -199,6 +199,10 @@ func singboxOutbound(p map[string]any) map[string]any {
 		}
 		out["tls"] = singboxTLS(p, server)
 		return out
+	case "anytls":
+		out["type"], out["password"] = "anytls", strOf(p, "password")
+		out["tls"] = singboxTLS(p, server)
+		return out
 	case "socks5":
 		out["type"] = "socks"
 		if u := strOf(p, "username"); u != "" {

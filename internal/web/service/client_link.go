@@ -427,17 +427,19 @@ func (s *ClientService) validateProtocolClients(tx *gorm.DB, inboundID int, chan
 	case model.TUIC:
 		return s.validateTuicIdentities(tx, inboundID, changed, detached, prune)
 	case model.MASQUE:
-		return validateMasqueEmails(changed)
+		return validateBasicAuthEmails("MASQUE", changed)
+	case model.Naive:
+		return validateBasicAuthEmails("NaiveProxy", changed)
 	}
 	return nil
 }
 
-// MASQUE sends the email as the Basic-auth user, so xray-core refuses the whole inbound,
-// and with it the Xray start, over one email holding ":".
-func validateMasqueEmails(clients []model.Client) error {
+// MASQUE and NaiveProxy send the email as the Basic-auth user, so one email holding ":" makes the
+// core refuse the whole inbound (and with MASQUE the Xray start).
+func validateBasicAuthEmails(protocol string, clients []model.Client) error {
 	for _, client := range clients {
 		if strings.Contains(client.Email, ":") {
-			return fmt.Errorf("MASQUE: client email %q cannot contain \":\"", client.Email)
+			return fmt.Errorf("%s: client email %q cannot contain \":\"", protocol, client.Email)
 		}
 	}
 	return nil

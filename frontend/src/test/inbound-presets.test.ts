@@ -55,6 +55,8 @@ describe('buildQuickInbound', () => {
       'grpc-tls',
       'xhttp-tls-enc',
       'hysteria2',
+      'anytls',
+      'naive',
     ] as const) {
       const { payload, stream } = wireOf(id);
       expect(stream.tlsSettings.serverName).toBe('hk.example.com');

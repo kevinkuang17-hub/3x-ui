@@ -664,6 +664,49 @@ export function genTrojanLink(input: GenTrojanLinkInput): string {
   return url.toString();
 }
 
+export interface GenSidecarLinkInput {
+  inbound: Inbound;
+  address: string;
+  port?: number;
+  remark?: string;
+  clientEmail?: string;
+  clientPassword: string;
+}
+
+const IP_LITERAL = /^(\d{1,3}(\.\d{1,3}){3}|\[?[0-9a-fA-F:]+\]?)$/;
+
+// The name AnyTLS/NaiveProxy clients verify: the inbound's TLS server name, else a domain address.
+function sidecarSni(inbound: Inbound, address: string): string {
+  const stream = inbound.streamSettings as { tlsSettings?: { serverName?: string } } | undefined;
+  const tls = stream?.tlsSettings;
+  const sni = (tls?.serverName ?? '').trim();
+  if (sni) return sni;
+  return IP_LITERAL.test(address) ? '' : address;
+}
+
+// anytls://password@host:port/?sni=..., the URI of the AnyTLS reference client.
+export function genAnyTLSLink(input: GenSidecarLinkInput): string {
+  const { inbound, address, port = inbound.port, remark = '', clientPassword } = input;
+  if (inbound.protocol !== 'anytls' || !clientPassword) return '';
+  const url = new URL(
+    `anytls://${encodeURIComponent(clientPassword)}@${formatUrlHost(address)}:${port}/`,
+  );
+  const sni = sidecarSni(inbound, address);
+  if (sni) url.searchParams.set('sni', sni);
+  url.hash = encodeURIComponent(remark);
+  return url.toString();
+}
+
+// naive+https://user:pass@domain:port; NaiveProxy has no SNI field, so the domain is the host.
+export function genNaiveLink(input: GenSidecarLinkInput): string {
+  const { inbound, address, port = inbound.port, remark = '', clientEmail, clientPassword } = input;
+  if (inbound.protocol !== 'naive' || !clientPassword || !clientEmail) return '';
+  const host = sidecarSni(inbound, address) || address;
+  const user = `${encodeURIComponent(clientEmail)}:${encodeURIComponent(clientPassword)}`;
+  const link = `naive+https://${user}@${formatUrlHost(host)}:${port}`;
+  return remark ? `${link}#${encodeURIComponent(remark)}` : link;
+}
+
 export interface GenShadowsocksLinkInput {
   inbound: Inbound;
   address: string;
@@ -1421,6 +1464,9 @@ export function getInboundClients(inbound: Inbound): ClientShape[] | null {
       return (inbound.settings.clients ?? []) as ClientShape[];
     case 'shadowsocks':
       return (inbound.settings.clients ?? []) as ClientShape[];
+    case 'anytls':
+    case 'naive':
+      return (inbound.settings.clients ?? []) as ClientShape[];
     default:
       return null;
   }
@@ -1512,6 +1558,23 @@ export function genLink(input: GenLinkInput): string {
       });
     case 'mtproto':
       return genMtprotoLink({ inbound, address, port, clientSecret: client.secret ?? '' });
+    case 'anytls':
+      return genAnyTLSLink({
+        inbound,
+        address,
+        port,
+        remark,
+        clientPassword: client.password ?? '',
+      });
+    case 'naive':
+      return genNaiveLink({
+        inbound,
+        address,
+        port,
+        remark,
+        clientEmail: client.email,
+        clientPassword: client.password ?? '',
+      });
     case 'tuic':
       return genTuicLink({
         inbound,

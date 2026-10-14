@@ -3383,7 +3383,9 @@
               "mtproto",
               "amneziawg",
               "tuic",
-              "masque"
+              "masque",
+              "anytls",
+              "naive"
             ],
             "example": "vless",
             "type": "string"
