@@ -901,7 +901,7 @@
         "again": "Run again",
         "running": "Checking ports, firewall, address, certificate and a real connection… (10–60 s)",
         "summaryBad": "{count} of {total} inbounds have problems",
-        "summaryGood": "All {total} inbounds work",
+        "summaryGood": "All {total} inbounds work from this panel's server; whether China reaches them is shown on each one",
         "okDelay": "Works · {delay} ms",
         "bad": "Has problems",
         "note": "The test connects from this panel's server. If it works here but users in China still cannot connect, the IP or port is usually blocked, or the ISP throttles UDP: switch to Reality, change the port, or change the server IP.",
@@ -921,11 +921,11 @@
           "firewallBlocked": "The firewall (ufw) blocks {proto} {port}",
           "portOpen": "{proto} {port} is listening and open in the firewall",
           "dnsNone": "{address} does not resolve",
-          "reachable": "{address}:{port} answers from outside",
+          "reachable": "{address}:{port} answers from this panel's server (abroad, not China)",
           "unreachable": "{address}:{port} cannot be reached from outside ({error})",
           "certExpired": "The certificate expired on {date}",
           "certMismatch": "The certificate does not cover {address}",
-          "e2eOk": "A real client connection works ({delay} ms)",
+          "e2eOk": "A real client connection from this panel's server works ({delay} ms)",
           "e2eFailed": "A real client connection fails: {error}",
           "e2eFailedOnly": "A real client connection fails: {error}",
           "sidecarDown": "The sing-box sidecar that serves AnyTLS and NaiveProxy is not running: {error}",
@@ -949,12 +949,16 @@
           "sidecarDown": "The panel downloads sing-box from GitHub on first use. Check that this server can reach github.com and that the inbound has a certificate file; the panel log shows sing-box's own message."
         },
         "china": {
-          "title": "From China (ITDOG, ~200 probes):",
           "ping": "Ping from China",
           "tcping": "TCPing port {port} from China",
           "udpOnly": "UDP protocol: TCPing does not apply; use Ping and a real client.",
           "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port.",
-          "probes": "China probes: {state} ({ok}/{total} get through)"
+          "probes": "China probes: {state} ({ok}/{total} get through)",
+          "embedHint": "ITDOG tests from about 200 probes in China; the map and table load in a few seconds. Blank? Open it in a new tab.",
+          "openTab": "Open in a new tab",
+          "unknown": "From China: unknown (no probe in China yet)",
+          "noResult": "From China: no probe result for this inbound yet",
+          "addProbe": "Add a probe in China"
         }
       }
     },

@@ -11,6 +11,8 @@ import {
 
 import { HttpUtil } from '@/utils';
 import { chinaCheckLinks } from '@/lib/china-check';
+
+import ItdogModal from './ItdogModal';
 import type { ChinaVerdict } from '@/pages/nodes/IspProbesCard';
 import type { Finding, Report } from '@/generated/types';
 
@@ -51,6 +53,8 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
   const [busy, setBusy] = useState(false);
   const [fixing, setFixing] = useState<string>('');
   const [probeVerdicts, setProbeVerdicts] = useState<Record<string, ChinaVerdict>>({});
+  const [probeCount, setProbeCount] = useState(0);
+  const [itdog, setItdog] = useState({ url: '', title: '' });
 
   const run = useCallback(async (only: number[]) => {
     setBusy(true);
@@ -74,11 +78,14 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
     setReports(null);
     void run(ids);
     // What the ISP probes inside China last saw, when any are installed.
-    void HttpUtil.get<{ verdicts?: Record<string, ChinaVerdict> }>(
+    void HttpUtil.get<{ verdicts?: Record<string, ChinaVerdict>; probes?: unknown[] }>(
       '/panel/api/probes/matrix',
       undefined,
       { silent: true },
-    ).then((msg) => setProbeVerdicts(msg?.success ? (msg.obj?.verdicts ?? {}) : {}));
+    ).then((msg) => {
+      setProbeVerdicts(msg?.success ? (msg.obj?.verdicts ?? {}) : {});
+      setProbeCount(msg?.success ? (msg.obj?.probes?.length ?? 0) : 0);
+    });
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [open]);
 
@@ -120,13 +127,16 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
     return text === key ? '' : text;
   };
 
+  // The checks above run from this panel's own server abroad; this row is about China.
   const renderChinaCheck = (r: Report) => {
     const links = chinaCheckLinks(r.address, r.port, r.protocol);
     if (!links) return null;
     const verdict = probeVerdicts[String(r.inboundId)];
+    const open = (url: string, kind: string) =>
+      setItdog({ url, title: `${r.remark || `#${r.inboundId}`} · ${kind}` });
     return (
       <div className="diag-china">
-        {verdict && (
+        {verdict ? (
           <Tag
             color={verdict.state === 'ok' ? 'green' : verdict.state === 'port' ? 'orange' : 'red'}
           >
@@ -136,20 +146,40 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
               total: verdict.probes,
             })}
           </Tag>
+        ) : (
+          <span className="diag-china-unknown">
+            {LEVEL_ICON.warn}{' '}
+            {t(
+              probeCount > 0
+                ? 'pages.inbounds.diagnose.china.noResult'
+                : 'pages.inbounds.diagnose.china.unknown',
+            )}
+          </span>
         )}
-        <Typography.Text strong>{t('pages.inbounds.diagnose.china.title')}</Typography.Text>
         <Space wrap size={6}>
-          <Button size="small" href={links.ping} target="_blank" rel="noopener noreferrer">
+          <Button size="small" onClick={() => open(links.ping, 'Ping')}>
             {t('pages.inbounds.diagnose.china.ping')}
           </Button>
           {links.tcping ? (
-            <Button size="small" href={links.tcping} target="_blank" rel="noopener noreferrer">
+            <Button size="small" onClick={() => open(links.tcping, `TCPing ${r.port}`)}>
               {t('pages.inbounds.diagnose.china.tcping', { port: r.port })}
             </Button>
           ) : (
             <Typography.Text type="secondary">
               {t('pages.inbounds.diagnose.china.udpOnly')}
             </Typography.Text>
+          )}
+          {probeCount === 0 && (
+            <Button
+              size="small"
+              type="link"
+              onClick={() => {
+                onClose();
+                navigate('/nodes');
+              }}
+            >
+              {t('pages.inbounds.diagnose.china.addProbe')}
+            </Button>
           )}
         </Space>
       </div>
@@ -174,6 +204,11 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
         </Button>,
       ]}
     >
+      <ItdogModal
+        url={itdog.url}
+        title={itdog.title}
+        onClose={() => setItdog({ url: '', title: '' })}
+      />
       <Space orientation="vertical" size={12} style={{ width: '100%' }}>
         {busy && (
           <Space>

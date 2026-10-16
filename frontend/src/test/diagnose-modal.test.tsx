@@ -68,7 +68,7 @@ describe('DiagnoseModal', () => {
 });
 
 describe('DiagnoseModal China check', () => {
-  it('links each inbound to an ITDOG test from China, TCP only where the protocol listens on TCP', async () => {
+  it('opens ITDOG inside the panel and says China is unknown without probes', async () => {
     const reality = {
       ...fixed,
       inboundId: 8,
@@ -76,6 +76,7 @@ describe('DiagnoseModal China check', () => {
       protocol: 'vless',
       port: 8443,
     };
+    vi.mocked(HttpUtil.get).mockResolvedValue(new Msg(true, '', { probes: [], verdicts: {} }));
     postSpy.mockResolvedValue(new Msg(true, '', [fixed, reality]));
     renderWithProviders(
       <MemoryRouter>
@@ -84,16 +85,20 @@ describe('DiagnoseModal China check', () => {
     );
 
     await screen.findByText('US A Reality');
-    const pings = screen.getAllByRole('link', { name: 'Ping from China' });
-    expect(pings.map((a) => a.getAttribute('href'))).toEqual([
-      'https://www.itdog.cn/ping/us.example.com',
-      'https://www.itdog.cn/ping/us.example.com',
-    ]);
-    const tcping = screen.getAllByRole('link', { name: /TCPing port/ });
-    expect(tcping.map((a) => a.getAttribute('href'))).toEqual([
-      'https://www.itdog.cn/tcping/us.example.com:8443',
-    ]);
+    expect(
+      screen.getAllByText('From China: unknown (no probe in China yet)', { exact: false }),
+    ).toHaveLength(2);
+    // Hysteria2 listens on UDP only, so only the Reality inbound offers a TCPing.
+    const tcping = screen.getAllByRole('button', { name: /TCPing port/ });
+    expect(tcping).toHaveLength(1);
     expect(screen.getByText(/UDP protocol: TCPing does not apply/)).toBeTruthy();
+
+    fireEvent.click(tcping[0]);
+    const frame = await screen.findByTitle('US A Reality · TCPing 8443');
+    expect(frame.getAttribute('src')).toBe('https://www.itdog.cn/tcping/us.example.com:8443');
+    expect(screen.getByRole('link', { name: /Open in a new tab/ }).getAttribute('href')).toBe(
+      'https://www.itdog.cn/tcping/us.example.com:8443',
+    );
   });
 });
 
