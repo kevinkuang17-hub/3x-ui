@@ -10,6 +10,8 @@ DIR="${PROBE_DIR:-/etc/x-ui-probe}"
 CONF="$DIR/url"
 SELF="$DIR/probe-agent.sh"
 TIMEOUT="${PROBE_TIMEOUT:-3}"
+# A site every network in China reaches: when it fails, this router is offline and reports nothing.
+CONTROL_HOST="${PROBE_CONTROL:-www.baidu.com}"
 
 die() {
     echo "probe-agent: $*" >&2
@@ -87,6 +89,41 @@ check() {
     fi
 }
 
+# ping_ms <host>: average ICMP round trip in ms, -1 when lost, 0 when ping is unavailable.
+ping_ms() {
+    command -v ping > /dev/null 2>&1 || {
+        echo 0
+        return
+    }
+    out=$(ping -c 3 -W 2 "$1" 2> /dev/null || true)
+    avg=$(echo "$out" | sed -n 's#.*= [0-9.]*/\([0-9.]*\)/.*#\1#p' | head -n 1)
+    if [ -n "$avg" ]; then
+        awk -v t="$avg" 'BEGIN { v = int(t + 0.5); if (v < 1) v = 1; print v }'
+    else
+        echo -1
+    fi
+}
+
+# is_private <host>: loopback/LAN addresses answer instantly by nature.
+is_private() {
+    case "$1" in
+        127.* | 10.* | 192.168.* | 172.1[6-9].* | 172.2[0-9].* | 172.3[01].* | localhost) return 0 ;;
+    esac
+    return 1
+}
+
+# self_update fetches the current agent from the master once a day; it takes effect next run.
+self_update() {
+    stamp="$DIR/updated"
+    [ -z "$(find "$stamp" -mtime -1 2> /dev/null)" ] || return 0
+    if curl -fsSL --max-time 30 "$1/agent.sh" -o "$SELF.tmp" 2> /dev/null && grep -q "probe-agent" "$SELF.tmp"; then
+        mv "$SELF.tmp" "$SELF"
+        chmod 700 "$SELF"
+    fi
+    rm -f "$SELF.tmp"
+    touch "$stamp"
+}
+
 run_agent() {
     [ -f "$CONF" ] || die "not installed"
     TOOL=$(tcp_tool)
@@ -96,17 +133,33 @@ run_agent() {
     mkdir "$DIR/lock" 2> /dev/null || exit 0
     trap 'rmdir "$DIR/lock" 2> /dev/null' EXIT INT TERM
     url=$(cat "$CONF")
+    self_update "$url"
+    [ "$(check "$CONTROL_HOST" 443)" -ge 0 ] 2> /dev/null || die "cannot reach $CONTROL_HOST; this router looks offline, nothing reported"
     targets=$(curl -fsS --max-time 30 "$url") || die "could not fetch targets"
+    pings=""
     body='{"results":['
     sep=""
     # Read from a here-doc so the loop runs in this shell, not a pipeline subshell.
     while read -r id host port; do
         [ -n "$id" ] || continue
         ms=$(check "$host" "$port")
+        # One ping per host, however many lines share it.
+        ping=$(printf '%s\n' "$pings" | awk -v h="$host" '$1 == h { print $2; exit }')
+        if [ -z "$ping" ]; then
+            ping=$(ping_ms "$host")
+            pings="$pings
+$host $ping"
+        fi
+        # OpenClash proxying the router's own traffic answers at once from the router itself:
+        # such a result says nothing about the path to the server.
+        proxied=false
+        if ! is_private "$host" && { [ "$TOOL" = curl ] && [ "$ms" -ge 0 ] && [ "$ms" -le 1 ]; } 2> /dev/null; then
+            proxied=true
+        fi
         if [ "$ms" -ge 0 ] 2> /dev/null; then
-            body="$body$sep{\"inboundId\":$id,\"ok\":true,\"latencyMs\":$ms}"
+            body="$body$sep{\"inboundId\":$id,\"ok\":true,\"latencyMs\":$ms,\"pingMs\":$ping,\"proxied\":$proxied}"
         else
-            body="$body$sep{\"inboundId\":$id,\"ok\":false,\"latencyMs\":0}"
+            body="$body$sep{\"inboundId\":$id,\"ok\":false,\"latencyMs\":0,\"pingMs\":$ping,\"proxied\":false}"
         fi
         sep=","
     done << EOF

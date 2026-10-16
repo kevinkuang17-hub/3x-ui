@@ -941,7 +941,8 @@
           "ping": "Ping from China",
           "tcping": "TCPing port {port} from China",
           "udpOnly": "UDP protocol: TCPing does not apply; use Ping and a real client.",
-          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port."
+          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port.",
+          "probes": "China probes: {state} ({ok}/{total} get through)"
         }
       }
     },
@@ -1416,8 +1417,8 @@
         "saved": "Custo do servidor salvo"
       },
       "probes": {
-        "title": "Sondas de operadora",
-        "intro": "Instale uma sonda num roteador ou servidor dentro da rede que importa (ex.: roteador de casa na China Telecom). A cada 5 minutos ela verifica de lá se cada linha é alcançável. Com a ocultação de linhas fora do ar ligada, uma linha que nenhuma sonda alcança sai das assinaturas.",
+        "title": "ISP probes (reachability from China)",
+        "intro": "Install a probe on a router or server inside China (for example your home or office router, OpenWrt works). Every 5 minutes it checks from there whether each line on this panel and its nodes can be reached, pings the server to tell a blocked port from a blocked IP, and reports back. With Telegram notifications on (Settings → Telegram → Reachability from China) you get an alert when a line stops working in China.",
         "add": "Adicionar sonda",
         "line": "Linha",
         "name": "Nome da sonda",
@@ -1431,7 +1432,26 @@
         "blocked": "bloqueada",
         "deleteConfirm": "Excluir a sonda {name}?",
         "deleted": "Sonda excluída",
-        "installHint": "Execute isto uma vez no roteador ou servidor (precisa de curl; OpenWrt funciona). Instala uma verificação a cada 5 minutos:"
+        "installHint": "Execute isto uma vez no roteador ou servidor (precisa de curl; OpenWrt funciona). Instala uma verificação a cada 5 minutos:",
+        "verdict": "From China",
+        "verdictState": {
+          "ok": "Reachable",
+          "port": "Port blocked",
+          "ip": "IP blocked",
+          "blocked": "Unreachable"
+        },
+        "verdictHint": {
+          "ok": "At least one probe in China gets through.",
+          "port": "No probe connects to the port, but the server answers ping: move the inbound to another port.",
+          "ip": "Neither the port nor ping gets through from any probe: the IP is blocked, the server needs a new IP.",
+          "blocked": "No probe connects; the probes could not ping, so the cause is unknown."
+        },
+        "pingMs": "ping {ms} ms",
+        "pingLost": "ping lost",
+        "proxied": "Via proxy",
+        "proxiedHint": "The router's own traffic goes through OpenClash, so this result says nothing about China. Turn off proxying the router's own traffic in OpenClash, or route these server IPs DIRECT.",
+        "altCommand": "If that address cannot be opened from the router, use the panel address instead:",
+        "openclashHint": "OpenClash routers: the probe must reach the servers directly. If the router's own traffic is proxied, results show \"Via proxy\" and are ignored."
       }
     },
     "settings": {
@@ -2120,7 +2140,10 @@
         "failed": "A operação com a chave falhou",
         "added": "Chave adicionada",
         "deleted": "Chave removida"
-      }
+      },
+      "eventGroupChina": "Reachability from China (ISP probes)",
+      "eventChinaBlocked": "Unreachable",
+      "eventChinaOk": "Back"
     },
     "xray": {
       "importRules": "Importar regras",
@@ -3139,7 +3162,12 @@
       "eventNodeDown": "O nó {{ .Name }} está INATIVO",
       "eventNodeUp": "O nó {{ .Name }} está ATIVO",
       "eventLoginFallback": "Falha de login a partir de {{ .Source }}",
-      "memoryThreshold": "Uso de memória {{ .Percent }}% excede o limite de {{ .Threshold }}%"
+      "memoryThreshold": "Uso de memória {{ .Percent }}% excede o limite de {{ .Threshold }}%",
+      "eventChinaBlocked": "{{ .Line }} ({{ .Address }}) cannot be reached from China: {{ .Reason }} ({{ .Probes }} probes)",
+      "eventChinaOk": "{{ .Line }} ({{ .Address }}) is reachable from China again",
+      "chinaReason_port": "the port is blocked, the IP still answers; move the inbound to another port",
+      "chinaReason_ip": "the IP is blocked; the server needs a new IP",
+      "chinaReason_blocked": "no probe gets through"
     },
     "buttons": {
       "closeKeyboard": "❌ Fechar teclado",

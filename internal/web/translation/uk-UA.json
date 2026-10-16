@@ -941,7 +941,8 @@
           "ping": "Ping from China",
           "tcping": "TCPing port {port} from China",
           "udpOnly": "UDP protocol: TCPing does not apply; use Ping and a real client.",
-          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port."
+          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port.",
+          "probes": "China probes: {state} ({ok}/{total} get through)"
         }
       }
     },
@@ -1416,8 +1417,8 @@
         "saved": "Вартість сервера збережено"
       },
       "probes": {
-        "title": "ISP-проби",
-        "intro": "Встановіть пробу на роутер або сервер у потрібній мережі (наприклад, домашній роутер у China Telecom). Кожні 5 хвилин вона перевіряє звідти доступність кожної лінії. Якщо приховування непрацюючих ліній увімкнено, лінія, недоступна всім пробам, прибирається з підписок.",
+        "title": "ISP probes (reachability from China)",
+        "intro": "Install a probe on a router or server inside China (for example your home or office router, OpenWrt works). Every 5 minutes it checks from there whether each line on this panel and its nodes can be reached, pings the server to tell a blocked port from a blocked IP, and reports back. With Telegram notifications on (Settings → Telegram → Reachability from China) you get an alert when a line stops working in China.",
         "add": "Додати пробу",
         "line": "Лінія",
         "name": "Назва проби",
@@ -1431,7 +1432,26 @@
         "blocked": "блок",
         "deleteConfirm": "Видалити пробу {name}?",
         "deleted": "Пробу видалено",
-        "installHint": "Виконайте це один раз на роутері або сервері (потрібен curl; OpenWrt підходить). Буде встановлено перевірку кожні 5 хвилин:"
+        "installHint": "Виконайте це один раз на роутері або сервері (потрібен curl; OpenWrt підходить). Буде встановлено перевірку кожні 5 хвилин:",
+        "verdict": "From China",
+        "verdictState": {
+          "ok": "Reachable",
+          "port": "Port blocked",
+          "ip": "IP blocked",
+          "blocked": "Unreachable"
+        },
+        "verdictHint": {
+          "ok": "At least one probe in China gets through.",
+          "port": "No probe connects to the port, but the server answers ping: move the inbound to another port.",
+          "ip": "Neither the port nor ping gets through from any probe: the IP is blocked, the server needs a new IP.",
+          "blocked": "No probe connects; the probes could not ping, so the cause is unknown."
+        },
+        "pingMs": "ping {ms} ms",
+        "pingLost": "ping lost",
+        "proxied": "Via proxy",
+        "proxiedHint": "The router's own traffic goes through OpenClash, so this result says nothing about China. Turn off proxying the router's own traffic in OpenClash, or route these server IPs DIRECT.",
+        "altCommand": "If that address cannot be opened from the router, use the panel address instead:",
+        "openclashHint": "OpenClash routers: the probe must reach the servers directly. If the router's own traffic is proxied, results show \"Via proxy\" and are ignored."
       }
     },
     "settings": {
@@ -2120,7 +2140,10 @@
         "failed": "Помилка операції з ключем",
         "added": "Ключ додано",
         "deleted": "Ключ видалено"
-      }
+      },
+      "eventGroupChina": "Reachability from China (ISP probes)",
+      "eventChinaBlocked": "Unreachable",
+      "eventChinaOk": "Back"
     },
     "xray": {
       "save": "Зберегти",
@@ -3139,7 +3162,12 @@
       "eventNodeDown": "Вузол {{ .Name }} НЕДОСТУПНИЙ",
       "eventNodeUp": "Вузол {{ .Name }} ДОСТУПНИЙ",
       "eventLoginFallback": "Невдала спроба входу з {{ .Source }}",
-      "memoryThreshold": "Використання пам'яті {{ .Percent }}% перевищує порогове значення {{ .Threshold }}%"
+      "memoryThreshold": "Використання пам'яті {{ .Percent }}% перевищує порогове значення {{ .Threshold }}%",
+      "eventChinaBlocked": "{{ .Line }} ({{ .Address }}) cannot be reached from China: {{ .Reason }} ({{ .Probes }} probes)",
+      "eventChinaOk": "{{ .Line }} ({{ .Address }}) is reachable from China again",
+      "chinaReason_port": "the port is blocked, the IP still answers; move the inbound to another port",
+      "chinaReason_ip": "the IP is blocked; the server needs a new IP",
+      "chinaReason_blocked": "no probe gets through"
     },
     "buttons": {
       "closeKeyboard": "❌ Закрити клавіатуру",

@@ -941,7 +941,8 @@
           "ping": "Ping from China",
           "tcping": "TCPing port {port} from China",
           "udpOnly": "UDP protocol: TCPing does not apply; use Ping and a real client.",
-          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port."
+          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port.",
+          "probes": "China probes: {state} ({ok}/{total} get through)"
         }
       }
     },
@@ -1416,8 +1417,8 @@
         "saved": "هزینهٔ سرور ذخیره شد"
       },
       "probes": {
-        "title": "پروب‌های اپراتور",
-        "intro": "روی روتر یا سروری داخل شبکهٔ مورد نظر (مثلاً روتر خانگی روی China Telecom) یک پروب نصب کنید. هر ۵ دقیقه از آنجا دسترسی به هر خط را بررسی می‌کند. با روشن بودن پنهان‌سازی خطوط قطع، خطی که هیچ پروبی به آن نرسد از اشتراک‌ها حذف می‌شود.",
+        "title": "ISP probes (reachability from China)",
+        "intro": "Install a probe on a router or server inside China (for example your home or office router, OpenWrt works). Every 5 minutes it checks from there whether each line on this panel and its nodes can be reached, pings the server to tell a blocked port from a blocked IP, and reports back. With Telegram notifications on (Settings → Telegram → Reachability from China) you get an alert when a line stops working in China.",
         "add": "افزودن پروب",
         "line": "خط",
         "name": "نام پروب",
@@ -1431,7 +1432,26 @@
         "blocked": "مسدود",
         "deleteConfirm": "پروب {name} حذف شود؟",
         "deleted": "پروب حذف شد",
-        "installHint": "این فرمان را یک بار روی روتر یا سرور اجرا کنید (curl لازم است؛ OpenWrt هم کار می‌کند). یک بررسی هر ۵ دقیقه نصب می‌شود:"
+        "installHint": "این فرمان را یک بار روی روتر یا سرور اجرا کنید (curl لازم است؛ OpenWrt هم کار می‌کند). یک بررسی هر ۵ دقیقه نصب می‌شود:",
+        "verdict": "From China",
+        "verdictState": {
+          "ok": "Reachable",
+          "port": "Port blocked",
+          "ip": "IP blocked",
+          "blocked": "Unreachable"
+        },
+        "verdictHint": {
+          "ok": "At least one probe in China gets through.",
+          "port": "No probe connects to the port, but the server answers ping: move the inbound to another port.",
+          "ip": "Neither the port nor ping gets through from any probe: the IP is blocked, the server needs a new IP.",
+          "blocked": "No probe connects; the probes could not ping, so the cause is unknown."
+        },
+        "pingMs": "ping {ms} ms",
+        "pingLost": "ping lost",
+        "proxied": "Via proxy",
+        "proxiedHint": "The router's own traffic goes through OpenClash, so this result says nothing about China. Turn off proxying the router's own traffic in OpenClash, or route these server IPs DIRECT.",
+        "altCommand": "If that address cannot be opened from the router, use the panel address instead:",
+        "openclashHint": "OpenClash routers: the probe must reach the servers directly. If the router's own traffic is proxied, results show \"Via proxy\" and are ignored."
       }
     },
     "settings": {
@@ -2120,7 +2140,10 @@
         "failed": "عملیات کلید عبور ناموفق بود",
         "added": "کلید عبور افزوده شد",
         "deleted": "کلید عبور حذف شد"
-      }
+      },
+      "eventGroupChina": "Reachability from China (ISP probes)",
+      "eventChinaBlocked": "Unreachable",
+      "eventChinaOk": "Back"
     },
     "xray": {
       "save": "ذخیره",
@@ -3139,7 +3162,12 @@
       "eventNodeDown": "نود {{ .Name }} قطع است",
       "eventNodeUp": "نود {{ .Name }} وصل است",
       "eventLoginFallback": "ورود ناموفق از {{ .Source }}",
-      "memoryThreshold": "مصرف حافظه {{ .Percent }}% از حد آستانه {{ .Threshold }}% فراتر رفته است"
+      "memoryThreshold": "مصرف حافظه {{ .Percent }}% از حد آستانه {{ .Threshold }}% فراتر رفته است",
+      "eventChinaBlocked": "{{ .Line }} ({{ .Address }}) cannot be reached from China: {{ .Reason }} ({{ .Probes }} probes)",
+      "eventChinaOk": "{{ .Line }} ({{ .Address }}) is reachable from China again",
+      "chinaReason_port": "the port is blocked, the IP still answers; move the inbound to another port",
+      "chinaReason_ip": "the IP is blocked; the server needs a new IP",
+      "chinaReason_blocked": "no probe gets through"
     },
     "buttons": {
       "closeKeyboard": "❌ بستن کیبورد",

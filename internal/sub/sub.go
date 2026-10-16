@@ -20,6 +20,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/probeapi"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 
 	"github.com/gin-gonic/gin"
@@ -346,6 +347,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	}
 
 	g := engine.Group("/")
+	probeapi.Register(g, func(c *gin.Context) string { return c.ClientIP() })
 
 	s.sub = NewSUBController(g,
 		WithSUBPath(LinksPath),

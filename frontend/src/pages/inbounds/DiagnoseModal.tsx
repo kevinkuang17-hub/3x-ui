@@ -11,6 +11,7 @@ import {
 
 import { HttpUtil } from '@/utils';
 import { chinaCheckLinks } from '@/lib/china-check';
+import type { ChinaVerdict } from '@/pages/nodes/IspProbesCard';
 import type { Finding, Report } from '@/generated/types';
 
 import './DiagnoseModal.css';
@@ -49,6 +50,7 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [fixing, setFixing] = useState<string>('');
+  const [probeVerdicts, setProbeVerdicts] = useState<Record<string, ChinaVerdict>>({});
 
   const run = useCallback(async (only: number[]) => {
     setBusy(true);
@@ -71,6 +73,12 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
     if (!open) return;
     setReports(null);
     void run(ids);
+    // What the ISP probes inside China last saw, when any are installed.
+    void HttpUtil.get<{ verdicts?: Record<string, ChinaVerdict> }>(
+      '/panel/api/probes/matrix',
+      undefined,
+      { silent: true },
+    ).then((msg) => setProbeVerdicts(msg?.success ? (msg.obj?.verdicts ?? {}) : {}));
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [open]);
 
@@ -115,8 +123,20 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
   const renderChinaCheck = (r: Report) => {
     const links = chinaCheckLinks(r.address, r.port, r.protocol);
     if (!links) return null;
+    const verdict = probeVerdicts[String(r.inboundId)];
     return (
       <div className="diag-china">
+        {verdict && (
+          <Tag
+            color={verdict.state === 'ok' ? 'green' : verdict.state === 'port' ? 'orange' : 'red'}
+          >
+            {t('pages.inbounds.diagnose.china.probes', {
+              state: t(`pages.nodes.probes.verdictState.${verdict.state}`),
+              ok: verdict.tcpOk,
+              total: verdict.probes,
+            })}
+          </Tag>
+        )}
         <Typography.Text strong>{t('pages.inbounds.diagnose.china.title')}</Typography.Text>
         <Space wrap size={6}>
           <Button size="small" href={links.ping} target="_blank" rel="noopener noreferrer">

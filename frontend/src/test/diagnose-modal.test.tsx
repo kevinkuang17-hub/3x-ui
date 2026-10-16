@@ -96,3 +96,18 @@ describe('DiagnoseModal China check', () => {
     expect(screen.getByText(/UDP protocol: TCPing does not apply/)).toBeTruthy();
   });
 });
+
+describe('DiagnoseModal with ISP probes', () => {
+  it("shows the China probes' verdict on the inbound it concerns", async () => {
+    vi.mocked(HttpUtil.get).mockResolvedValue(
+      new Msg(true, '', { verdicts: { '7': { state: 'port', probes: 3, tcpOk: 0, pingOk: 3 } } }),
+    );
+    postSpy.mockResolvedValue(new Msg(true, '', [fixed]));
+    renderWithProviders(
+      <MemoryRouter>
+        <DiagnoseModal open ids={[]} onClose={vi.fn()} onChanged={vi.fn()} />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('China probes: Port blocked (0/3 get through)')).toBeTruthy();
+  });
+});

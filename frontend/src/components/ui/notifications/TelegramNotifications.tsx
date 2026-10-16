@@ -1,6 +1,7 @@
 import { InputNumber } from 'antd';
 import {
   CloudServerOutlined,
+  GlobalOutlined,
   ThunderboltOutlined,
   DesktopOutlined,
   DashboardOutlined,
@@ -46,6 +47,14 @@ const GROUPS: NotificationGroupConfig[] = [
     events: [
       { key: 'node.down', label: 'eventNodeDown', settingKey: '' },
       { key: 'node.up', label: 'eventNodeUp', settingKey: '' },
+    ],
+  },
+  {
+    icon: <GlobalOutlined />,
+    title: 'eventGroupChina',
+    events: [
+      { key: 'china.blocked', label: 'eventChinaBlocked', settingKey: '' },
+      { key: 'china.ok', label: 'eventChinaOk', settingKey: '' },
     ],
   },
   {
