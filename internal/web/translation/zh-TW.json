@@ -901,7 +901,7 @@
         "again": "重新檢測",
         "running": "正在檢測端口、防火牆、地址、證書和真實連接……（约 10–60 秒）",
         "summaryBad": "{total} 個入站中有 {count} 個有问题",
-        "summaryGood": "全部 {total} 個入站都正常",
+        "summaryGood": "全部 {total} 個入站從面板伺服器（國外）檢測都正常；國內能不能連，看每個入站下面的「國內情況」",
         "okDelay": "正常 · {delay} ms",
         "bad": "有问题",
         "note": "測試是从本面板所在服務器發起的。如果這里显示正常、但国内用戶仍連不上，通常是 IP 或端口被牆，或運營商限制了 UDP：可以改用 Reality 協議、換端口，或更換服務器 IP。",
@@ -921,11 +921,11 @@
           "firewallBlocked": "防火牆（ufw）拦截了 {proto} {port}",
           "portOpen": "{proto} {port} 正在监听，防火牆已放行",
           "dnsNone": "{address} 无法解析",
-          "reachable": "从外部可以連通 {address}:{port}",
+          "reachable": "從面板伺服器（國外）能連通 {address}:{port}，不代表國內能連",
           "unreachable": "从外部連不上 {address}:{port}（{error}）",
           "certExpired": "證書已于 {date} 過期",
           "certMismatch": "證書不包含 {address}",
-          "e2eOk": "真實客戶端連接正常（{delay} ms）",
+          "e2eOk": "從面板伺服器用真實用戶端連線正常（{delay} ms）",
           "e2eFailed": "真實客戶端連接失敗：{error}",
           "e2eFailedOnly": "真實客戶端連接失敗：{error}",
           "sidecarDown": "負責 AnyTLS / NaiveProxy 的 sing-box 沒有執行：{error}",
@@ -949,12 +949,16 @@
           "sidecarDown": "面板第一次使用時會從 GitHub 下載 sing-box。請確認伺服器能存取 github.com，並且入站已設定憑證檔案；面板日誌裡有 sing-box 的具體報錯。"
         },
         "china": {
-          "title": "國內連通檢測（ITDOG，約 200 個國內節點）：",
           "ping": "國內 Ping",
           "tcping": "國內 TCPing 埠 {port}",
           "udpOnly": "UDP 協定不能用 TCPing 測，看 Ping 結果並用用戶端實測。",
           "hint": "上面的檢測是從面板伺服器（國外）發起的。ITDOG 按鈕是從國內各地測試：全綠 = 國內能連上；Ping 大面積逾時 = IP 被牆；Ping 正常但 TCPing 逾時 = 這個埠被封，換個埠即可。",
-          "probes": "國內探針：{state}（{ok}/{total} 個能連上）"
+          "probes": "國內探針：{state}（{ok}/{total} 個能連上）",
+          "embedHint": "ITDOG 從國內約 200 個檢測點測試，地圖和表格需要幾秒載入。如果下面一片空白，請點右邊在新分頁開啟。",
+          "openTab": "在新分頁開啟",
+          "unknown": "國內情況：未知（還沒有國內探針）",
+          "noResult": "國內情況：探針還沒有這個入站的結果",
+          "addProbe": "新增國內探針"
         }
       }
     },
