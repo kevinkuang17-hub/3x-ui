@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 
 import { HttpUtil } from '@/utils';
+import { chinaCheckLinks } from '@/lib/china-check';
 import type { Finding, Report } from '@/generated/types';
 
 import './DiagnoseModal.css';
@@ -111,6 +112,30 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
     return text === key ? '' : text;
   };
 
+  const renderChinaCheck = (r: Report) => {
+    const links = chinaCheckLinks(r.address, r.port, r.protocol);
+    if (!links) return null;
+    return (
+      <div className="diag-china">
+        <Typography.Text strong>{t('pages.inbounds.diagnose.china.title')}</Typography.Text>
+        <Space wrap size={6}>
+          <Button size="small" href={links.ping} target="_blank" rel="noopener noreferrer">
+            {t('pages.inbounds.diagnose.china.ping')}
+          </Button>
+          {links.tcping ? (
+            <Button size="small" href={links.tcping} target="_blank" rel="noopener noreferrer">
+              {t('pages.inbounds.diagnose.china.tcping', { port: r.port })}
+            </Button>
+          ) : (
+            <Typography.Text type="secondary">
+              {t('pages.inbounds.diagnose.china.udpOnly')}
+            </Typography.Text>
+          )}
+        </Space>
+      </div>
+    );
+  };
+
   const problems = reports?.filter((r) => !r.ok).length ?? 0;
 
   return (
@@ -204,10 +229,14 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
                 </div>
               ))}
             </div>
+            {renderChinaCheck(r)}
           </Card>
         ))}
         <Typography.Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 0 }}>
           {t('pages.inbounds.diagnose.note')}
+        </Typography.Paragraph>
+        <Typography.Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 0 }}>
+          {t('pages.inbounds.diagnose.china.hint')}
         </Typography.Paragraph>
       </Space>
     </Modal>

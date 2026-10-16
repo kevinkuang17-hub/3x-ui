@@ -66,3 +66,33 @@ describe('DiagnoseModal', () => {
     expect(onChanged).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('DiagnoseModal China check', () => {
+  it('links each inbound to an ITDOG test from China, TCP only where the protocol listens on TCP', async () => {
+    const reality = {
+      ...fixed,
+      inboundId: 8,
+      remark: 'US A Reality',
+      protocol: 'vless',
+      port: 8443,
+    };
+    postSpy.mockResolvedValue(new Msg(true, '', [fixed, reality]));
+    renderWithProviders(
+      <MemoryRouter>
+        <DiagnoseModal open ids={[]} onClose={vi.fn()} onChanged={vi.fn()} />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('US A Reality');
+    const pings = screen.getAllByRole('link', { name: 'Ping from China' });
+    expect(pings.map((a) => a.getAttribute('href'))).toEqual([
+      'https://www.itdog.cn/ping/us.example.com',
+      'https://www.itdog.cn/ping/us.example.com',
+    ]);
+    const tcping = screen.getAllByRole('link', { name: /TCPing port/ });
+    expect(tcping.map((a) => a.getAttribute('href'))).toEqual([
+      'https://www.itdog.cn/tcping/us.example.com:8443',
+    ]);
+    expect(screen.getByText(/UDP protocol: TCPing does not apply/)).toBeTruthy();
+  });
+});

@@ -933,6 +933,13 @@
           "e2eFailed": "Fix the problems above first; this usually follows from them.",
           "e2eFailedOnly": "The server answers but refuses the connection: the inbound settings do not match what clients get (e.g. Reality target unreachable, wrong SNI, mismatched obfs password). Edit the inbound or recreate it with the one-click dialog.",
           "sidecarDown": "The panel downloads sing-box from GitHub on first use. Check that this server can reach github.com and that the inbound has a certificate file; the panel log shows sing-box's own message."
+        },
+        "china": {
+          "title": "From China (ITDOG, ~200 probes):",
+          "ping": "Ping from China",
+          "tcping": "TCPing port {port} from China",
+          "udpOnly": "UDP protocol: TCPing does not apply; use Ping and a real client.",
+          "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port."
         }
       }
     },

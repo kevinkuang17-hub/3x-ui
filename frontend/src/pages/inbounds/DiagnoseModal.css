@@ -42,3 +42,13 @@
 .diag-error {
   color: var(--ant-color-error, #ff4d4f);
 }
+
+.diag-china {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--ant-color-border-secondary, #f0f0f0);
+}

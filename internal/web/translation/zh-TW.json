@@ -933,6 +933,13 @@
           "e2eFailed": "先解决上面的问题，這一项通常是它们導致的。",
           "e2eFailedOnly": "服務器有响應但拒绝了連接：入站配置和客戶端拿到的不一致（如 Reality 伪装目标不可达、SNI 不对、混淆密碼不一致）。编辑入站，或用一鍵入站重新創建。",
           "sidecarDown": "面板第一次使用時會從 GitHub 下載 sing-box。請確認伺服器能存取 github.com，並且入站已設定憑證檔案；面板日誌裡有 sing-box 的具體報錯。"
+        },
+        "china": {
+          "title": "國內連通檢測（ITDOG，約 200 個國內節點）：",
+          "ping": "國內 Ping",
+          "tcping": "國內 TCPing 埠 {port}",
+          "udpOnly": "UDP 協定不能用 TCPing 測，看 Ping 結果並用用戶端實測。",
+          "hint": "上面的檢測是從面板伺服器（國外）發起的。ITDOG 按鈕是從國內各地測試：全綠 = 國內能連上；Ping 大面積逾時 = IP 被牆；Ping 正常但 TCPing 逾時 = 這個埠被封，換個埠即可。"
         }
       }
     },
