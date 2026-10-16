@@ -1418,7 +1418,10 @@ func (s *SettingService) SetAutoUpdate(enable bool, hour int, nodes bool) error 
 }
 
 // The shared key routers enroll themselves as ISP probes with; empty until first asked for.
-func (s *SettingService) GetProbeEnrollKey() (string, error) { return s.getString("probeEnrollKey") }
+func (s *SettingService) GetProbeEnrollKey() (string, error) {
+	return s.getString("probeEnrollKey")
+}
+
 func (s *SettingService) SetProbeEnrollKey(key string) error {
 	return s.setString("probeEnrollKey", key)
 }
