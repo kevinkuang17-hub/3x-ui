@@ -1435,7 +1435,7 @@
       "probes": {
         "title": "ISP probes (reachability from China)",
         "intro": "Install a probe on a router or server inside China (for example your home or office router, OpenWrt works). Every 5 minutes it checks from there whether each line on this panel and its nodes can be reached, pings the server to tell a blocked port from a blocked IP, and reports back. With Telegram notifications on (Settings → Telegram → Reachability from China) you get an alert when a line stops working in China.",
-        "add": "Yoklayıcı ekle",
+        "add": "Add manually",
         "line": "Hat",
         "name": "Yoklayıcı adı",
         "namePlaceholder": "ör. ev yönlendiricisi, Şanghay Telecom",
@@ -1467,7 +1467,11 @@
         "proxied": "Via proxy",
         "proxiedHint": "The router's own traffic goes through OpenClash, so this result says nothing about China. Turn off proxying the router's own traffic in OpenClash, or route these server IPs DIRECT.",
         "altCommand": "If that address cannot be opened from the router, use the panel address instead:",
-        "openclashHint": "OpenClash routers: the probe must reach the servers directly. If the router's own traffic is proxied, results show \"Via proxy\" and are ignored."
+        "openclashHint": "OpenClash routers: the probe must reach the servers directly. If the router's own traffic is proxied, results show \"Via proxy\" and are ignored.",
+        "enroll": "One command for all routers",
+        "enrollHint": "Run this same command on every router (OpenWrt terminal). Each router registers itself, names itself after its location and carrier (e.g. \"中国 广东 深圳 电信\"), and starts checking every 5 minutes; running it again on the same router changes nothing.",
+        "enrollReset": "Reset command",
+        "enrollResetConfirm": "The old command will stop adding probes (probes already added keep working). Continue?"
       }
     },
     "settings": {

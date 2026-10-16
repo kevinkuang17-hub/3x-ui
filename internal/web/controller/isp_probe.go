@@ -18,6 +18,8 @@ func NewIspProbeController(g *gin.RouterGroup) *IspProbeController {
 	g.GET("/matrix", a.matrix)
 	g.POST("/add", a.add)
 	g.POST("/del/:id", a.del)
+	g.GET("/enroll", a.enroll)
+	g.POST("/enroll/reset", a.enrollReset)
 	return a
 }
 
@@ -53,6 +55,29 @@ func (a *IspProbeController) del(c *gin.Context) {
 		return
 	}
 	jsonMsg(c, I18nWeb(c, "pages.nodes.probes.deleted"), a.probes.Delete(id))
+}
+
+// enroll returns the one command every router can run to register itself as a probe.
+func (a *IspProbeController) enroll(c *gin.Context) {
+	a.enrollReply(c, false)
+}
+
+// enrollReset replaces the key, so a leaked command stops registering probes.
+func (a *IspProbeController) enrollReset(c *gin.Context) {
+	a.enrollReply(c, true)
+}
+
+func (a *IspProbeController) enrollReply(c *gin.Context, reset bool) {
+	key, err := a.probes.EnrollKey(reset)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	subURL := ""
+	if origin := a.probes.SubOrigin(); origin != "" {
+		subURL = origin + "/probe-enroll/" + key
+	}
+	jsonObj(c, gin.H{"path": basePathOf(c) + "probe-enroll/" + key, "subUrl": subURL}, nil)
 }
 
 // RemoteIP is the caller's address as the panel trusts it, for routes registered elsewhere.

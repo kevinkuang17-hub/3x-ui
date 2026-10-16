@@ -41,8 +41,21 @@ func Register(g *gin.RouterGroup, remoteIP func(*gin.Context) string) {
 		}
 		c.JSON(http.StatusOK, gin.H{"success": true, "obj": gin.H{"stored": n}})
 	})
-	g.GET("/probe/:token/agent.sh", func(c *gin.Context) {
+	g.GET("/probe/:token/agent.sh", serveAgent)
+	// Self-enrollment: every router runs the same command; each gets its own probe token back.
+	g.GET("/probe-enroll/:key/agent.sh", serveAgent)
+	g.POST("/probe-enroll/:key", func(c *gin.Context) {
+		token, err := (&service.IspProbeService{}).Enroll(c.Param("key"), c.PostForm("deviceId"), c.PostForm("name"), remoteIP(c))
 		c.Header("Cache-Control", "no-store")
-		c.Data(http.StatusOK, "text/x-shellscript; charset=utf-8", agentScript)
+		if err != nil {
+			c.String(http.StatusForbidden, err.Error())
+			return
+		}
+		c.String(http.StatusOK, token)
 	})
+}
+
+func serveAgent(c *gin.Context) {
+	c.Header("Cache-Control", "no-store")
+	c.Data(http.StatusOK, "text/x-shellscript; charset=utf-8", agentScript)
 }

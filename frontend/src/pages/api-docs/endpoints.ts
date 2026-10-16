@@ -2685,6 +2685,31 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'GET',
+        path: '/panel/api/probes/enroll',
+        summary:
+          'The shared enrollment path (and subUrl on the subscription server): one command, run on any router, registers that router as a probe: curl -fsSL "<url>/agent.sh" | sh -s -- enroll "<url>".',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/probes/enroll/reset',
+        summary:
+          'Replace the enrollment key; the old command stops registering probes. Probes already registered keep working.',
+      },
+      {
+        method: 'GET',
+        path: '/probe-enroll/:key/agent.sh',
+        summary: 'Public: the probe agent script, for the enrollment command.',
+        params: [{ name: 'key', in: 'path', type: 'string', desc: 'Enrollment key.' }],
+      },
+      {
+        method: 'POST',
+        path: '/probe-enroll/:key',
+        summary:
+          'Public, used by the agent: register the calling router (form fields deviceId, name such as "中国 广东 广州 电信") and return its own probe token as plain text. The same deviceId gets its existing probe back with a new token.',
+        params: [{ name: 'key', in: 'path', type: 'string', desc: 'Enrollment key.' }],
+      },
+      {
+        method: 'GET',
         path: '/probe/:token',
         summary:
           'Public, used by the agent: plain-text targets, one "inboundId host port" per line.',

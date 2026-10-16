@@ -2,6 +2,7 @@
 # ISP probe agent for 3X-UI: tests from this network whether node lines can be reached and
 # reports to the master. POSIX sh, so it runs on OpenWrt routers (busybox) as well as Linux.
 #   install:  curl -fsSL '<probe URL>/agent.sh' | sh -s -- install '<probe URL>'   (served by the master)
+#   enroll:   curl -fsSL '<enroll URL>/agent.sh' | sh -s -- enroll '<enroll URL>'  (one command, any router)
 #   run once: sh /etc/x-ui-probe/probe-agent.sh run
 #   remove:   sh /etc/x-ui-probe/probe-agent.sh uninstall
 set -eu
@@ -50,6 +51,41 @@ install_agent() {
     fi
     echo "probe-agent: installed; checking lines every 5 minutes."
     sh "$SELF" run && echo "probe-agent: first report sent."
+}
+
+# device_id is a stable, anonymous id for this router, so enrolling it twice reuses its probe.
+device_id() {
+    for f in /etc/machine-id /sys/class/net/br-lan/address /sys/class/net/eth0/address; do
+        if [ -s "$f" ]; then
+            md5sum < "$f" | cut -c1-32
+            return
+        fi
+    done
+    (cat /proc/sys/kernel/hostname 2> /dev/null || hostname) | md5sum | cut -c1-32
+}
+
+# location asks a Chinese IP service where this line is, e.g. "中国 广东 广州 电信"; the panel
+# names the probe after it and reads the carrier from it.
+location() {
+    curl -fsS --max-time 8 https://myip.ipip.net 2> /dev/null | sed -n 's/.*来自于：//p' | tr -s ' ' | sed 's/ *$//' | head -n 1
+}
+
+enroll_agent() {
+    url="$1"
+    echo "$url" | grep -Eq '^https?://[^/]+/.*probe-enroll/[0-9a-f]{32}$' || die "that does not look like an enrollment URL: $url"
+    command -v curl > /dev/null 2>&1 || die "curl is required (opkg update && opkg install curl)"
+    if [ -f "$CONF" ]; then
+        echo "probe-agent: this router is already a probe; nothing to do."
+        exit 0
+    fi
+    host=$(cat /proc/sys/kernel/hostname 2> /dev/null || hostname 2> /dev/null || echo router)
+    loc=$(location)
+    name="$host"
+    [ -z "$loc" ] || name="$loc · $host"
+    token=$(curl -fsS --max-time 30 --data-urlencode "deviceId=$(device_id)" --data-urlencode "name=$name" "$url") || die "the panel refused the enrollment (was the key reset?)"
+    echo "$token" | grep -Eq '^[0-9a-f]{40}$' || die "unexpected answer from the panel: $token"
+    echo "probe-agent: registered as \"$name\"."
+    install_agent "${url%%/probe-enroll/*}/probe/$token"
 }
 
 uninstall_agent() {
@@ -171,7 +207,8 @@ EOF
 
 case "${1:-}" in
     install) install_agent "${2:-}" ;;
+    enroll) enroll_agent "${2:-}" ;;
     run) run_agent ;;
     uninstall) uninstall_agent ;;
-    *) die "usage: probe-agent.sh install '<probe URL>' | run | uninstall" ;;
+    *) die "usage: probe-agent.sh install '<probe URL>' | enroll '<enroll URL>' | run | uninstall" ;;
 esac
