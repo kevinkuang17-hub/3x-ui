@@ -2652,13 +2652,14 @@ export const sections: readonly Section[] = [
       {
         method: 'GET',
         path: '/panel/api/probes/matrix',
-        summary: 'Probes, the lines they test, and each probe’s latest result per line.',
+        summary:
+          'Probes, the lines they test (this panel’s and its nodes’), each probe’s latest result per line (TCP connect, ping, whether a local proxy answered) and the verdict per line: ok, port (port blocked), ip (IP blocked) or blocked.',
       },
       {
         method: 'POST',
         path: '/panel/api/probes/add',
         summary:
-          'Register a probe. Returns its path (shown once): install with curl -fsSL "<origin><path>/agent.sh" | sh -s -- install "<origin><path>".',
+          'Register a probe. Returns its path (shown once) and subUrl, the same probe on the subscription server when its address is known: install with curl -fsSL "<url>/agent.sh" | sh -s -- install "<url>".',
         body: '{\n  "name": "Home router",\n  "isp": "telecom"\n}',
       },
       {

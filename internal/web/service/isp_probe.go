@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,10 +31,14 @@ type IspProbeService struct{}
 type ProbeTarget struct {
 	InboundId int    `json:"inboundId"`
 	Name      string `json:"name"`
-	Node      string `json:"node"`
-	Host      string `json:"host"`
-	Port      int    `json:"port"`
+	// Node is empty for an inbound on this panel's own server.
+	Node string `json:"node"`
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
+
+// probeMasterAddress is where China reaches this panel's own inbounds; tests replace it.
+var probeMasterAddress = cachedPublicIPv4
 
 func hashProbeToken(token string) string {
 	sum := sha256.Sum256([]byte(token))
@@ -57,6 +63,37 @@ func (s *IspProbeService) Add(name, isp string) (*model.IspProbe, string, error)
 	return p, token, nil
 }
 
+// SubProbeURL is the probe URL on the subscription server ("" when its address is unknown): from
+// inside China the panel domain may be blocked while the subscription domain still answers.
+func (s *IspProbeService) SubProbeURL(token string) string {
+	settings := SettingService{}
+	if enabled, _ := settings.GetSubEnable(); !enabled {
+		return ""
+	}
+	origin := ""
+	if uri, _ := settings.GetSubURI(); uri != "" {
+		if u, err := url.Parse(uri); err == nil && u.Scheme != "" && u.Host != "" {
+			origin = u.Scheme + "://" + u.Host
+		}
+	} else if domain, _ := settings.GetSubDomain(); domain != "" {
+		cert, _ := settings.GetSubCertFile()
+		key, _ := settings.GetSubKeyFile()
+		port, _ := settings.GetSubPort()
+		scheme := "http"
+		if cert != "" && key != "" {
+			scheme = "https"
+		}
+		origin = scheme + "://" + domain
+		if !(scheme == "https" && port == 443) && !(scheme == "http" && port == 80) {
+			origin += ":" + strconv.Itoa(port)
+		}
+	}
+	if origin == "" {
+		return ""
+	}
+	return origin + "/probe/" + token
+}
+
 func (s *IspProbeService) Delete(id int) error {
 	db := database.GetDB()
 	db.Where("probe_id = ?", id).Delete(&model.IspProbeResult{})
@@ -71,8 +108,8 @@ func (s *IspProbeService) byToken(token string) (*model.IspProbe, error) {
 	return &p, nil
 }
 
-// Targets lists the TCP lines a probe should test: node-hosted inbounds reachable at the
-// address subscriptions advertise.
+// Targets lists the TCP lines a probe should test: every enabled inbound, on a node or on this
+// server, at the address subscriptions advertise.
 func (s *IspProbeService) Targets() ([]ProbeTarget, error) {
 	db := database.GetDB()
 	var nodes []model.Node
@@ -84,7 +121,7 @@ func (s *IspProbeService) Targets() ([]ProbeTarget, error) {
 		byID[nodes[i].Id] = &nodes[i]
 	}
 	var inbounds []*model.Inbound
-	if err := db.Where("enable = ? AND node_id IS NOT NULL", true).Order("id asc").Find(&inbounds).Error; err != nil {
+	if err := db.Where("enable = ?", true).Order("id asc").Find(&inbounds).Error; err != nil {
 		return nil, err
 	}
 	// Lines fronted by managed hosts (CDN, relays) are not reached at the node's own address.
@@ -96,11 +133,23 @@ func (s *IspProbeService) Targets() ([]ProbeTarget, error) {
 	for _, id := range hosted {
 		skip[id] = true
 	}
+	var master *model.Node
 	out := make([]ProbeTarget, 0, len(inbounds))
 	for _, ib := range inbounds {
-		node := byID[*ib.NodeID]
-		if node == nil || skip[ib.Id] || linehealth.IsUDP(ib) || ib.Port <= 0 {
+		if skip[ib.Id] || linehealth.IsUDP(ib) || ib.Port <= 0 {
 			continue
+		}
+		node, nodeName := (*model.Node)(nil), ""
+		if ib.NodeID != nil {
+			if node = byID[*ib.NodeID]; node == nil {
+				continue
+			}
+			nodeName = node.Name
+		} else {
+			if master == nil {
+				master = &model.Node{Address: probeMasterAddress()}
+			}
+			node = master
 		}
 		host := linehealth.ProbeHost(ib, node)
 		if host == "" {
@@ -110,7 +159,7 @@ func (s *IspProbeService) Targets() ([]ProbeTarget, error) {
 		if name == "" {
 			name = ib.Tag
 		}
-		out = append(out, ProbeTarget{InboundId: ib.Id, Name: name, Node: node.Name, Host: host, Port: ib.Port})
+		out = append(out, ProbeTarget{InboundId: ib.Id, Name: name, Node: nodeName, Host: host, Port: ib.Port})
 	}
 	return out, nil
 }
@@ -138,6 +187,9 @@ type ProbeReportItem struct {
 	InboundId int  `json:"inboundId"`
 	Ok        bool `json:"ok"`
 	LatencyMs int  `json:"latencyMs"`
+	// PingMs: -1 lost, 0 not measured (older agents, no ping tool).
+	PingMs  int  `json:"pingMs"`
+	Proxied bool `json:"proxied"`
 }
 
 // Report stores the agent's latest results, ignoring inbounds it was not asked to test.
@@ -167,7 +219,14 @@ func (s *IspProbeService) Report(token, remoteIP string, items []ProbeReportItem
 		if !it.Ok || lat < 0 {
 			lat = 0
 		}
-		rows = append(rows, model.IspProbeResult{ProbeId: p.Id, InboundId: it.InboundId, Ok: it.Ok, LatencyMs: lat, CheckedAt: now})
+		ping := it.PingMs
+		if ping < -1 {
+			ping = -1
+		}
+		rows = append(rows, model.IspProbeResult{
+			ProbeId: p.Id, InboundId: it.InboundId, Ok: it.Ok, LatencyMs: lat, CheckedAt: now,
+			PingMs: ping, Proxied: it.Proxied,
+		})
 	}
 	db := database.GetDB()
 	db.Model(&model.IspProbe{}).Where("id = ?", p.Id).Updates(map[string]any{"last_seen": now, "last_ip": remoteIP})
@@ -176,7 +235,7 @@ func (s *IspProbeService) Report(token, remoteIP string, items []ProbeReportItem
 	}
 	err = db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "probe_id"}, {Name: "inbound_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"ok", "latency_ms", "checked_at"}),
+		DoUpdates: clause.AssignmentColumns([]string{"ok", "latency_ms", "checked_at", "ping_ms", "proxied"}),
 	}).Create(&rows).Error
 	return len(rows), err
 }
@@ -185,6 +244,8 @@ type ProbeMatrix struct {
 	Probes  []model.IspProbe       `json:"probes"`
 	Targets []ProbeTarget          `json:"targets"`
 	Results []model.IspProbeResult `json:"results"`
+	// Verdicts maps an inbound id to what the fresh results say about it from inside China.
+	Verdicts map[int]ChinaVerdict `json:"verdicts"`
 }
 
 func (s *IspProbeService) Matrix() (*ProbeMatrix, error) {
@@ -201,16 +262,27 @@ func (s *IspProbeService) Matrix() (*ProbeMatrix, error) {
 	if err := db.Find(&m.Results).Error; err != nil {
 		return nil, err
 	}
+	m.Verdicts = ChinaVerdicts(time.Now())
 	return m, nil
 }
 
-// BlockedFromProbes returns inbounds that every fresh probe (at least two) failed to reach:
-// the line is up but blocked for users, so line health treats it as down. A probe failing most
-// of its lines is more likely broken itself (no network, no TCP tool), so it is ignored.
-func BlockedFromProbes(now time.Time) map[int]bool {
+// ChinaVerdict sums up one line from the fresh, trustworthy probe results.
+type ChinaVerdict struct {
+	// State: ok (some probe gets through), port (TCP fails everywhere but the host answers
+	// ping: the port is blocked), ip (nothing gets through: the IP is blocked) or blocked
+	// (TCP fails everywhere, no ping to tell why).
+	State  string `json:"state"`
+	Probes int    `json:"probes"`
+	TcpOk  int    `json:"tcpOk"`
+	PingOk int    `json:"pingOk"`
+}
+
+// freshResults drops stale results, results a local proxy answered, and every result of a probe
+// that fails most of its lines without any ping answer: it is more likely broken itself.
+func freshResults(now time.Time) []model.IspProbeResult {
 	var rows []model.IspProbeResult
-	database.GetDB().Where("checked_at >= ?", now.Add(-ProbeFresh).Unix()).Find(&rows)
-	type tally struct{ total, failed int }
+	database.GetDB().Where("checked_at >= ? AND proxied = ?", now.Add(-ProbeFresh).Unix(), false).Find(&rows)
+	type tally struct{ total, failed, pinged int }
 	perProbe := map[int]*tally{}
 	for _, r := range rows {
 		t := perProbe[r.ProbeId]
@@ -222,25 +294,67 @@ func BlockedFromProbes(now time.Time) map[int]bool {
 		if !r.Ok {
 			t.failed++
 		}
+		if r.PingMs > 0 {
+			t.pinged++
+		}
 	}
-	counts := map[int]*tally{}
+	kept := rows[:0]
 	for _, r := range rows {
-		if p := perProbe[r.ProbeId]; p.total >= probeSanityMin && p.failed*2 > p.total {
+		// A probe that gets ping answers has a network, so its TCP failures are real blocks.
+		if p := perProbe[r.ProbeId]; p.total >= probeSanityMin && p.failed*2 > p.total && p.pinged == 0 {
 			continue
 		}
-		t := counts[r.InboundId]
-		if t == nil {
-			t = &tally{}
-			counts[r.InboundId] = t
+		kept = append(kept, r)
+	}
+	return kept
+}
+
+// ChinaVerdicts judges every line at least two fresh probes checked.
+func ChinaVerdicts(now time.Time) map[int]ChinaVerdict {
+	byLine := map[int]*ChinaVerdict{}
+	pinged := map[int]int{}
+	for _, r := range freshResults(now) {
+		v := byLine[r.InboundId]
+		if v == nil {
+			v = &ChinaVerdict{}
+			byLine[r.InboundId] = v
 		}
-		t.total++
-		if !r.Ok {
-			t.failed++
+		v.Probes++
+		if r.Ok {
+			v.TcpOk++
+		}
+		if r.PingMs != 0 {
+			pinged[r.InboundId]++
+			if r.PingMs > 0 {
+				v.PingOk++
+			}
 		}
 	}
+	out := make(map[int]ChinaVerdict, len(byLine))
+	for id, v := range byLine {
+		switch {
+		case v.TcpOk > 0:
+			v.State = "ok"
+		case v.Probes < 2:
+			continue
+		case v.PingOk > 0:
+			v.State = "port"
+		case pinged[id] > 0:
+			v.State = "ip"
+		default:
+			v.State = "blocked"
+		}
+		out[id] = *v
+	}
+	return out
+}
+
+// BlockedFromProbes returns inbounds that every fresh probe (at least two) failed to reach:
+// the line is up but blocked for users, so line health treats it as down.
+func BlockedFromProbes(now time.Time) map[int]bool {
 	out := map[int]bool{}
-	for id, t := range counts {
-		if t.total >= 2 && t.failed == t.total {
+	for id, v := range ChinaVerdicts(now) {
+		if v.State != "ok" {
 			out[id] = true
 		}
 	}

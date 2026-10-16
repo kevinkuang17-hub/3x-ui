@@ -23,6 +23,10 @@ const (
 	EventLineDown EventType = "line.down"
 	EventLineUp   EventType = "line.up"
 
+	// ISP probes inside China can no longer (or can again) reach a line
+	EventChinaBlocked EventType = "china.blocked"
+	EventChinaOk      EventType = "china.ok"
+
 	// A node's server is due for renewal soon (VPS cost tracking)
 	EventVpsRenew EventType = "vps.renew"
 
@@ -105,4 +109,15 @@ type VpsRenewData struct {
 	Monthly  float64 `json:"monthly"`
 	Currency string  `json:"currency"`
 	RenewAt  int64   `json:"renewAt"`
+}
+
+// ChinaLineData describes a line as the probes inside China see it.
+type ChinaLineData struct {
+	InboundId int
+	Node      string // empty for the panel's own server
+	Host      string
+	Port      int
+	// State is the probes' verdict: ok, port (port blocked), ip (IP blocked) or blocked.
+	State  string
+	Probes int
 }

@@ -111,6 +111,23 @@ func (t *Tgbot) formatEventMessage(e eventbus.Event) string {
 		}
 		return msg
 
+	case eventbus.EventChinaBlocked, eventbus.EventChinaOk:
+		data, ok := e.Data.(*eventbus.ChinaLineData)
+		if !ok {
+			return ""
+		}
+		line := e.Source
+		if data.Node != "" {
+			line = data.Node + " · " + line
+		}
+		where := fmt.Sprintf("%s:%d", data.Host, data.Port)
+		if e.Type == eventbus.EventChinaOk {
+			return header + "🟢 " + t.I18nBot("tgbot.messages.eventChinaOk", "Line=="+line, "Address=="+where)
+		}
+		reason := t.I18nBot("tgbot.messages.chinaReason_" + data.State)
+		return header + "🚫 " + t.I18nBot("tgbot.messages.eventChinaBlocked",
+			"Line=="+line, "Address=="+where, "Reason=="+reason, "Probes=="+strconv.Itoa(data.Probes))
+
 	case eventbus.EventCPUHigh:
 		if data, ok := e.Data.(*eventbus.SystemMetricData); ok {
 			tgCpu, err := t.settingService.GetTgCpu()

@@ -15674,7 +15674,7 @@
         "tags": [
           "ISP probes"
         ],
-        "summary": "Probes, the lines they test, and each probe’s latest result per line.",
+        "summary": "Probes, the lines they test (this panel’s and its nodes’), each probe’s latest result per line (TCP connect, ping, whether a local proxy answered) and the verdict per line: ok, port (port blocked), ip (IP blocked) or blocked.",
         "operationId": "get_panel_api_probes_matrix",
         "responses": {
           "200": {
@@ -15704,7 +15704,7 @@
         "tags": [
           "ISP probes"
         ],
-        "summary": "Register a probe. Returns its path (shown once): install with curl -fsSL \"<origin><path>/agent.sh\" | sh -s -- install \"<origin><path>\".",
+        "summary": "Register a probe. Returns its path (shown once) and subUrl, the same probe on the subscription server when its address is known: install with curl -fsSL \"<url>/agent.sh\" | sh -s -- install \"<url>\".",
         "operationId": "post_panel_api_probes_add",
         "requestBody": {
           "required": true,

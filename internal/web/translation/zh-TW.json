@@ -941,7 +941,8 @@
           "ping": "國內 Ping",
           "tcping": "國內 TCPing 埠 {port}",
           "udpOnly": "UDP 協定不能用 TCPing 測，看 Ping 結果並用用戶端實測。",
-          "hint": "上面的檢測是從面板伺服器（國外）發起的。ITDOG 按鈕是從國內各地測試：全綠 = 國內能連上；Ping 大面積逾時 = IP 被牆；Ping 正常但 TCPing 逾時 = 這個埠被封，換個埠即可。"
+          "hint": "上面的檢測是從面板伺服器（國外）發起的。ITDOG 按鈕是從國內各地測試：全綠 = 國內能連上；Ping 大面積逾時 = IP 被牆；Ping 正常但 TCPing 逾時 = 這個埠被封，換個埠即可。",
+          "probes": "國內探針：{state}（{ok}/{total} 個能連上）"
         }
       }
     },
@@ -1416,8 +1417,8 @@
         "saved": "伺服器費用已儲存"
       },
       "probes": {
-        "title": "電信商探針",
-        "intro": "在你在意的網路裡的路由器或伺服器上裝一個探針（例如中華電信寬頻的家用路由器），它每 5 分鐘從那裡檢測一次各節點線路通不通。開啟「自動隱藏不通的線路」後，所有探針都連不上的線路會從訂閱移除。",
+        "title": "國內探針（國內連通檢測）",
+        "intro": "在國內的路由器或伺服器上裝一個探針（比如家裡或公司的 OpenWrt 路由器）。它每 5 分鐘從那裡檢測一次本機和各節點的每條線路通不通，並 Ping 伺服器來區分「埠被封」還是「IP 被牆」。在 設定 → Telegram 裡勾選「國內連通」後，線路在國內連不上時會自動推送提醒。",
         "add": "新增探針",
         "line": "線路",
         "name": "探針名稱",
@@ -1431,7 +1432,26 @@
         "blocked": "不通",
         "deleteConfirm": "刪除探針 {name}？",
         "deleted": "探針已刪除",
-        "installHint": "在路由器或伺服器上執行一次這條指令（需要 curl，OpenWrt 也可以），會裝好每 5 分鐘一次的定時檢測："
+        "installHint": "在路由器或伺服器上執行一次這條指令（需要 curl，OpenWrt 也可以），會裝好每 5 分鐘一次的定時檢測：",
+        "verdict": "國內結論",
+        "verdictState": {
+          "ok": "正常",
+          "port": "埠被封",
+          "ip": "IP 被牆",
+          "blocked": "連不上"
+        },
+        "verdictHint": {
+          "ok": "至少有一個國內探針能連上。",
+          "port": "所有探針都連不上這個埠，但伺服器能 Ping 通：換個埠即可。",
+          "ip": "所有探針埠和 Ping 都不通：IP 被牆，需要更換伺服器 IP。",
+          "blocked": "所有探針都連不上；探針沒法 Ping，原因不確定。"
+        },
+        "pingMs": "Ping {ms} ms",
+        "pingLost": "Ping 不通",
+        "proxied": "走了代理",
+        "proxiedHint": "這台路由器自身的流量走了 OpenClash 代理，結果不代表國內情況。請在 OpenClash 裡關閉「路由本機代理」，或把這些伺服器 IP 設為直連。",
+        "altCommand": "如果路由器打不開上面的地址，改用面板地址：",
+        "openclashHint": "裝了 OpenClash 的路由器：探針要直連伺服器才準確。如果路由器自身流量走了代理，結果會顯示「走了代理」並被忽略。"
       }
     },
     "settings": {
@@ -2120,7 +2140,10 @@
         "failed": "密碼金鑰操作失敗",
         "added": "密碼金鑰已新增",
         "deleted": "密碼金鑰已刪除"
-      }
+      },
+      "eventGroupChina": "國內連通（國內探針）",
+      "eventChinaBlocked": "連不上",
+      "eventChinaOk": "恢復"
     },
     "xray": {
       "save": "儲存",
@@ -3139,7 +3162,12 @@
       "eventNodeDown": "節點 {{ .Name }} 已離線",
       "eventNodeUp": "節點 {{ .Name }} 已上線",
       "eventLoginFallback": "來自 {{ .Source }} 的登入失敗",
-      "memoryThreshold": "記憶體使用率 {{ .Percent }}% 超過閾值 {{ .Threshold }}%"
+      "memoryThreshold": "記憶體使用率 {{ .Percent }}% 超過閾值 {{ .Threshold }}%",
+      "eventChinaBlocked": "{{ .Line }}（{{ .Address }}）國內連不上：{{ .Reason }}（{{ .Probes }} 個探針確認）",
+      "eventChinaOk": "{{ .Line }}（{{ .Address }}）國內已恢復連通",
+      "chinaReason_port": "埠被封（IP 還通），換個埠即可",
+      "chinaReason_ip": "IP 被牆，需要更換伺服器 IP",
+      "chinaReason_blocked": "所有探針都連不上"
     },
     "buttons": {
       "closeKeyboard": "❌ 關閉鍵盤",

@@ -40,12 +40,28 @@ interface Result {
   ok: boolean;
   latencyMs: number;
   checkedAt: number;
+  pingMs: number;
+  proxied: boolean;
+}
+export interface ChinaVerdict {
+  state: 'ok' | 'port' | 'ip' | 'blocked';
+  probes: number;
+  tcpOk: number;
+  pingOk: number;
 }
 interface Matrix {
   probes: Probe[];
   targets: Target[];
   results: Result[];
+  verdicts?: Record<string, ChinaVerdict>;
 }
+
+const VERDICT_COLOR: Record<ChinaVerdict['state'], string> = {
+  ok: 'green',
+  port: 'orange',
+  ip: 'red',
+  blocked: 'red',
+};
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
 const FRESH_SECONDS = 15 * 60;
@@ -57,13 +73,15 @@ export default function IspProbesCard() {
   const [name, setName] = useState('');
   const [isp, setIsp] = useState('telecom');
   const [command, setCommand] = useState('');
+  const [altCommand, setAltCommand] = useState('');
   const { data, refetch, isFetching } = useQuery({
     queryKey: ['probes', 'matrix'],
     queryFn: async () => {
       const msg = await HttpUtil.get<Matrix>('/panel/api/probes/matrix', undefined, {
         silent: true,
       });
-      const base = msg?.success && msg.obj ? msg.obj : { probes: [], targets: [], results: [] };
+      const base =
+        msg?.success && msg.obj ? msg.obj : { probes: [], targets: [], results: [], verdicts: {} };
       return { ...base, fetchedAt: Date.now() / 1000 };
     },
     refetchInterval: 60_000,
@@ -74,16 +92,20 @@ export default function IspProbesCard() {
     (data?.results ?? []).map((r) => [`${r.probeId}:${r.inboundId}`, r] as const),
   );
   const now = data?.fetchedAt ?? 0;
+  const verdicts = data?.verdicts ?? {};
 
   async function add() {
-    const msg = await HttpUtil.post<{ path: string }>(
+    const msg = await HttpUtil.post<{ path: string; subUrl?: string }>(
       '/panel/api/probes/add',
       { name, isp },
       { ...JSON_HEADERS, silentSuccess: true },
     );
     if (msg?.success && msg.obj) {
-      const url = `${window.location.origin}${msg.obj.path}`;
-      setCommand(`curl -fsSL '${url}/agent.sh' | sh -s -- install '${url}'`);
+      const panelUrl = `${window.location.origin}${msg.obj.path}`;
+      const install = (url: string) => `curl -fsSL '${url}/agent.sh' | sh -s -- install '${url}'`;
+      // The subscription domain usually stays reachable from China when the panel domain does not.
+      setCommand(install(msg.obj.subUrl || panelUrl));
+      setAltCommand(msg.obj.subUrl ? install(panelUrl) : '');
       void refetch();
     }
   }
@@ -96,10 +118,25 @@ export default function IspProbesCard() {
       render: (_v, row) => (
         <Tooltip title={`${row.host}:${row.port}`}>
           <span>
-            {row.node} · {row.name}
+            {row.node || t('pages.inbounds.localPanel')} · {row.name}
           </span>
         </Tooltip>
       ),
+    },
+    {
+      title: t('pages.nodes.probes.verdict'),
+      key: 'verdict',
+      render: (_v, row) => {
+        const v = verdicts[String(row.inboundId)];
+        if (!v) return <Tag>{t('pages.nodes.probes.noData')}</Tag>;
+        return (
+          <Tooltip title={t(`pages.nodes.probes.verdictHint.${v.state}`)}>
+            <Tag color={VERDICT_COLOR[v.state]}>
+              {t(`pages.nodes.probes.verdictState.${v.state}`)}
+            </Tag>
+          </Tooltip>
+        );
+      },
     },
     ...probes.map((p) => ({
       title: (
@@ -128,10 +165,31 @@ export default function IspProbesCard() {
         const r = results.get(`${p.id}:${row.inboundId}`);
         if (!r || now - r.checkedAt > FRESH_SECONDS)
           return <Tag>{t('pages.nodes.probes.noData')}</Tag>;
-        return r.ok ? (
-          <Tag color="green">{r.latencyMs} ms</Tag>
-        ) : (
-          <Tag color="red">{t('pages.nodes.probes.blocked')}</Tag>
+        if (r.proxied)
+          return (
+            <Tooltip title={t('pages.nodes.probes.proxiedHint')}>
+              <Tag color="gold">{t('pages.nodes.probes.proxied')}</Tag>
+            </Tooltip>
+          );
+        const ping =
+          r.pingMs > 0
+            ? t('pages.nodes.probes.pingMs', { ms: r.pingMs })
+            : r.pingMs < 0
+              ? t('pages.nodes.probes.pingLost')
+              : '';
+        return (
+          <Space size={2} direction="vertical">
+            {r.ok ? (
+              <Tag color="green">{r.latencyMs} ms</Tag>
+            ) : (
+              <Tag color="red">{t('pages.nodes.probes.blocked')}</Tag>
+            )}
+            {ping && (
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {ping}
+              </Typography.Text>
+            )}
+          </Space>
         );
       },
     })),
@@ -200,6 +258,23 @@ export default function IspProbesCard() {
               style={{ wordBreak: 'break-all' }}
             >
               {command}
+            </Typography.Paragraph>
+            {altCommand && (
+              <>
+                <Typography.Paragraph type="secondary">
+                  {t('pages.nodes.probes.altCommand')}
+                </Typography.Paragraph>
+                <Typography.Paragraph
+                  code
+                  copyable={{ text: altCommand }}
+                  style={{ wordBreak: 'break-all' }}
+                >
+                  {altCommand}
+                </Typography.Paragraph>
+              </>
+            )}
+            <Typography.Paragraph type="secondary">
+              {t('pages.nodes.probes.openclashHint')}
             </Typography.Paragraph>
           </>
         ) : (

@@ -21,6 +21,10 @@ type IspProbeResult struct {
 	Ok        bool  `json:"ok"`
 	LatencyMs int   `json:"latencyMs"`
 	CheckedAt int64 `json:"checkedAt"`
+	// PingMs is the ICMP round trip to the line's host: -1 lost, 0 not measured.
+	PingMs int `json:"pingMs" gorm:"default:0"`
+	// Proxied: the probe's own traffic went through a local proxy (OpenClash), so it proves nothing.
+	Proxied bool `json:"proxied" gorm:"default:false"`
 }
 
 func (IspProbeResult) TableName() string { return "isp_probe_results" }

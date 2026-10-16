@@ -34,6 +34,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/probeapi"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/crm"
@@ -273,9 +274,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g.POST("/node-join/:token/prepare", controller.NodeJoinPrepare)
 	g.POST("/node-join/:token/finish", controller.NodeJoinFinish)
 	g.POST("/node-ip/:key", controller.NodeReportIP)
-	g.GET("/probe/:token", controller.ProbeTargets)
-	g.POST("/probe/:token", controller.ProbeReport)
-	g.GET("/probe/:token/agent.sh", controller.ProbeAgent)
+	probeapi.Register(g, controller.RemoteIP)
 	g.POST("/passkey/login/available", middleware.CSRFMiddleware(), controller.PasskeyLoginAvailable)
 	g.POST("/passkey/login/begin", middleware.CSRFMiddleware(), controller.PasskeyLoginBegin)
 	g.POST("/passkey/login/finish", middleware.CSRFMiddleware(), controller.PasskeyLoginFinish)
@@ -404,6 +403,9 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 	_, _ = s.cron.AddJob(cadenceOutboundSub, job.NewOutboundSubscriptionJob())
 
 	_, _ = s.cron.AddJob(cadenceReapOrphans, job.NewReapSyncOrphansJob())
+
+	// Alert when the ISP probes inside China stop (or start again) reaching a line.
+	_, _ = s.cron.AddJob(cadenceLineHealth, job.NewChinaWatchJob())
 
 	// Hide node-hosted lines that stop answering from subscriptions until they recover.
 	_, _ = s.cron.AddJob(cadenceLineHealth, job.NewLineHealthJob())
