@@ -21,15 +21,21 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      # GITHUB_TOKEN may not push changes to .github/workflows; an optional SYNC_TOKEN secret
+      # (a token with the "workflow" scope) lets official workflow edits through as well.
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
       - name: 合并官方最新版本
         id: merge
         env:
           GH_TOKEN: ${{ github.token }}
+          HAS_SYNC_TOKEN: ${{ secrets.SYNC_TOKEN != '' }}
         run: |
           set -e
           trap 'echo "::error::同步失败：$BASH_COMMAND"' ERR
+          BEFORE=$(git rev-parse HEAD)
           git config user.name "sync-bot"
           git config user.email "sync-bot@users.noreply.github.com"
           # Locale JSON is merged key by key (.gitattributes), so both sides adding strings never conflicts.
@@ -68,6 +74,14 @@ jobs:
               git commit --no-edit
             fi
             echo "overridden=1" >> "$GITHUB_OUTPUT"
+          fi
+          # 官方改了 .github/workflows 而又没有 SYNC_TOKEN 时推送会被 GitHub 拒绝：先保留本仓库的编译脚本照常发布，
+          # 把官方的改动记进 Issue，人工合并。
+          if [ "$HAS_SYNC_TOKEN" != "true" ] && [ -n "$(git diff --name-only "$BEFORE" HEAD -- .github/workflows)" ]; then
+            git diff "$BEFORE" HEAD -- .github/workflows > "$RUNNER_TEMP/workflows.diff"
+            git checkout "$BEFORE" -- .github/workflows
+            git commit -q -m "sync: 暂时保留本仓库的 .github/workflows（官方改动见 Issue）"
+            echo "workflows=1" >> "$GITHUB_OUTPUT"
           fi
           TAG="$UP-k1"
           echo "$TAG" > .github/release-tag
@@ -111,6 +125,16 @@ jobs:
           BODY=$(printf '同步官方 %s 时，下面这些文件两边改了同一段代码，已按规则以官方代码为准，编译检查已通过并已发布。\n\n这些文件里本仓库的修改可能被官方版本替换，相关功能请留意：\n%s\n\n运行记录：%s/%s/actions/runs/%s' "$UP" "$FILES" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
           gh label create sync-overridden --color FBCA04 --description "同步时以官方代码覆盖了冲突" -R "$GITHUB_REPOSITORY" 2>/dev/null || true
           gh issue create -R "$GITHUB_REPOSITORY" --label sync-overridden --title "同步官方 $UP：冲突处已采用官方代码" --body "$BODY"
+      - name: 记录官方对编译脚本的改动
+        if: success() && steps.merge.outputs.workflows == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          UP=$(cat "$RUNNER_TEMP/upstream-tag.txt")
+          DIFF=$(head -c 6000 "$RUNNER_TEMP/workflows.diff")
+          BODY=$(printf '官方 %s 修改了 .github/workflows，自动同步没有权限推送这些文件，所以本次发布沿用本仓库原来的编译脚本（版本已正常发布）。\n\n请人工合并下面的改动，或在仓库 Secrets 里添加带 workflow 权限的 SYNC_TOKEN，以后就会自动合并。\n\n```diff\n%s\n```' "$UP" "$DIFF")
+          gh label create sync-workflows --color FBCA04 --description "官方改了编译脚本，需人工合并" -R "$GITHUB_REPOSITORY" 2>/dev/null || true
+          gh issue create -R "$GITHUB_REPOSITORY" --label sync-workflows --title "同步官方 $UP：编译脚本的改动需要人工合并" --body "$BODY" || true
       # A failed sync must not go unnoticed: one open issue (GitHub emails the owner) until a sync succeeds.
       - name: 同步失败时开 Issue 通知
         if: failure()
