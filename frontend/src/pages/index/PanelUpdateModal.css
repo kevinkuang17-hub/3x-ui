@@ -24,3 +24,8 @@
   gap: 8px;
   margin-top: 12px;
 }
+
+.auto-update-desc {
+  font-size: 12px;
+  margin: 4px 12px 8px !important;
+}

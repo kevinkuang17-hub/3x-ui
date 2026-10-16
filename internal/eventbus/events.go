@@ -27,6 +27,9 @@ const (
 	EventChinaBlocked EventType = "china.blocked"
 	EventChinaOk      EventType = "china.ok"
 
+	// Unattended panel self-update started, finished or was rolled back
+	EventPanelUpdate EventType = "panel.update"
+
 	// A node's server is due for renewal soon (VPS cost tracking)
 	EventVpsRenew EventType = "vps.renew"
 
@@ -120,4 +123,12 @@ type ChinaLineData struct {
 	// State is the probes' verdict: ok, port (port blocked), ip (IP blocked) or blocked.
 	State  string
 	Probes int
+}
+
+// PanelUpdateData describes one unattended self-update.
+type PanelUpdateData struct {
+	From  string
+	To    string
+	State string // started, success or failed (the old version was put back)
+	Nodes int    // nodes told to update along with this panel
 }

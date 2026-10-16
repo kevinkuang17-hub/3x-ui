@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Modal, Switch, Tag } from 'antd';
+import { Alert, Button, Checkbox, Modal, Select, Switch, Tag, Typography } from 'antd';
 import { CloudDownloadOutlined } from '@ant-design/icons';
 
 import { HttpUtil, PromiseUtil } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
-import type { PanelUpdateStatus } from '@/generated/types';
+import type { AutoUpdateConfig, PanelUpdateStatus } from '@/generated/types';
 import './PanelUpdateModal.css';
 
 type UpdateOutcome = 'success' | 'failed' | 'timeout';
@@ -48,10 +48,50 @@ export default function PanelUpdateModal({
   const [channelBusy, setChannelBusy] = useState(false);
 
   const isDev = info.channel === 'dev';
+  const [auto, setAuto] = useState<AutoUpdateConfig | null>(null);
+  const [autoBusy, setAutoBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void HttpUtil.get<AutoUpdateConfig>('/panel/api/server/autoUpdate', undefined, {
+      silent: true,
+    }).then((msg) => {
+      if (!cancelled && msg?.success && msg.obj) setAuto(msg.obj);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  async function saveAuto(patch: Partial<AutoUpdateConfig>) {
+    if (!auto) return;
+    const next = { ...auto, ...patch };
+    setAutoBusy(true);
+    try {
+      const msg = await HttpUtil.post<AutoUpdateConfig>(
+        '/panel/api/server/autoUpdate',
+        { enable: next.enable, hour: next.hour, nodes: next.nodes },
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+      if (msg?.success && msg.obj) setAuto(msg.obj);
+    } finally {
+      setAutoBusy(false);
+    }
+  }
+
+  // lastResult is "kind:detail…" from the server; only the kind is translated.
+  const lastResultText = (result: string) => {
+    const kind = result.split(':')[0];
+    const key = `pages.index.autoUpdateResult.${kind}`;
+    const text = t(key);
+    return text === key ? result : text;
+  };
 
   async function pollUpdateStatus(expectedRunId: string): Promise<UpdateOutcome> {
     await PromiseUtil.sleep(5000);
-    const deadline = Date.now() + 90_000;
+    // update.sh watches the new version for 20 s before reporting, and may roll it back.
+    const deadline = Date.now() + 150_000;
     while (Date.now() < deadline) {
       try {
         const msg = await HttpUtil.get<PanelUpdateStatus>(
@@ -161,6 +201,57 @@ export default function PanelUpdateModal({
             <Switch checked={!!devChannelEnable} loading={channelBusy} onChange={handleChannel} />
           </div>
         </div>
+
+        {auto && (
+          <div className="version-list">
+            <div className="version-list-item">
+              <span>{t('pages.index.autoUpdate')}</span>
+              <Switch
+                checked={auto.enable}
+                loading={autoBusy}
+                onChange={(enable) => void saveAuto({ enable })}
+              />
+            </div>
+            {auto.enable && (
+              <>
+                <div className="version-list-item">
+                  <span>{t('pages.index.autoUpdateHour')}</span>
+                  <Select
+                    size="small"
+                    value={auto.hour}
+                    disabled={autoBusy}
+                    style={{ width: 90 }}
+                    onChange={(hour) => void saveAuto({ hour })}
+                    options={Array.from({ length: 24 }, (_, h) => ({
+                      value: h,
+                      label: `${String(h).padStart(2, '0')}:00`,
+                    }))}
+                  />
+                </div>
+                <div className="version-list-item">
+                  <Checkbox
+                    checked={auto.nodes}
+                    disabled={autoBusy}
+                    onChange={(e) => void saveAuto({ nodes: e.target.checked })}
+                  >
+                    {t('pages.index.autoUpdateNodes')}
+                  </Checkbox>
+                </div>
+                <Typography.Paragraph type="secondary" className="auto-update-desc">
+                  {t('pages.index.autoUpdateDesc')}
+                </Typography.Paragraph>
+                {auto.lastRun && (
+                  <Typography.Paragraph type="secondary" className="auto-update-desc">
+                    {t('pages.index.autoUpdateLast', {
+                      date: auto.lastRun,
+                      result: lastResultText(auto.lastResult),
+                    })}
+                  </Typography.Paragraph>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {devChannelEnable && (
           <Alert

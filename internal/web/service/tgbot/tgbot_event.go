@@ -128,6 +128,21 @@ func (t *Tgbot) formatEventMessage(e eventbus.Event) string {
 		return header + "🚫 " + t.I18nBot("tgbot.messages.eventChinaBlocked",
 			"Line=="+line, "Address=="+where, "Reason=="+reason, "Probes=="+strconv.Itoa(data.Probes))
 
+	case eventbus.EventPanelUpdate:
+		data, ok := e.Data.(*eventbus.PanelUpdateData)
+		if !ok {
+			return ""
+		}
+		args := []string{"From==" + data.From, "To==" + data.To, "Nodes==" + strconv.Itoa(data.Nodes)}
+		switch data.State {
+		case "started":
+			return header + "⏳ " + t.I18nBot("tgbot.messages.eventPanelUpdateStarted", args...)
+		case "success":
+			return header + "✅ " + t.I18nBot("tgbot.messages.eventPanelUpdateDone", args...)
+		default:
+			return header + "⚠️ " + t.I18nBot("tgbot.messages.eventPanelUpdateFailed", args...)
+		}
+
 	case eventbus.EventCPUHigh:
 		if data, ok := e.Data.(*eventbus.SystemMetricData); ok {
 			tgCpu, err := t.settingService.GetTgCpu()

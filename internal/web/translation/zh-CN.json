@@ -299,7 +299,19 @@
       "importKeepHostSettingsDesc": "保留本面板的监听地址、端口、基础路径、证书和节点身份，而不是使用上传文件中的值。",
       "upstreamPending": "官方 3X-UI {version} 已发布，本系统还没有同步",
       "upstreamPendingDesc": "系统每天早上自动合并官方新版并发布（保留我们的修改）。如果超过一天还在提示，说明自动合并遇到冲突需要人工处理，GitHub 仓库里会有一条“同步失败”的 Issue，也会发邮件通知。",
-      "upstreamPendingTag": "官方 {version} 待同步"
+      "upstreamPendingTag": "官方 {version} 待同步",
+      "autoUpdateSaved": "自动更新设置已保存",
+      "autoUpdateHour": "每天几点（北京时间）",
+      "autoUpdateNodes": "同时更新各节点",
+      "autoUpdateDesc": "每天这个时间检查一次新版本，有就自动安装，数据不会被覆盖。更新时面板和 Xray 会重启，连接会断几秒。如果新版本启动失败，会自动恢复原来的版本。结果会通过 Telegram 通知你。",
+      "autoUpdateLast": "上次检查：{date}，{result}",
+      "autoUpdateResult": {
+        "current": "已是最新",
+        "started": "已开始更新",
+        "updated": "已更新",
+        "failed": "更新失败，已保留原版本",
+        "error": "检查失败"
+      }
     },
     "inbounds": {
       "totalDownUp": "总上传 / 下载",
@@ -2143,7 +2155,8 @@
       },
       "eventGroupChina": "国内连通（国内探针）",
       "eventChinaBlocked": "连不上",
-      "eventChinaOk": "恢复"
+      "eventChinaOk": "恢复",
+      "eventPanelUpdate": "面板自动更新"
     },
     "xray": {
       "importRules": "导入规则",
@@ -3167,7 +3180,10 @@
       "eventChinaOk": "{{ .Line }}（{{ .Address }}）国内已恢复连通",
       "chinaReason_port": "端口被封（IP 还通），换个端口即可",
       "chinaReason_ip": "IP 被墙，需要更换服务器 IP",
-      "chinaReason_blocked": "所有探针都连不上"
+      "chinaReason_blocked": "所有探针都连不上",
+      "eventPanelUpdateStarted": "开始自动更新面板：{{ .From }} → {{ .To }}（同时通知 {{ .Nodes }} 个节点更新），面板稍后会重启。",
+      "eventPanelUpdateDone": "面板已自动更新到 {{ .To }}（原版本 {{ .From }}）。",
+      "eventPanelUpdateFailed": "自动更新到 {{ .To }} 失败，面板仍在运行原版本 {{ .From }}，请查看面板日志。"
     },
     "buttons": {
       "closeKeyboard": "❌ 关闭键盘",

@@ -39,7 +39,10 @@ const GROUPS: NotificationGroupConfig[] = [
   {
     icon: <ThunderboltOutlined />,
     title: 'eventGroupXray',
-    events: [{ key: 'xray.crash', label: 'eventXrayCrash', settingKey: '' }],
+    events: [
+      { key: 'xray.crash', label: 'eventXrayCrash', settingKey: '' },
+      { key: 'panel.update', label: 'eventPanelUpdate', settingKey: '' },
+    ],
   },
   {
     icon: <DesktopOutlined />,

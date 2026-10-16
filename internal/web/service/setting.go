@@ -226,6 +226,10 @@ var defaultValueMap = map[string]string{
 	"xrayOutboundTestUrl":         "https://www.google.com/generate_204",
 	"panelOutbound":               "",
 	"devChannelEnable":            "false",
+	"autoUpdateEnable":            "false",
+	"autoUpdateHour":              "4",
+	"autoUpdateNodes":             "true",
+	"autoUpdateState":             "",
 
 	// LDAP defaults
 	"ldapEnable":             "false",
@@ -1391,6 +1395,29 @@ func (s *SettingService) GetDevChannelEnable() (bool, error) {
 
 func (s *SettingService) SetDevChannelEnable(value bool) error {
 	return s.setBool("devChannelEnable", value)
+}
+
+// Unattended self-update: on/off, the hour (Beijing time) it runs, whether nodes follow, and
+// its bookkeeping (JSON: last run day, last outcome, the version a pending update started from).
+func (s *SettingService) GetAutoUpdateEnable() (bool, error) { return s.getBool("autoUpdateEnable") }
+func (s *SettingService) GetAutoUpdateHour() (int, error)    { return s.getInt("autoUpdateHour") }
+func (s *SettingService) GetAutoUpdateNodes() (bool, error)  { return s.getBool("autoUpdateNodes") }
+func (s *SettingService) GetAutoUpdateState() (string, error) {
+	return s.getString("autoUpdateState")
+}
+
+func (s *SettingService) SetAutoUpdate(enable bool, hour int, nodes bool) error {
+	if err := s.setBool("autoUpdateEnable", enable); err != nil {
+		return err
+	}
+	if err := s.setInt("autoUpdateHour", hour); err != nil {
+		return err
+	}
+	return s.setBool("autoUpdateNodes", nodes)
+}
+
+func (s *SettingService) SetAutoUpdateState(state string) error {
+	return s.setString("autoUpdateState", state)
 }
 
 // GetIpLimitEnable reports whether the IP-limit feature is available. Always

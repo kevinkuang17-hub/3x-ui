@@ -40,6 +40,13 @@ var eventBus *eventbus.Bus
 // Sample tick runs.
 func SetEventBus(b *eventbus.Bus) { eventBus = b }
 
+// PublishEvent sends e on the shared bus; a no-op before the server wires one.
+func PublishEvent(e eventbus.Event) {
+	if b := eventBus; b != nil {
+		b.Publish(e)
+	}
+}
+
 type XrayMetricsService struct {
 	settingService SettingService
 

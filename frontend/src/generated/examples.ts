@@ -431,6 +431,13 @@ export const EXAMPLES: Record<string, unknown> = {
     "scope": "admin",
     "token": "new-token-string"
   },
+  "AutoUpdateConfig": {
+    "enable": true,
+    "hour": 4,
+    "lastResult": "updated:v3.10.2-k1:v3.10.2-k2",
+    "lastRun": "2026-10-16",
+    "nodes": true
+  },
   "CertIssueStatus": {
     "certFile": "/root/cert/hk.example.com/fullchain.pem",
     "domain": "hk.example.com",

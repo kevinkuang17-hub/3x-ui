@@ -250,7 +250,7 @@
       "dontRefresh": "Instalasi sedang berlangsung, harap jangan menyegarkan halaman ini",
       "logs": "Log",
       "accessLogs": "Log Akses",
-      "autoUpdate": "Pembaruan Otomatis",
+      "autoUpdate": "Update automatically",
       "amneziawgLogs": "Log AmneziaWG",
       "amneziawgHandshake": "Handshake Terakhir",
       "amneziawgInterface": "Antarmuka",
@@ -299,7 +299,19 @@
       "importKeepHostSettingsDesc": "Mempertahankan alamat dengar, port, path dasar, sertifikat, dan identitas node panel ini alih-alih mengambilnya dari berkas yang diunggah.",
       "upstreamPending": "Official 3X-UI {version} is out but not in this build yet",
       "upstreamPendingDesc": "The fork syncs official releases every morning and publishes them with its changes. If this stays for more than a day, the automatic merge needs a hand: see the open issue on the fork's GitHub page.",
-      "upstreamPendingTag": "Official {version} pending"
+      "upstreamPendingTag": "Official {version} pending",
+      "autoUpdateSaved": "Automatic update saved",
+      "autoUpdateHour": "Every day at (Beijing time)",
+      "autoUpdateNodes": "Update the nodes too",
+      "autoUpdateDesc": "Once a day at this hour the panel checks for a new release and installs it; your data is kept. Panel and Xray restart, so connections drop for a few seconds. If the new version does not start, the old one is put back. Telegram tells you either way.",
+      "autoUpdateLast": "Last check: {date}, {result}",
+      "autoUpdateResult": {
+        "current": "already up to date",
+        "started": "update started",
+        "updated": "updated",
+        "failed": "update failed, old version kept",
+        "error": "could not check"
+      }
     },
     "inbounds": {
       "totalDownUp": "Total Terkirim/Diterima",
@@ -2143,7 +2155,8 @@
       },
       "eventGroupChina": "Reachability from China (ISP probes)",
       "eventChinaBlocked": "Unreachable",
-      "eventChinaOk": "Back"
+      "eventChinaOk": "Back",
+      "eventPanelUpdate": "Automatic panel update"
     },
     "xray": {
       "save": "Simpan",
@@ -3167,7 +3180,10 @@
       "eventChinaOk": "{{ .Line }} ({{ .Address }}) is reachable from China again",
       "chinaReason_port": "the port is blocked, the IP still answers; move the inbound to another port",
       "chinaReason_ip": "the IP is blocked; the server needs a new IP",
-      "chinaReason_blocked": "no probe gets through"
+      "chinaReason_blocked": "no probe gets through",
+      "eventPanelUpdateStarted": "Automatic update started: {{ .From }} → {{ .To }} ({{ .Nodes }} nodes told to update too). The panel restarts in a moment.",
+      "eventPanelUpdateDone": "The panel updated itself to {{ .To }} (from {{ .From }}).",
+      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log."
     },
     "buttons": {
       "closeKeyboard": "❌ Tutup Papan Ketik",

@@ -91,3 +91,30 @@ describe('panel update modal', () => {
     expect(screen.queryByText(/is out but not in this build yet/)).toBeNull();
   });
 });
+
+describe('panel update modal: automatic update', () => {
+  it('loads the setting and saves the switch with the chosen hour and nodes', async () => {
+    const { Msg } = await import('@/utils');
+    const { waitFor } = await import('@testing-library/react');
+    const off = { enable: false, hour: 4, nodes: true, lastRun: '', lastResult: '' };
+    vi.mocked(HttpUtil.get).mockResolvedValue(new Msg(true, '', off));
+    vi.mocked(HttpUtil.post).mockResolvedValue(new Msg(true, '', { ...off, enable: true }));
+    renderWithProviders(
+      <PanelUpdateModal
+        open
+        info={{ currentVersion: '3.10.2-k2', latestVersion: 'v3.10.2-k2', updateAvailable: false }}
+        onClose={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    const label = await screen.findByText('Update automatically');
+    const toggle = label.parentElement!.querySelector('button[role="switch"]')!;
+    fireEvent.click(toggle);
+    await waitFor(() => expect(vi.mocked(HttpUtil.post)).toHaveBeenCalled());
+    expect(vi.mocked(HttpUtil.post).mock.calls[0].slice(0, 2)).toEqual([
+      '/panel/api/server/autoUpdate',
+      { enable: true, hour: 4, nodes: true },
+    ]);
+    expect(await screen.findByText('Every day at (Beijing time)')).toBeTruthy();
+  });
+});

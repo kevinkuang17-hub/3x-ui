@@ -430,6 +430,14 @@ export interface ApiTokenView {
   token?: string;
 }
 
+export interface AutoUpdateConfig {
+  enable: boolean;
+  hour: number;
+  lastResult: string;
+  lastRun: string;
+  nodes: boolean;
+}
+
 export interface CertIssueStatus {
   certFile: string;
   domain: string;

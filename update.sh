@@ -498,6 +498,61 @@ require_repo_files() {
     done
 }
 
+# The program files of the running version, kept so a release that does not start can be undone.
+# Data lives in /etc/x-ui and is never touched by the update or by a rollback.
+xui_rollback_dir="${xui_folder}.rollback"
+
+_backup_for_rollback() {
+    rm -rf "${xui_rollback_dir}"
+    mkdir -p "${xui_rollback_dir}/bin" || return 1
+    local f
+    for f in x-ui x-ui.sh; do
+        [[ -f "${xui_folder}/${f}" ]] && cp -a "${xui_folder}/${f}" "${xui_rollback_dir}/"
+    done
+    for f in "${xui_folder}"/bin/xray-linux-* "${xui_folder}"/bin/mtg-linux-*; do
+        [[ -f "${f}" ]] && cp -a "${f}" "${xui_rollback_dir}/bin/"
+    done
+    [[ -f /usr/bin/x-ui ]] && cp -a /usr/bin/x-ui "${xui_rollback_dir}/x-ui-cli"
+    [[ -f "${xui_service}/x-ui.service" ]] && cp -a "${xui_service}/x-ui.service" "${xui_rollback_dir}/x-ui.service"
+    [[ -s "${xui_rollback_dir}/x-ui" ]]
+}
+
+# _panel_healthy: the service is up and has not crash-restarted 20 seconds after the update.
+_panel_healthy() {
+    sleep 20
+    if [[ $release == "alpine" ]]; then
+        rc-service x-ui status > /dev/null 2>&1
+        return
+    fi
+    systemctl is-active --quiet x-ui || return 1
+    # systemd older than 235 has no NRestarts; then being active has to do.
+    local restarts
+    restarts="$(systemctl show -p NRestarts --value x-ui 2> /dev/null)"
+    [[ -z "${restarts}" || "${restarts}" == "0" ]]
+}
+
+_rollback() {
+    [[ -s "${xui_rollback_dir}/x-ui" ]] || return 1
+    echo -e "${yellow}The new version did not start; restoring the previous version...${plain}"
+    if [[ $release == "alpine" ]]; then
+        rc-service x-ui stop > /dev/null 2>&1
+    else
+        systemctl stop x-ui > /dev/null 2>&1
+    fi
+    cp -a "${xui_rollback_dir}/x-ui" "${xui_folder}/x-ui"
+    [[ -f "${xui_rollback_dir}/x-ui.sh" ]] && cp -a "${xui_rollback_dir}/x-ui.sh" "${xui_folder}/x-ui.sh"
+    cp -a "${xui_rollback_dir}"/bin/. "${xui_folder}/bin/" 2> /dev/null
+    [[ -f "${xui_rollback_dir}/x-ui-cli" ]] && cp -a "${xui_rollback_dir}/x-ui-cli" /usr/bin/x-ui
+    if [[ $release == "alpine" ]]; then
+        rc-service x-ui start > /dev/null 2>&1
+    else
+        [[ -f "${xui_rollback_dir}/x-ui.service" ]] && cp -a "${xui_rollback_dir}/x-ui.service" "${xui_service}/x-ui.service"
+        systemctl daemon-reload > /dev/null 2>&1
+        systemctl enable x-ui > /dev/null 2>&1
+        systemctl start x-ui > /dev/null 2>&1
+    fi
+}
+
 update_x-ui() {
     cd ${xui_folder%/x-ui}/
 
@@ -567,6 +622,9 @@ update_x-ui() {
     fi
 
     if [[ -e ${xui_folder}/ ]]; then
+        if ! _backup_for_rollback; then
+            echo -e "${yellow}Could not keep a copy of the current version; a failed start cannot be undone${plain}"
+        fi
         echo -e "${green}Stopping x-ui...${plain}"
         if [[ $release == "alpine" ]]; then
             if [ -f "/etc/init.d/x-ui" ]; then
@@ -777,6 +835,14 @@ update_x-ui() {
     # works out of the box on update too (no-op when XUI_ENABLE_FAIL2BAN=false).
     # Never fatal.
     setup_fail2ban
+
+    if ! _panel_healthy; then
+        if _rollback; then
+            _fail "ERROR: x-ui ${tag_version} did not start, so the previous version was restored (your data is unchanged). Check: journalctl -u x-ui -n 50"
+        fi
+        _fail "ERROR: x-ui ${tag_version} did not start and there is no previous version to restore. Check: journalctl -u x-ui -n 50"
+    fi
+    rm -rf "${xui_rollback_dir}"
 
     echo -e "${green}x-ui ${tag_version}${plain} updating finished, it is running now..."
     echo -e ""
