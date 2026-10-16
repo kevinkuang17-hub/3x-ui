@@ -230,6 +230,7 @@ var defaultValueMap = map[string]string{
 	"autoUpdateHour":              "4",
 	"autoUpdateNodes":             "true",
 	"autoUpdateState":             "",
+	"probeEnrollKey":              "",
 
 	// LDAP defaults
 	"ldapEnable":             "false",
@@ -1414,6 +1415,15 @@ func (s *SettingService) SetAutoUpdate(enable bool, hour int, nodes bool) error 
 		return err
 	}
 	return s.setBool("autoUpdateNodes", nodes)
+}
+
+// The shared key routers enroll themselves as ISP probes with; empty until first asked for.
+func (s *SettingService) GetProbeEnrollKey() (string, error) {
+	return s.getString("probeEnrollKey")
+}
+
+func (s *SettingService) SetProbeEnrollKey(key string) error {
+	return s.setString("probeEnrollKey", key)
 }
 
 func (s *SettingService) SetAutoUpdateState(state string) error {

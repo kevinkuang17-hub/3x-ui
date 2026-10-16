@@ -195,7 +195,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	}
 	(&service.ProtectService{}).ApplyStored()
 	// Outside systems call these without a panel login, so the allowlist leaves them open.
-	publicPaths := []string{basePath + "node-join/", basePath + "node-ip/", basePath + "probe/", basePath + "sso/"}
+	publicPaths := []string{basePath + "node-join/", basePath + "node-ip/", basePath + "probe/", basePath + "probe-enroll/", basePath + "sso/"}
 	engine.Use(panelaccess.Middleware(publicPaths, denyPanelAccess))
 
 	webDomain, err := s.settingService.GetWebDomain()

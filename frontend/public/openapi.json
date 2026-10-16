@@ -15916,6 +15916,148 @@
         }
       }
     },
+    "/panel/api/probes/enroll": {
+      "get": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "The shared enrollment path (and subUrl on the subscription server): one command, run on any router, registers that router as a probe: curl -fsSL \"<url>/agent.sh\" | sh -s -- enroll \"<url>\".",
+        "operationId": "get_panel_api_probes_enroll",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/probes/enroll/reset": {
+      "post": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Replace the enrollment key; the old command stops registering probes. Probes already registered keep working.",
+        "operationId": "post_panel_api_probes_enroll_reset",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/probe-enroll/{key}/agent.sh": {
+      "get": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Public: the probe agent script, for the enrollment command.",
+        "operationId": "get_probe_enroll_key_agent_sh",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "Enrollment key.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/probe-enroll/{key}": {
+      "post": {
+        "tags": [
+          "ISP probes"
+        ],
+        "summary": "Public, used by the agent: register the calling router (form fields deviceId, name such as \"中国 广东 广州 电信\") and return its own probe token as plain text. The same deviceId gets its existing probe back with a new token.",
+        "operationId": "post_probe_enroll_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "Enrollment key.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/probe/{token}": {
       "get": {
         "tags": [

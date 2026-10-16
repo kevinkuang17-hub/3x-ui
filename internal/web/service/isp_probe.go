@@ -63,35 +63,116 @@ func (s *IspProbeService) Add(name, isp string) (*model.IspProbe, string, error)
 	return p, token, nil
 }
 
-// SubProbeURL is the probe URL on the subscription server ("" when its address is unknown): from
-// inside China the panel domain may be blocked while the subscription domain still answers.
-func (s *IspProbeService) SubProbeURL(token string) string {
+// maxProbes bounds how many probes self-enrollment can create, should the key leak.
+const maxProbes = 100
+
+func randomHex(n int) (string, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+// EnrollKey returns the shared enrollment key, creating it on first use; reset replaces it, so
+// the old one-line command stops working.
+func (s *IspProbeService) EnrollKey(reset bool) (string, error) {
+	settings := SettingService{}
+	key, _ := settings.GetProbeEnrollKey()
+	if key != "" && !reset {
+		return key, nil
+	}
+	key, err := randomHex(16)
+	if err != nil {
+		return "", err
+	}
+	return key, settings.SetProbeEnrollKey(key)
+}
+
+// ispFromText reads the carrier out of a location line such as "中国 广东 广州 电信".
+func ispFromText(text string) string {
+	switch {
+	case strings.Contains(text, "电信"):
+		return "telecom"
+	case strings.Contains(text, "联通"):
+		return "unicom"
+	case strings.Contains(text, "移动"):
+		return "mobile"
+	}
+	return "other"
+}
+
+// Enroll registers a router that ran the shared command and returns its own probe token. The same
+// device enrolling again gets its existing probe back, with a fresh token.
+func (s *IspProbeService) Enroll(key, deviceId, name, remoteIP string) (string, error) {
+	want, _ := (&SettingService{}).GetProbeEnrollKey()
+	if want == "" || key != want {
+		return "", common.NewError("unknown enrollment key")
+	}
+	name = strings.TrimSpace(name)
+	if name == "" {
+		name = "probe " + remoteIP
+	}
+	if len(name) > 64 {
+		name = name[:64]
+	}
+	deviceId = strings.TrimSpace(deviceId)
+	token, err := randomHex(20)
+	if err != nil {
+		return "", err
+	}
+	db := database.GetDB()
+	var p model.IspProbe
+	if deviceId != "" && db.Where("device_id = ?", deviceId).First(&p).Error == nil {
+		err := db.Model(&p).Updates(map[string]any{"token_hash": hashProbeToken(token), "name": name, "isp": ispFromText(name), "last_ip": remoteIP}).Error
+		return token, err
+	}
+	var count int64
+	db.Model(&model.IspProbe{}).Count(&count)
+	if count >= maxProbes {
+		return "", common.NewErrorf("already %d probes; delete some first", count)
+	}
+	p = model.IspProbe{Name: name, Isp: ispFromText(name), TokenHash: hashProbeToken(token), DeviceId: deviceId, LastIp: remoteIP}
+	return token, db.Create(&p).Error
+}
+
+// SubOrigin is the subscription server's public origin ("" when unknown): from inside China the
+// panel domain may be blocked while the subscription domain, often behind a CDN, still answers.
+func (s *IspProbeService) SubOrigin() string {
 	settings := SettingService{}
 	if enabled, _ := settings.GetSubEnable(); !enabled {
 		return ""
 	}
-	origin := ""
 	if uri, _ := settings.GetSubURI(); uri != "" {
 		if u, err := url.Parse(uri); err == nil && u.Scheme != "" && u.Host != "" {
-			origin = u.Scheme + "://" + u.Host
+			return u.Scheme + "://" + u.Host
 		}
-	} else if domain, _ := settings.GetSubDomain(); domain != "" {
-		cert, _ := settings.GetSubCertFile()
-		key, _ := settings.GetSubKeyFile()
-		port, _ := settings.GetSubPort()
-		scheme := "http"
-		if cert != "" && key != "" {
-			scheme = "https"
-		}
-		origin = scheme + "://" + domain
-		if standard := (scheme == "https" && port == 443) || (scheme == "http" && port == 80); !standard {
-			origin += ":" + strconv.Itoa(port)
-		}
-	}
-	if origin == "" {
 		return ""
 	}
-	return origin + "/probe/" + token
+	domain, _ := settings.GetSubDomain()
+	if domain == "" {
+		return ""
+	}
+	cert, _ := settings.GetSubCertFile()
+	key, _ := settings.GetSubKeyFile()
+	port, _ := settings.GetSubPort()
+	scheme := "http"
+	if cert != "" && key != "" {
+		scheme = "https"
+	}
+	origin := scheme + "://" + domain
+	if standard := (scheme == "https" && port == 443) || (scheme == "http" && port == 80); !standard {
+		origin += ":" + strconv.Itoa(port)
+	}
+	return origin
+}
+
+// SubProbeURL is the probe URL on the subscription server, "" when its address is unknown.
+func (s *IspProbeService) SubProbeURL(token string) string {
+	if origin := s.SubOrigin(); origin != "" {
+		return origin + "/probe/" + token
+	}
+	return ""
 }
 
 func (s *IspProbeService) Delete(id int) error {

@@ -74,6 +74,24 @@ export default function IspProbesCard() {
   const [isp, setIsp] = useState('telecom');
   const [command, setCommand] = useState('');
   const [altCommand, setAltCommand] = useState('');
+  const [enroll, setEnroll] = useState<{ command: string; alt: string } | null>(null);
+
+  async function loadEnroll(reset: boolean) {
+    const msg = reset
+      ? await HttpUtil.post<{ path: string; subUrl?: string }>(
+          '/panel/api/probes/enroll/reset',
+          {},
+          { ...JSON_HEADERS, silentSuccess: true },
+        )
+      : await HttpUtil.get<{ path: string; subUrl?: string }>('/panel/api/probes/enroll');
+    if (!msg?.success || !msg.obj) return;
+    const panelUrl = `${window.location.origin}${msg.obj.path}`;
+    const cmd = (url: string) => `curl -fsSL '${url}/agent.sh' | sh -s -- enroll '${url}'`;
+    setEnroll({
+      command: cmd(msg.obj.subUrl || panelUrl),
+      alt: msg.obj.subUrl ? cmd(panelUrl) : '',
+    });
+  }
   const { data, refetch, isFetching } = useQuery({
     queryKey: ['probes', 'matrix'],
     queryFn: async () => {
@@ -206,17 +224,26 @@ export default function IspProbesCard() {
         </Space>
       }
       extra={
-        <Button
-          size="small"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setName('');
-            setCommand('');
-            setAdding(true);
-          }}
-        >
-          {t('pages.nodes.probes.add')}
-        </Button>
+        <Space size={6}>
+          <Button
+            size="small"
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => void loadEnroll(false)}
+          >
+            {t('pages.nodes.probes.enroll')}
+          </Button>
+          <Button
+            size="small"
+            onClick={() => {
+              setName('');
+              setCommand('');
+              setAdding(true);
+            }}
+          >
+            {t('pages.nodes.probes.add')}
+          </Button>
+        </Space>
       }
     >
       {probes.length === 0 ? (
@@ -234,6 +261,50 @@ export default function IspProbesCard() {
           scroll={{ x: 'max-content' }}
         />
       )}
+      <Modal
+        open={!!enroll}
+        title={t('pages.nodes.probes.enroll')}
+        onCancel={() => setEnroll(null)}
+        footer={[
+          <Popconfirm
+            key="reset"
+            title={t('pages.nodes.probes.enrollResetConfirm')}
+            onConfirm={() => void loadEnroll(true)}
+          >
+            <Button danger>{t('pages.nodes.probes.enrollReset')}</Button>
+          </Popconfirm>,
+          <Button key="close" type="primary" onClick={() => setEnroll(null)}>
+            {t('close')}
+          </Button>,
+        ]}
+        destroyOnHidden
+      >
+        <Typography.Paragraph>{t('pages.nodes.probes.enrollHint')}</Typography.Paragraph>
+        <Typography.Paragraph
+          code
+          copyable={{ text: enroll?.command }}
+          style={{ wordBreak: 'break-all' }}
+        >
+          {enroll?.command}
+        </Typography.Paragraph>
+        {enroll?.alt && (
+          <>
+            <Typography.Paragraph type="secondary">
+              {t('pages.nodes.probes.altCommand')}
+            </Typography.Paragraph>
+            <Typography.Paragraph
+              code
+              copyable={{ text: enroll.alt }}
+              style={{ wordBreak: 'break-all' }}
+            >
+              {enroll.alt}
+            </Typography.Paragraph>
+          </>
+        )}
+        <Typography.Paragraph type="secondary">
+          {t('pages.nodes.probes.openclashHint')}
+        </Typography.Paragraph>
+      </Modal>
       <Modal
         open={adding}
         title={t('pages.nodes.probes.add')}

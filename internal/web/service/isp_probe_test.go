@@ -198,3 +198,49 @@ func TestBrokenProbeRuleKeepsProbesWithPing(t *testing.T) {
 		t.Fatalf("verdicts = %+v; every port blocked with the hosts answering ping", v)
 	}
 }
+
+// One command for every router: each enrolls itself, a router running it twice keeps one probe,
+// and resetting the key stops the old command.
+func TestProbeEnroll(t *testing.T) {
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
+	s := &IspProbeService{}
+	key, err := s.EnrollKey(false)
+	if err != nil || len(key) != 32 {
+		t.Fatalf("key %q err %v", key, err)
+	}
+	if again, _ := s.EnrollKey(false); again != key {
+		t.Fatal("the key must stay until reset, or the shared command keeps changing")
+	}
+	if _, err := s.Enroll("wrong", "dev1", "x", "1.2.3.4"); err == nil {
+		t.Fatal("a wrong key must be refused")
+	}
+	tok1, err := s.Enroll(key, "dev1", "中国 广东 深圳 电信 · router", "113.88.1.2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.TargetsText(tok1, "113.88.1.2"); err != nil {
+		t.Fatalf("enrolled token must work: %v", err)
+	}
+	tok2, err := s.Enroll(key, "dev1", "中国 广东 深圳 电信 · router", "113.88.1.2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var probes []model.IspProbe
+	database.GetDB().Find(&probes)
+	if len(probes) != 1 || probes[0].Isp != "telecom" || probes[0].Name != "中国 广东 深圳 电信 · router" {
+		t.Fatalf("probes = %+v; one telecom probe expected", probes)
+	}
+	if _, err := s.TargetsText(tok1, "113.88.1.2"); err == nil {
+		t.Fatal("re-enrolling must retire the old token")
+	}
+	if _, err := s.TargetsText(tok2, "113.88.1.2"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Enroll(key, "dev2", "中国 北京 联通", "1.1.1.1"); err != nil {
+		t.Fatal(err)
+	}
+	newKey, _ := s.EnrollKey(true)
+	if _, err := s.Enroll(key, "dev3", "x", "1.1.1.1"); err == nil || newKey == key {
+		t.Fatal("after a reset the old key must be refused")
+	}
+}

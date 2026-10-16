@@ -24,29 +24,31 @@ constructs the real router and diffs it against the registry both ways.
 
 Scope: everything under /panel/api/ plus the session-auth surface the
 registry also documents (/login, /logout, /csrf-token, /sponsors,
-/getTwoFactorEnable, /ws, /sso/:token, /node-join/*, /node-ip/:key, /probe/:token, /passkey/login/*). SPA page routes are UI, not API, and stay out;
+/getTwoFactorEnable, /ws, /sso/:token, /node-join/*, /node-ip/:key, /probe/:token, /probe-enroll/:key, /passkey/login/*). SPA page routes are UI, not API, and stay out;
 registry paths that start with "/{" describe the standalone subscription
 server, which this engine does not serve.
 */
 
 var contractExtraRoutes = map[string]bool{
-	"POST /login":                    true,
-	"POST /logout":                   true,
-	"GET /csrf-token":                true,
-	"GET /sponsors":                  true,
-	"POST /getTwoFactorEnable":       true,
-	"GET /ws":                        true,
-	"GET /sso/:token":                true,
-	"POST /sso/:token":               true,
-	"POST /node-join/:token/prepare": true,
-	"POST /node-join/:token/finish":  true,
-	"POST /node-ip/:key":             true,
-	"GET /probe/:token":              true,
-	"POST /probe/:token":             true,
-	"GET /probe/:token/agent.sh":     true,
-	"POST /passkey/login/available":  true,
-	"POST /passkey/login/begin":      true,
-	"POST /passkey/login/finish":     true,
+	"POST /login":                     true,
+	"POST /logout":                    true,
+	"GET /csrf-token":                 true,
+	"GET /sponsors":                   true,
+	"POST /getTwoFactorEnable":        true,
+	"GET /ws":                         true,
+	"GET /sso/:token":                 true,
+	"POST /sso/:token":                true,
+	"POST /node-join/:token/prepare":  true,
+	"POST /node-join/:token/finish":   true,
+	"POST /node-ip/:key":              true,
+	"GET /probe/:token":               true,
+	"POST /probe/:token":              true,
+	"GET /probe/:token/agent.sh":      true,
+	"GET /probe-enroll/:key/agent.sh": true,
+	"POST /probe-enroll/:key":         true,
+	"POST /passkey/login/available":   true,
+	"POST /passkey/login/begin":       true,
+	"POST /passkey/login/finish":      true,
 }
 
 func inContractScope(method, path string) bool {

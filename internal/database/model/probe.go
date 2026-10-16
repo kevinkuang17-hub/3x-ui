@@ -10,6 +10,8 @@ type IspProbe struct {
 	LastSeen  int64  `json:"lastSeen"`
 	LastIp    string `json:"lastIp"`
 	CreatedAt int64  `json:"createdAt" gorm:"autoCreateTime"`
+	// DeviceId identifies a self-enrolled router, so enrolling it again reuses its probe.
+	DeviceId string `json:"-" gorm:"index;default:''"`
 }
 
 func (IspProbe) TableName() string { return "isp_probes" }
