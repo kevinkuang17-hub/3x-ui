@@ -84,7 +84,7 @@ func (s *IspProbeService) SubProbeURL(token string) string {
 			scheme = "https"
 		}
 		origin = scheme + "://" + domain
-		if !(scheme == "https" && port == 443) && !(scheme == "http" && port == 80) {
+		if standard := (scheme == "https" && port == 443) || (scheme == "http" && port == 80); !standard {
 			origin += ":" + strconv.Itoa(port)
 		}
 	}
