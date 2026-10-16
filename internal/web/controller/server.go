@@ -71,6 +71,8 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 	g.POST("/restartXrayService", a.restartXrayService)
 	g.POST("/installXray/:version", a.installXray)
 	g.POST("/updatePanel", a.updatePanel)
+	g.GET("/autoUpdate", a.getAutoUpdate)
+	g.POST("/autoUpdate", a.setAutoUpdate)
 	g.POST("/setUpdateChannel", a.setUpdateChannel)
 	g.POST("/updateGeofile", a.updateGeofile)
 	g.POST("/updateGeofile/:fileName", a.updateGeofile)
@@ -234,6 +236,25 @@ func (a *ServerController) updatePanel(c *gin.Context) {
 		obj = gin.H{"runId": strconv.FormatInt(runID, 10)}
 	}
 	jsonMsgObj(c, I18nWeb(c, "pages.index.panelUpdateStartedPopover"), obj, err)
+}
+
+// getAutoUpdate returns the unattended self-update setting and its last run.
+func (a *ServerController) getAutoUpdate(c *gin.Context) {
+	jsonObj(c, a.panelService.GetAutoUpdate(), nil)
+}
+
+func (a *ServerController) setAutoUpdate(c *gin.Context) {
+	var body struct {
+		Enable bool `json:"enable"`
+		Hour   int  `json:"hour"`
+		Nodes  bool `json:"nodes"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, "invalid data", err)
+		return
+	}
+	err := a.panelService.SetAutoUpdate(body.Enable, body.Hour, body.Nodes)
+	jsonMsgObj(c, I18nWeb(c, "pages.index.autoUpdateSaved"), a.panelService.GetAutoUpdate(), err)
 }
 
 // getUpdateStatus reports the outcome of the most recently launched panel

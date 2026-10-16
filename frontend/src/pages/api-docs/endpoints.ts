@@ -700,6 +700,21 @@ export const sections: readonly Section[] = [
         response: '{\n  "success": true,\n  "obj": {\n    "runId": "1735689600123456789"\n  }\n}',
       },
       {
+        method: 'GET',
+        path: '/panel/api/server/autoUpdate',
+        summary:
+          'Unattended self-update: whether it is on, the hour it runs each day (Beijing time), whether outdated nodes are told to update too, and what the last daily check did.',
+        responseSchema: 'AutoUpdateConfig',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/server/autoUpdate',
+        summary:
+          'Set the unattended self-update. Turning it on also enables the panel.update Telegram notice.',
+        body: '{\n  "enable": true,\n  "hour": 4,\n  "nodes": true\n}',
+        responseSchema: 'AutoUpdateConfig',
+      },
+      {
         method: 'POST',
         path: '/panel/api/server/setUpdateChannel',
         summary:

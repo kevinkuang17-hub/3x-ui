@@ -452,6 +452,15 @@ export const ApiTokenViewSchema = z.object({
 });
 export type ApiTokenView = z.infer<typeof ApiTokenViewSchema>;
 
+export const AutoUpdateConfigSchema = z.object({
+  enable: z.boolean(),
+  hour: z.number().int(),
+  lastResult: z.string(),
+  lastRun: z.string(),
+  nodes: z.boolean(),
+});
+export type AutoUpdateConfig = z.infer<typeof AutoUpdateConfigSchema>;
+
 export const CertIssueStatusSchema = z.object({
   certFile: z.string(),
   domain: z.string(),

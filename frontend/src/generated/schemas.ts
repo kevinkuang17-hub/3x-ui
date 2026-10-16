@@ -1761,6 +1761,41 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "AutoUpdateConfig": {
+    "description": "AutoUpdateConfig is the unattended self-update setting and what its last run did.",
+    "properties": {
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "hour": {
+        "description": "Hour is when it runs each day, 0-23 in Beijing time.",
+        "example": 4,
+        "type": "integer"
+      },
+      "lastResult": {
+        "example": "updated:v3.10.2-k1:v3.10.2-k2",
+        "type": "string"
+      },
+      "lastRun": {
+        "description": "LastRun is the Beijing date of the last check, LastResult what it did then.",
+        "example": "2026-10-16",
+        "type": "string"
+      },
+      "nodes": {
+        "example": true,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "enable",
+      "hour",
+      "lastResult",
+      "lastRun",
+      "nodes"
+    ],
+    "type": "object"
+  },
   "CertIssueStatus": {
     "description": "CertIssueStatus is the progress of a certificate request through acme.sh and Cloudflare DNS.",
     "properties": {
