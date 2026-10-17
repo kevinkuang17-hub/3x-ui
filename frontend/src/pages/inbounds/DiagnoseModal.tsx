@@ -12,7 +12,6 @@ import {
 import { HttpUtil } from '@/utils';
 import { chinaCheckLinks } from '@/lib/china-check';
 
-import ItdogModal from './ItdogModal';
 import type { ChinaVerdict } from '@/pages/nodes/IspProbesCard';
 import type { Finding, Report } from '@/generated/types';
 
@@ -54,7 +53,6 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
   const [fixing, setFixing] = useState<string>('');
   const [probeVerdicts, setProbeVerdicts] = useState<Record<string, ChinaVerdict>>({});
   const [probeCount, setProbeCount] = useState(0);
-  const [itdog, setItdog] = useState({ url: '', title: '' });
 
   const run = useCallback(async (only: number[]) => {
     setBusy(true);
@@ -128,12 +126,11 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
   };
 
   // The checks above run from this panel's own server abroad; this row is about China.
+  // ITDOG refuses to be framed (X-Frame-Options), so its test opens in a new tab.
   const renderChinaCheck = (r: Report) => {
     const links = chinaCheckLinks(r.address, r.port, r.protocol);
     if (!links) return null;
     const verdict = probeVerdicts[String(r.inboundId)];
-    const open = (url: string, kind: string) =>
-      setItdog({ url, title: `${r.remark || `#${r.inboundId}`} · ${kind}` });
     return (
       <div className="diag-china">
         {verdict ? (
@@ -157,11 +154,11 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
           </span>
         )}
         <Space wrap size={6}>
-          <Button size="small" onClick={() => open(links.ping, 'Ping')}>
+          <Button size="small" href={links.ping} target="_blank" rel="noopener noreferrer">
             {t('pages.inbounds.diagnose.china.ping')}
           </Button>
           {links.tcping ? (
-            <Button size="small" onClick={() => open(links.tcping, `TCPing ${r.port}`)}>
+            <Button size="small" href={links.tcping} target="_blank" rel="noopener noreferrer">
               {t('pages.inbounds.diagnose.china.tcping', { port: r.port })}
             </Button>
           ) : (
@@ -204,11 +201,6 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
         </Button>,
       ]}
     >
-      <ItdogModal
-        url={itdog.url}
-        title={itdog.title}
-        onClose={() => setItdog({ url: '', title: '' })}
-      />
       <Space orientation="vertical" size={12} style={{ width: '100%' }}>
         {busy && (
           <Space>

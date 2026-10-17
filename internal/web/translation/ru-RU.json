@@ -954,8 +954,6 @@
           "udpOnly": "UDP protocol: TCPing does not apply; use Ping and a real client.",
           "hint": "The checks above run from this panel, outside China. The ITDOG buttons test from China: all green means China reaches the server; mostly timeouts on Ping means the IP is blocked; Ping fine but TCPing timing out means that port is blocked — move the inbound to another port.",
           "probes": "China probes: {state} ({ok}/{total} get through)",
-          "embedHint": "ITDOG tests from about 200 probes in China; the map and table load in a few seconds. Blank? Open it in a new tab.",
-          "openTab": "Open in a new tab",
           "unknown": "From China: unknown (no probe in China yet)",
           "noResult": "From China: no probe result for this inbound yet",
           "addProbe": "Add a probe in China"
