@@ -214,8 +214,10 @@ func TestLineHealthHidesLinesOfOfflineNode(t *testing.T) {
 	db.Create(big)
 	var bigLines []int
 	for i, proto := range []model.Protocol{model.VLESS, model.VLESS, model.VLESS, model.Hysteria} {
-		ib := &model.Inbound{UserId: 1, Enable: true, Port: 20001 + i, Protocol: proto, Tag: fmt.Sprintf("us-%d", i),
-			Remark: fmt.Sprintf("US A %d", i), Settings: `{"clients":[]}`, StreamSettings: `{"network":"tcp"}`, NodeID: &big.Id}
+		ib := &model.Inbound{
+			UserId: 1, Enable: true, Port: 20001 + i, Protocol: proto, Tag: fmt.Sprintf("us-%d", i),
+			Remark: fmt.Sprintf("US A %d", i), Settings: `{"clients":[]}`, StreamSettings: `{"network":"tcp"}`, NodeID: &big.Id,
+		}
 		db.Create(ib)
 		bigLines = append(bigLines, ib.Id)
 		fd.set(fmt.Sprintf("us.example.com:%d", 20001+i), true)
