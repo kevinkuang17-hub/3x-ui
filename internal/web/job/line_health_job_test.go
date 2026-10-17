@@ -140,7 +140,7 @@ func TestLineHealthUDPFollowsNodeXrayState(t *testing.T) {
 	}{
 		{"online", "running", lineOK},
 		{"online", "stopped", lineFail},
-		{"offline", "stopped", lineUnknown},
+		{"offline", "stopped", lineFail},
 		{"online", "", lineUnknown},
 	}
 	for _, c := range cases {
@@ -202,5 +202,46 @@ func TestLineHealthHidesLinesProbesCannotReach(t *testing.T) {
 	}
 	if !linehealth.IsDown(ids[10041]) || linehealth.IsDown(ids[10042]) {
 		t.Fatalf("a line every ISP probe fails must be hidden even when the master reaches it: %v", linehealth.Down())
+	}
+}
+
+// A node server going offline takes all its lines, UDP ones too, out of subscriptions, even when
+// it holds most of the lines; only every node going quiet at once reads as the master's network.
+func TestLineHealthHidesLinesOfOfflineNode(t *testing.T) {
+	j, fd, ids := seedLineHealth(t, 10101)
+	db := database.GetDB()
+	big := &model.Node{Name: "us-a", Scheme: "https", Address: "us.example.com", Port: 2053, ApiToken: "tok", Enable: true, Status: "offline"}
+	db.Create(big)
+	var bigLines []int
+	for i, proto := range []model.Protocol{model.VLESS, model.VLESS, model.VLESS, model.Hysteria} {
+		ib := &model.Inbound{
+			UserId: 1, Enable: true, Port: 20001 + i, Protocol: proto, Tag: fmt.Sprintf("us-%d", i),
+			Remark: fmt.Sprintf("US A %d", i), Settings: `{"clients":[]}`, StreamSettings: `{"network":"tcp"}`, NodeID: &big.Id,
+		}
+		db.Create(ib)
+		bigLines = append(bigLines, ib.Id)
+		fd.set(fmt.Sprintf("us.example.com:%d", 20001+i), true)
+	}
+	for range lineHealthFailThreshold {
+		j.Run()
+	}
+	for _, id := range bigLines {
+		if !linehealth.IsDown(id) {
+			t.Fatalf("line %d of the offline node still in subscriptions; hidden: %v", id, linehealth.Down())
+		}
+	}
+	if linehealth.IsDown(ids[10101]) {
+		t.Fatal("the online node's line must stay")
+	}
+
+	// Every node offline at once: the master lost its network, so the lines come back untouched.
+	db.Model(&model.Node{}).Where("1 = 1").Update("status", "offline")
+	linehealth.Reset()
+	j.fails = map[int]int{}
+	for range lineHealthFailThreshold + 1 {
+		j.Run()
+	}
+	if down := linehealth.Down(); len(down) != 0 {
+		t.Fatalf("all nodes offline must hide nothing, got %v", down)
 	}
 }

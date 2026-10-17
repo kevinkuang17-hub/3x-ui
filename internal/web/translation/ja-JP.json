@@ -2116,7 +2116,7 @@
       "crmSsoDesc": "CRM は管理者 API トークンで POST /panel/api/crm/sso を呼ぶと、パスワード不要でパネルに入れる使い捨てリンク（有効 2 分）を取得できます。ここで試しに生成できます。",
       "crmSsoGenerate": "ログインリンクを生成",
       "subLineHealth": "停止した回線を自動で隠す",
-      "subLineHealthDesc": "パネルは毎分ノード上の回線を確認し、3 回連続で応答しない回線を復旧まで購読から外します。大半の回線が同時に落ちた場合は何も隠しません（パネル自身のネットワーク障害の可能性が高いため）。",
+      "subLineHealthDesc": "Every minute the panel checks each line on the nodes. A line that fails 3 times in a row, or whose node server is offline (UDP lines such as Hysteria2 included), is taken out of subscriptions, so users who refresh stop getting it; it comes back by itself once it works again. Nothing is removed or detached. If most lines fail at once while every node looks down, the master's own network is suspected and nothing is hidden.",
       "cfSettings": "Cloudflare",
       "cfIntro": "パネルがノードの A レコードを作成・更新できるようにします（ノード → ドメイン、およびワンクリック追加）。",
       "cfApiToken": "API トークン",
@@ -2164,7 +2164,9 @@
       "eventGroupChina": "Reachability from China (ISP probes)",
       "eventChinaBlocked": "Unreachable",
       "eventChinaOk": "Back",
-      "eventPanelUpdate": "Automatic panel update"
+      "eventPanelUpdate": "Automatic panel update",
+      "eventLineDown": "Line hidden",
+      "eventLineUp": "Line back"
     },
     "xray": {
       "importRules": "ルールをインポート",
@@ -3191,7 +3193,9 @@
       "chinaReason_blocked": "no probe gets through",
       "eventPanelUpdateStarted": "Automatic update started: {{ .From }} → {{ .To }} ({{ .Nodes }} nodes told to update too). The panel restarts in a moment.",
       "eventPanelUpdateDone": "The panel updated itself to {{ .To }} (from {{ .From }}).",
-      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log."
+      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log.",
+      "eventLineDown": "Line {{ .Line }} cannot be reached and was taken out of subscriptions",
+      "eventLineUp": "Line {{ .Line }} works again and is back in subscriptions"
     },
     "buttons": {
       "closeKeyboard": "❌ キーボードを閉じる",

@@ -2116,7 +2116,7 @@
       "crmSsoDesc": "CRM 用管理员 API 令牌调用 POST /panel/api/crm/sso，即可拿到一次性链接，打开即免密登录面板（2 分钟内有效）。可以在这里生成一个试试。",
       "crmSsoGenerate": "生成登录链接",
       "subLineHealth": "自动隐藏不通的线路",
-      "subLineHealthDesc": "面板每分钟检测一次节点上的线路，连续 3 次不通就先从订阅里拿掉，恢复后自动加回，用户不会拿到坏线路。如果大部分线路同时不通（多半是面板自身网络问题），则不做任何隐藏。",
+      "subLineHealthDesc": "面板每分钟检测一次节点上的每条线路：连续 3 次不通，或者所在的节点服务器离线（包括 Hy2 这类 UDP 线路），就先从订阅里拿掉，用户刷新订阅后就不会再用它；恢复后自动加回。不会删除入站，也不会解绑客户端。如果所有节点同时显示不通，多半是面板自己网络有问题，这时不做任何隐藏。",
       "cfSettings": "Cloudflare",
       "cfIntro": "让面板为节点自动创建和更新 A 记录（节点 → 域名，以及一键添加节点）。",
       "cfApiToken": "API 令牌",
@@ -2164,7 +2164,9 @@
       "eventGroupChina": "国内连通（国内探针）",
       "eventChinaBlocked": "连不上",
       "eventChinaOk": "恢复",
-      "eventPanelUpdate": "面板自动更新"
+      "eventPanelUpdate": "面板自动更新",
+      "eventLineDown": "线路被隐藏",
+      "eventLineUp": "线路恢复"
     },
     "xray": {
       "importRules": "导入规则",
@@ -3191,7 +3193,9 @@
       "chinaReason_blocked": "所有探针都连不上",
       "eventPanelUpdateStarted": "开始自动更新面板：{{ .From }} → {{ .To }}（同时通知 {{ .Nodes }} 个节点更新），面板稍后会重启。",
       "eventPanelUpdateDone": "面板已自动更新到 {{ .To }}（原版本 {{ .From }}）。",
-      "eventPanelUpdateFailed": "自动更新到 {{ .To }} 失败，面板仍在运行原版本 {{ .From }}，请查看面板日志。"
+      "eventPanelUpdateFailed": "自动更新到 {{ .To }} 失败，面板仍在运行原版本 {{ .From }}，请查看面板日志。",
+      "eventLineDown": "线路 {{ .Line }} 连不上，已从订阅中暂时拿掉，用户刷新订阅后不会再用它",
+      "eventLineUp": "线路 {{ .Line }} 已恢复，重新加回订阅"
     },
     "buttons": {
       "closeKeyboard": "❌ 关闭键盘",
