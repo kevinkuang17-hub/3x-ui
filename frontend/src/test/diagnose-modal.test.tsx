@@ -68,7 +68,7 @@ describe('DiagnoseModal', () => {
 });
 
 describe('DiagnoseModal China check', () => {
-  it('opens ITDOG inside the panel and says China is unknown without probes', async () => {
+  it('opens ITDOG in a new tab and says China is unknown without probes', async () => {
     const reality = {
       ...fixed,
       inboundId: 8,
@@ -89,16 +89,12 @@ describe('DiagnoseModal China check', () => {
       screen.getAllByText('From China: unknown (no probe in China yet)', { exact: false }),
     ).toHaveLength(2);
     // Hysteria2 listens on UDP only, so only the Reality inbound offers a TCPing.
-    const tcping = screen.getAllByRole('button', { name: /TCPing port/ });
+    const tcping = screen.getAllByRole('link', { name: /TCPing port/ });
     expect(tcping).toHaveLength(1);
     expect(screen.getByText(/UDP protocol: TCPing does not apply/)).toBeTruthy();
 
-    fireEvent.click(tcping[0]);
-    const frame = await screen.findByTitle('US A Reality · TCPing 8443');
-    expect(frame.getAttribute('src')).toBe('https://www.itdog.cn/tcping/us.example.com:8443');
-    expect(screen.getByRole('link', { name: /Open in a new tab/ }).getAttribute('href')).toBe(
-      'https://www.itdog.cn/tcping/us.example.com:8443',
-    );
+    expect(tcping[0].getAttribute('href')).toBe('https://www.itdog.cn/tcping/us.example.com:8443');
+    expect(tcping[0].getAttribute('target')).toBe('_blank');
   });
 });
 
