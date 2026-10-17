@@ -128,6 +128,11 @@ func (t *Tgbot) formatEventMessage(e eventbus.Event) string {
 		return header + "🚫 " + t.I18nBot("tgbot.messages.eventChinaBlocked",
 			"Line=="+line, "Address=="+where, "Reason=="+reason, "Probes=="+strconv.Itoa(data.Probes))
 
+	case eventbus.EventLineDown:
+		return header + "🔴 " + t.I18nBot("tgbot.messages.eventLineDown", "Line=="+e.Source)
+	case eventbus.EventLineUp:
+		return header + "🟢 " + t.I18nBot("tgbot.messages.eventLineUp", "Line=="+e.Source)
+
 	case eventbus.EventPanelUpdate:
 		data, ok := e.Data.(*eventbus.PanelUpdateData)
 		if !ok {

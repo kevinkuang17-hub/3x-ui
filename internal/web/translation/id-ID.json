@@ -2116,7 +2116,7 @@
       "crmSsoDesc": "CRM dapat memanggil POST /panel/api/crm/sso dengan token API admin untuk mendapat tautan sekali pakai yang masuk tanpa kata sandi (berlaku 2 menit). Buat satu di sini untuk mencoba.",
       "crmSsoGenerate": "Buat tautan login",
       "subLineHealth": "Sembunyikan jalur mati otomatis",
-      "subLineHealthDesc": "Setiap menit panel memeriksa jalur di node; jalur yang gagal 3 kali berturut-turut dikeluarkan dari langganan hingga pulih. Jika sebagian besar gagal bersamaan, tidak ada yang disembunyikan (kemungkinan jaringan panel sendiri).",
+      "subLineHealthDesc": "Every minute the panel checks each line on the nodes. A line that fails 3 times in a row, or whose node server is offline (UDP lines such as Hysteria2 included), is taken out of subscriptions, so users who refresh stop getting it; it comes back by itself once it works again. Nothing is removed or detached. If most lines fail at once while every node looks down, the master's own network is suspected and nothing is hidden.",
       "cfSettings": "Cloudflare",
       "cfIntro": "Memungkinkan panel membuat dan memperbarui record A untuk node Anda (Node → Domain, dan tambah sekali klik).",
       "cfApiToken": "Token API",
@@ -2164,7 +2164,9 @@
       "eventGroupChina": "Reachability from China (ISP probes)",
       "eventChinaBlocked": "Unreachable",
       "eventChinaOk": "Back",
-      "eventPanelUpdate": "Automatic panel update"
+      "eventPanelUpdate": "Automatic panel update",
+      "eventLineDown": "Line hidden",
+      "eventLineUp": "Line back"
     },
     "xray": {
       "save": "Simpan",
@@ -3191,7 +3193,9 @@
       "chinaReason_blocked": "no probe gets through",
       "eventPanelUpdateStarted": "Automatic update started: {{ .From }} → {{ .To }} ({{ .Nodes }} nodes told to update too). The panel restarts in a moment.",
       "eventPanelUpdateDone": "The panel updated itself to {{ .To }} (from {{ .From }}).",
-      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log."
+      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log.",
+      "eventLineDown": "Line {{ .Line }} cannot be reached and was taken out of subscriptions",
+      "eventLineUp": "Line {{ .Line }} works again and is back in subscriptions"
     },
     "buttons": {
       "closeKeyboard": "❌ Tutup Papan Ketik",

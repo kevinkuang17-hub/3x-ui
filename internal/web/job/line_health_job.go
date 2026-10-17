@@ -97,7 +97,26 @@ func (j *LineHealthJob) Run() {
 		}
 	}
 	verdicts := j.probeAll(probe, nodesByID)
-	j.apply(inbounds, verdicts, service.BlockedFromProbes(j.clock()))
+	j.apply(inbounds, verdicts, service.BlockedFromProbes(j.clock()), downNodes(nodes))
+}
+
+// downNodes are enabled nodes the heartbeat reports offline while another node still answers:
+// the server is really down, not the master's own network.
+func downNodes(nodes []*model.Node) map[int]bool {
+	down, online := map[int]bool{}, 0
+	for _, n := range nodes {
+		switch {
+		case !n.Enable:
+		case n.Status == "online":
+			online++
+		case n.Status == "offline":
+			down[n.Id] = true
+		}
+	}
+	if online == 0 {
+		return nil
+	}
+	return down
 }
 
 func (j *LineHealthJob) probeAll(inbounds []*model.Inbound, nodesByID map[int]*model.Node) map[int]lineVerdict {
@@ -126,6 +145,10 @@ func (j *LineHealthJob) probeAll(inbounds []*model.Inbound, nodesByID map[int]*m
 }
 
 func (j *LineHealthJob) probeOne(ib *model.Inbound, node *model.Node) lineVerdict {
+	// A node that stopped answering heartbeats serves nothing, whatever the protocol.
+	if node.Status == "offline" {
+		return lineFail
+	}
 	if linehealth.IsUDP(ib) {
 		// No handshake to test over UDP: trust the node's own report, and only while it answers.
 		if node.Status != "online" || node.XrayState == "" {
@@ -155,11 +178,20 @@ func (j *LineHealthJob) clock() time.Time {
 	return time.Now()
 }
 
-// apply turns one round of verdicts into hide/restore decisions. blocked lists lines every ISP
-// probe failed to reach: those count as failures even when the master itself gets through.
-func (j *LineHealthJob) apply(inbounds []*model.Inbound, verdicts map[int]lineVerdict, blocked map[int]bool) {
+// apply turns verdicts into hide/restore decisions; blocked (ISP probes) counts as failure. Lines on
+// a node confirmed down skip the mass-failure guard: one big node going away is not a master blip.
+func (j *LineHealthJob) apply(inbounds []*model.Inbound, verdicts map[int]lineVerdict, blocked, down map[int]bool) {
+	onDownNode := make(map[int]bool)
+	for _, ib := range inbounds {
+		if ib.NodeID != nil && down[*ib.NodeID] {
+			onDownNode[ib.Id] = true
+		}
+	}
 	probed, failed := 0, 0
-	for _, v := range verdicts {
+	for id, v := range verdicts {
+		if onDownNode[id] {
+			continue
+		}
 		if v != lineUnknown {
 			probed++
 		}
@@ -170,7 +202,7 @@ func (j *LineHealthJob) apply(inbounds []*model.Inbound, verdicts map[int]lineVe
 	if failed > 0 && (failed == probed || (failed >= lineHealthMassFailMin && failed*2 > probed)) {
 		logger.Warningf("line health: %d of %d lines failed at once; assuming a master-side network problem, ignoring this round's master checks", failed, probed)
 		for id, v := range verdicts {
-			if v == lineFail {
+			if v == lineFail && !onDownNode[id] {
 				verdicts[id] = lineUnknown
 			}
 		}

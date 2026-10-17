@@ -2116,7 +2116,7 @@
       "crmSsoDesc": "CRM می‌تواند با توکن API مدیر، POST /panel/api/crm/sso را فراخوانی کند و یک لینک یک‌بارمصرف برای ورود بدون رمز (اعتبار ۲ دقیقه) بگیرد. برای امتحان می‌توانید اینجا بسازید.",
       "crmSsoGenerate": "ساخت لینک ورود",
       "subLineHealth": "پنهان‌سازی خودکار خطوط قطع",
-      "subLineHealthDesc": "پنل هر دقیقه خطوط روی نودها را بررسی می‌کند؛ خطی که ۳ بار پیاپی پاسخ ندهد تا زمان بازگشت از اشتراک‌ها حذف می‌شود. اگر بیشتر خطوط هم‌زمان قطع شوند، چیزی پنهان نمی‌شود (احتمالاً مشکل از شبکه خود پنل است).",
+      "subLineHealthDesc": "Every minute the panel checks each line on the nodes. A line that fails 3 times in a row, or whose node server is offline (UDP lines such as Hysteria2 included), is taken out of subscriptions, so users who refresh stop getting it; it comes back by itself once it works again. Nothing is removed or detached. If most lines fail at once while every node looks down, the master's own network is suspected and nothing is hidden.",
       "cfSettings": "Cloudflare",
       "cfIntro": "به پنل اجازه می‌دهد رکوردهای A نودهای شما را بسازد و به‌روز کند (نودها ← دامنه، و افزودن با یک کلیک).",
       "cfApiToken": "توکن API",
@@ -2164,7 +2164,9 @@
       "eventGroupChina": "Reachability from China (ISP probes)",
       "eventChinaBlocked": "Unreachable",
       "eventChinaOk": "Back",
-      "eventPanelUpdate": "Automatic panel update"
+      "eventPanelUpdate": "Automatic panel update",
+      "eventLineDown": "Line hidden",
+      "eventLineUp": "Line back"
     },
     "xray": {
       "save": "ذخیره",
@@ -3191,7 +3193,9 @@
       "chinaReason_blocked": "no probe gets through",
       "eventPanelUpdateStarted": "Automatic update started: {{ .From }} → {{ .To }} ({{ .Nodes }} nodes told to update too). The panel restarts in a moment.",
       "eventPanelUpdateDone": "The panel updated itself to {{ .To }} (from {{ .From }}).",
-      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log."
+      "eventPanelUpdateFailed": "Automatic update to {{ .To }} failed; the panel still runs {{ .From }}. Check the panel log.",
+      "eventLineDown": "Line {{ .Line }} cannot be reached and was taken out of subscriptions",
+      "eventLineUp": "Line {{ .Line }} works again and is back in subscriptions"
     },
     "buttons": {
       "closeKeyboard": "❌ بستن کیبورد",
