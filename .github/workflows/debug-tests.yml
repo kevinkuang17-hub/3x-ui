@@ -4,8 +4,8 @@ on:
   push:
     branches: ["dev/**"]
 env:
-  PKGS: "./internal/web/service/ ./internal/web/job/ ./internal/sub/ ./internal/web/controller/"
-  RUN: "ConfigHistory|NodeCost|Plan|NodeJoin|NodeDns|Apple|Render|Probe|LineHealth|App|PanelUsers|OperatorAllowed|Passkey"
+  PKGS: "./..."
+  RUN: "."
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,7 +22,26 @@ jobs:
           set +e
           go test -count=1 -run "$RUN" $PKGS > out.txt 2>&1
           code=$?
-          grep -E -- "--- FAIL|FAIL|panic|_test.go:[0-9]+|Error|\.go:[0-9]+:" out.txt | head -120 > fail.txt
+          grep -E -- "--- FAIL|^FAIL|panic|_test.go:[0-9]+" out.txt | head -150 > fail.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' fail.txt)
           echo "::error title=go test::${msg}"
+          exit $code
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Gen
+        run: |
+          set +e
+          (cd frontend && npm ci --no-audit --no-fund >/dev/null 2>&1)
+          make gen > gen.txt 2>&1; code=$?
+          { tail -40 gen.txt; git status --short; git diff --stat; git diff | head -150; } > fail.txt
+          msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' fail.txt)
+          echo "::error title=gen::${msg}"
           exit $code
