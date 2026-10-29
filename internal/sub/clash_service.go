@@ -23,9 +23,6 @@ import (
 )
 
 type SubClashService struct {
-	enableRouting bool
-	clashRules    string
-	SubService    *SubService
 	// live reads the global template from settings on every request, so a template picked in the
 	// rule library applies without restarting the subscription server.
 	live           bool

@@ -22,7 +22,7 @@ func TestGetClash_GroupRulesOverrideGlobal(t *testing.T) {
 	if err := db.Create(&model.ClientGroup{Name: "vip", ClashRules: "DOMAIN-SUFFIX,crm-group.test,DIRECT"}).Error; err != nil {
 		t.Fatal(err)
 	}
-	clash := NewSubClashService(true, "DOMAIN-SUFFIX,global.test,DIRECT", NewSubService(""))
+	clash := NewSubClashService(true, "DOMAIN-SUFFIX,global.test,DIRECT", false, NewSubService(""))
 
 	vip, _, err := clash.GetClash("sub-vip", "sub.example.com")
 	if err != nil {
@@ -51,7 +51,7 @@ func TestGetClash_GroupRulesApplyWhenGlobalRoutingDisabled(t *testing.T) {
 	if err := db.Create(&model.ClientGroup{Name: "vip", ClashRules: "DOMAIN-SUFFIX,crm-group.test,DIRECT"}).Error; err != nil {
 		t.Fatal(err)
 	}
-	out, _, err := NewSubClashService(false, "", NewSubService("")).GetClash("sub-vip", "sub.example.com")
+	out, _, err := NewSubClashService(false, "", false, NewSubService("")).GetClash("sub-vip", "sub.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)
 	}
@@ -70,7 +70,7 @@ func TestGetClash_GroupWithoutRulesFollowsGlobal(t *testing.T) {
 	if err := db.Create(&model.ClientGroup{Name: "basic"}).Error; err != nil {
 		t.Fatal(err)
 	}
-	out, _, err := NewSubClashService(true, "DOMAIN-SUFFIX,global.test,DIRECT", NewSubService("")).GetClash("sub-g", "sub.example.com")
+	out, _, err := NewSubClashService(true, "DOMAIN-SUFFIX,global.test,DIRECT", false, NewSubService("")).GetClash("sub-g", "sub.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestGetClash_RuleLibraryGoesAheadOfTemplate(t *testing.T) {
 	if err := (&service.ClientService{}).SetGroupRouting("own", "", &service.RoutingChoice{ExtraRules: "own.example,REJECT"}); err != nil {
 		t.Fatal(err)
 	}
-	clash := NewSubClashService(true, "DOMAIN-SUFFIX,template.test,DIRECT", NewSubService(""))
+	clash := NewSubClashService(true, "DOMAIN-SUFFIX,template.test,DIRECT", false, NewSubService(""))
 
 	out, _, err := clash.GetClash("sub-lib", "sub.example.com")
 	if err != nil {
@@ -138,7 +138,7 @@ func TestGetClash_LibraryProxyFollowsTemplateMainGroup(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	out, _, err := NewSubClashService(true, template, NewSubService("")).GetClash("sub-tpl", "sub.example.com")
+	out, _, err := NewSubClashService(true, template, false, NewSubService("")).GetClash("sub-tpl", "sub.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestGetClash_CompanyDNS(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	clash := NewSubClashService(false, "", NewSubService(""))
+	clash := NewSubClashService(false, "", false, NewSubService(""))
 	plain, _, err := clash.GetClash("sub-dns", "sub.example.com")
 	if err != nil {
 		t.Fatal(err)

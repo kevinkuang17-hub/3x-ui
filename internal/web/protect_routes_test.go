@@ -32,7 +32,7 @@ func protectRouter(t *testing.T, settings map[string]string) *gin.Engine {
 		_ = panelaccess.Configure("")
 	})
 	previous := global.GetWebServer()
-	s := NewServer()
+	s := NewServer(nil)
 	s.cron = cron.New(cron.WithLocation(time.Local), cron.WithSeconds())
 	global.SetWebServer(s)
 	t.Cleanup(func() {
