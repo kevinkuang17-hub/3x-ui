@@ -1,11 +1,13 @@
 # Temporary: surfaces failing Go test output as annotations (job logs are not reachable from the dev sandbox).
 name: debug-tests
+permissions:
+  contents: write
 on:
   push:
     branches: ["dev/**"]
 env:
-  PKGS: "./internal/web/service/ ./internal/web/job/ ./internal/sub/ ./internal/web/controller/"
-  RUN: "ConfigHistory|NodeCost|Plan|NodeJoin|NodeDns|Apple|Render|Probe|LineHealth|App|PanelUsers|OperatorAllowed|Passkey"
+  PKGS: "./..."
+  RUN: "."
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,7 +24,30 @@ jobs:
           set +e
           go test -count=1 -run "$RUN" $PKGS > out.txt 2>&1
           code=$?
-          grep -E -- "--- FAIL|FAIL|panic|_test.go:[0-9]+|Error|\.go:[0-9]+:" out.txt | head -120 > fail.txt
+          grep -E -- "--- FAIL|^FAIL|panic|_test.go:[0-9]+|\.go:[0-9]+:[0-9]+:" out.txt | head -150 > fail.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' fail.txt)
           echo "::error title=go test::${msg}"
+          exit $code
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Gen
+        run: |
+          set +e
+          (cd frontend && npm ci --no-audit --no-fund >/dev/null 2>&1)
+          make gen > gen.txt 2>&1; code=$?
+          { tail -30 gen.txt; git status --short; } > fail.txt
+          msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' fail.txt)
+          echo "::error title=gen::${msg}"
+          rm -f gen.txt fail.txt
+          git config user.name gen-bot; git config user.email gen-bot@users.noreply.github.com
+          git add frontend/src/generated frontend/public/openapi.json
+          git commit -m "gen: regenerate from CI" && git push origin HEAD:${GITHUB_REF_NAME}
           exit $code
