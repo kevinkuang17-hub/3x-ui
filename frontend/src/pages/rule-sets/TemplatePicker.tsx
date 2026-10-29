@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Form, Input, Select, Tag } from 'antd';
 import { useQuery } from '@tanstack/react-query';
@@ -36,14 +36,20 @@ interface Props {
 
 // TemplatePicker chooses the one-click routing template the rule library builds on.
 export default function TemplatePicker({ value, onChange, groups, groupsError }: Props) {
+  const uid = useId();
   const { t } = useTranslation();
   const [choice, setChoice] = useState(() => choiceOf(value));
   // Custom text is handed up when the box loses focus, so typing a URL does not fetch every prefix.
   const [customText, setCustomText] = useState(() => (choiceOf(value) === CUSTOM ? value : ''));
   return (
     <Form layout="vertical">
-      <Form.Item label={t('pages.ruleSets.template')} extra={t('pages.ruleSets.templateDesc')}>
+      <Form.Item
+        htmlFor={`${uid}-select-46`}
+        label={t('pages.ruleSets.template')}
+        extra={t('pages.ruleSets.templateDesc')}
+      >
         <Select
+          id={`${uid}-select-46`}
           value={choice}
           onChange={(c: string) => {
             setChoice(c);
@@ -64,6 +70,7 @@ export default function TemplatePicker({ value, onChange, groups, groupsError }:
       {choice === CUSTOM && (
         <Form.Item>
           <Input.TextArea
+            aria-label={t('pages.groups.clashRulesCustomPlaceholder')}
             value={customText}
             onChange={(e) => setCustomText(e.target.value)}
             onBlur={() => onChange(customText.trim())}

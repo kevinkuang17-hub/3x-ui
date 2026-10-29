@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AutoComplete,
@@ -93,6 +93,7 @@ async function fetchGroupNames(): Promise<string[]> {
 }
 
 export default function PlansPage() {
+  const uid = useId();
   usePageTitle();
   const { t } = useTranslation();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -209,7 +210,7 @@ export default function PlansPage() {
               aria-label={t('pages.plans.apply')}
               size="small"
               type="text"
-              icon={<ThunderboltOutlined />}
+              icon={<ThunderboltOutlined aria-hidden />}
               onClick={() => {
                 setApplyEmails([]);
                 setApplyMode('renew');
@@ -222,7 +223,7 @@ export default function PlansPage() {
               aria-label={t('edit')}
               size="small"
               type="text"
-              icon={<EditOutlined />}
+              icon={<EditOutlined aria-hidden />}
               onClick={() => setEditing({ ...row })}
             />
           </Tooltip>
@@ -232,7 +233,7 @@ export default function PlansPage() {
               size="small"
               type="text"
               danger
-              icon={<DeleteOutlined />}
+              icon={<DeleteOutlined aria-hidden />}
               onClick={() => onDelete(row)}
             />
           </Tooltip>
@@ -294,7 +295,7 @@ export default function PlansPage() {
                 <div className="card-toolbar">
                   <Button
                     type="primary"
-                    icon={<PlusOutlined />}
+                    icon={<PlusOutlined aria-hidden />}
                     onClick={() => setEditing({ ...EMPTY_PLAN })}
                   >
                     {t('pages.plans.add')}
@@ -313,7 +314,7 @@ export default function PlansPage() {
                 locale={{
                   emptyText: (
                     <div className="card-empty">
-                      <ShoppingOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                      <ShoppingOutlined aria-hidden style={{ fontSize: 32, marginBottom: 8 }} />
                       <div>{t('pages.plans.empty')}</div>
                     </div>
                   ),
@@ -335,16 +336,22 @@ export default function PlansPage() {
         >
           {editing && (
             <Form layout="vertical">
-              <Form.Item label={t('pages.plans.name')} required>
+              <Form.Item htmlFor={`${uid}-input-339`} label={t('pages.plans.name')} required>
                 <Input
+                  id={`${uid}-input-339`}
                   value={editing.name}
                   onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                   autoFocus
                 />
               </Form.Item>
               <Space wrap>
-                <Form.Item label={t('pages.plans.traffic')} extra={t('pages.plans.zeroUnlimited')}>
+                <Form.Item
+                  htmlFor={`${uid}-inputnumber-347`}
+                  label={t('pages.plans.traffic')}
+                  extra={t('pages.plans.zeroUnlimited')}
+                >
                   <InputNumber
+                    id={`${uid}-inputnumber-347`}
                     min={0}
                     addonAfter="GB"
                     value={+(editing.totalGB / GiB).toFixed(2)}
@@ -353,23 +360,38 @@ export default function PlansPage() {
                     }
                   />
                 </Form.Item>
-                <Form.Item label={t('pages.plans.days')} extra={t('pages.plans.zeroNever')}>
+                <Form.Item
+                  htmlFor={`${uid}-inputnumber-357`}
+                  label={t('pages.plans.days')}
+                  extra={t('pages.plans.zeroNever')}
+                >
                   <InputNumber
+                    id={`${uid}-inputnumber-357`}
                     min={0}
                     value={editing.days}
                     onChange={(v) => setEditing({ ...editing, days: Number(v ?? 0) })}
                   />
                 </Form.Item>
-                <Form.Item label={t('pages.plans.limitIp')} extra={t('pages.plans.zeroUnlimited')}>
+                <Form.Item
+                  htmlFor={`${uid}-inputnumber-364`}
+                  label={t('pages.plans.limitIp')}
+                  extra={t('pages.plans.zeroUnlimited')}
+                >
                   <InputNumber
+                    id={`${uid}-inputnumber-364`}
                     min={0}
                     value={editing.limitIp}
                     onChange={(v) => setEditing({ ...editing, limitIp: Number(v ?? 0) })}
                   />
                 </Form.Item>
               </Space>
-              <Form.Item label={t('pages.plans.group')} extra={t('pages.plans.groupDesc')}>
+              <Form.Item
+                htmlFor={`${uid}-autocomplete-372`}
+                label={t('pages.plans.group')}
+                extra={t('pages.plans.groupDesc')}
+              >
                 <AutoComplete
+                  id={`${uid}-autocomplete-372`}
                   value={editing.group}
                   options={groupOptions}
                   onChange={(v: string) => setEditing({ ...editing, group: v })}
@@ -377,39 +399,46 @@ export default function PlansPage() {
                 />
               </Form.Item>
               <Form.Item
+                htmlFor={`${uid}-switch-383`}
                 label={t('pages.plans.delayStart')}
                 extra={t('pages.plans.delayStartDesc')}
               >
                 <Switch
+                  id={`${uid}-switch-383`}
                   checked={editing.delayStart}
                   onChange={(v) => setEditing({ ...editing, delayStart: v })}
                 />
               </Form.Item>
               <Form.Item
+                htmlFor={`${uid}-switch-392`}
                 label={t('pages.plans.resetTraffic')}
                 extra={t('pages.plans.resetTrafficDesc')}
               >
                 <Switch
+                  id={`${uid}-switch-392`}
                   checked={editing.resetTraffic}
                   onChange={(v) => setEditing({ ...editing, resetTraffic: v })}
                 />
               </Form.Item>
               <Space wrap>
-                <Form.Item label={t('pages.plans.price')}>
+                <Form.Item htmlFor={`${uid}-input-399`} label={t('pages.plans.price')}>
                   <Input
+                    id={`${uid}-input-399`}
                     value={editing.price}
                     onChange={(e) => setEditing({ ...editing, price: e.target.value })}
                   />
                 </Form.Item>
-                <Form.Item label={t('pages.plans.sortOrder')}>
+                <Form.Item htmlFor={`${uid}-inputnumber-405`} label={t('pages.plans.sortOrder')}>
                   <InputNumber
+                    id={`${uid}-inputnumber-405`}
                     value={editing.sortOrder}
                     onChange={(v) => setEditing({ ...editing, sortOrder: Number(v ?? 0) })}
                   />
                 </Form.Item>
               </Space>
-              <Form.Item label={t('pages.plans.remark')}>
+              <Form.Item htmlFor={`${uid}-input-textarea-412`} label={t('pages.plans.remark')}>
                 <Input.TextArea
+                  id={`${uid}-input-textarea-412`}
                   value={editing.remark}
                   autoSize={{ minRows: 2, maxRows: 5 }}
                   onChange={(e) => setEditing({ ...editing, remark: e.target.value })}
@@ -431,8 +460,9 @@ export default function PlansPage() {
           destroyOnHidden
         >
           <Form layout="vertical">
-            <Form.Item label={t('pages.plans.clients')}>
+            <Form.Item htmlFor={`${uid}-select-435`} label={t('pages.plans.clients')}>
               <Select
+                id={`${uid}-select-435`}
                 mode="multiple"
                 allowClear
                 showSearch
@@ -443,8 +473,9 @@ export default function PlansPage() {
                 style={{ width: '100%' }}
               />
             </Form.Item>
-            <Form.Item label={t('pages.plans.pickGroup')}>
+            <Form.Item htmlFor={`${uid}-select-447`} label={t('pages.plans.pickGroup')}>
               <Select
+                id={`${uid}-select-447`}
                 value={null}
                 placeholder={t('pages.plans.pickGroupPlaceholder')}
                 options={groupOptions}

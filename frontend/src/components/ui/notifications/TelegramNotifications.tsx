@@ -14,13 +14,14 @@ import type { NotificationGroupConfig } from './types';
 
 const GROUPS: NotificationGroupConfig[] = [
   {
-    icon: <CloudServerOutlined />,
+    icon: <CloudServerOutlined aria-hidden />,
     title: 'eventGroupOutbound',
     events: [
       {
         key: 'outbound.down',
         label: 'eventOutboundDown',
         settingKey: 'outboundDownThreshold',
+        hint: 'eventDownThresholdHint',
         extra: ({ value, onChange, ariaLabel }) => (
           <InputNumber
             size="small"
@@ -37,7 +38,7 @@ const GROUPS: NotificationGroupConfig[] = [
     ],
   },
   {
-    icon: <ThunderboltOutlined />,
+    icon: <ThunderboltOutlined aria-hidden />,
     title: 'eventGroupXray',
     events: [
       { key: 'xray.crash', label: 'eventXrayCrash', settingKey: '' },
@@ -45,17 +46,33 @@ const GROUPS: NotificationGroupConfig[] = [
     ],
   },
   {
-    icon: <DesktopOutlined />,
+    icon: <DesktopOutlined aria-hidden />,
     title: 'eventGroupNode',
     events: [
-      { key: 'node.down', label: 'eventNodeDown', settingKey: '' },
+      {
+        key: 'node.down',
+        label: 'eventNodeDown',
+        settingKey: 'nodeDownThreshold',
+        hint: 'eventDownThresholdHint',
+        extra: ({ value, onChange, ariaLabel }) => (
+          <InputNumber
+            size="small"
+            min={1}
+            max={100}
+            value={value}
+            onChange={onChange}
+            aria-label={ariaLabel}
+            style={{ width: 80 }}
+          />
+        ),
+      },
       { key: 'node.up', label: 'eventNodeUp', settingKey: '' },
       { key: 'line.down', label: 'eventLineDown', settingKey: '' },
       { key: 'line.up', label: 'eventLineUp', settingKey: '' },
     ],
   },
   {
-    icon: <GlobalOutlined />,
+    icon: <GlobalOutlined aria-hidden />,
     title: 'eventGroupChina',
     events: [
       { key: 'china.blocked', label: 'eventChinaBlocked', settingKey: '' },
@@ -63,7 +80,7 @@ const GROUPS: NotificationGroupConfig[] = [
     ],
   },
   {
-    icon: <DashboardOutlined />,
+    icon: <DashboardOutlined aria-hidden />,
     title: 'eventGroupSystem',
     events: [
       {
@@ -101,7 +118,7 @@ const GROUPS: NotificationGroupConfig[] = [
     ],
   },
   {
-    icon: <SafetyOutlined />,
+    icon: <SafetyOutlined aria-hidden />,
     title: 'eventGroupSecurity',
     events: [{ key: 'login.attempt', label: 'eventLoginAttempt', settingKey: '' }],
   },

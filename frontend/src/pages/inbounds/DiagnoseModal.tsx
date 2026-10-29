@@ -34,9 +34,9 @@ async function runDiagnose(ids: number[]): Promise<Report[]> {
 }
 
 const LEVEL_ICON: Record<string, React.ReactNode> = {
-  ok: <CheckCircleFilled className="diag-ok" />,
-  warn: <ExclamationCircleFilled className="diag-warn" />,
-  error: <CloseCircleFilled className="diag-error" />,
+  ok: <CheckCircleFilled aria-hidden className="diag-ok" />,
+  warn: <ExclamationCircleFilled aria-hidden className="diag-warn" />,
+  error: <CloseCircleFilled aria-hidden className="diag-error" />,
 };
 
 // Problems first, so a long list starts with what needs attention.
@@ -193,7 +193,12 @@ export default function DiagnoseModal({ open, ids, onClose, onChanged }: Diagnos
       onCancel={onClose}
       destroyOnHidden
       footer={[
-        <Button key="again" icon={<ReloadOutlined />} disabled={busy} onClick={() => void run(ids)}>
+        <Button
+          key="again"
+          icon={<ReloadOutlined aria-hidden />}
+          disabled={busy}
+          onClick={() => void run(ids)}
+        >
           {t('pages.inbounds.diagnose.again')}
         </Button>,
         <Button key="close" type="primary" onClick={onClose}>

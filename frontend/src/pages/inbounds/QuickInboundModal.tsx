@@ -506,6 +506,7 @@ export default function QuickInboundModal({
             <Space direction="vertical" size={4}>
               <Typography.Text>{t('pages.inbounds.quick.server')}</Typography.Text>
               <Select
+                aria-label={t('pages.inbounds.quick.server')}
                 value={server}
                 onChange={setServer}
                 className="quick-inbound-server"
@@ -519,6 +520,7 @@ export default function QuickInboundModal({
           <Space direction="vertical" size={4}>
             <Typography.Text>{t('pages.inbounds.quick.baseName')}</Typography.Text>
             <Input
+              aria-label={t('pages.inbounds.quick.baseName')}
               value={baseName}
               placeholder={t('pages.inbounds.quick.remarkPlaceholder')}
               onChange={(e) => {
@@ -638,6 +640,7 @@ export default function QuickInboundModal({
                     {row && (
                       <Space wrap size={8} className="quick-inbound-fields">
                         <Input
+                          aria-label={t('pages.inbounds.quick.remark')}
                           size="small"
                           prefix={t('pages.inbounds.quick.remark')}
                           value={row.remark}
@@ -646,6 +649,7 @@ export default function QuickInboundModal({
                           }
                         />
                         <InputNumber
+                          aria-label={t('pages.inbounds.quick.port')}
                           size="small"
                           prefix={t('pages.inbounds.quick.port')}
                           min={1}
@@ -714,7 +718,7 @@ export default function QuickInboundModal({
                 )}
                 <Button
                   size="small"
-                  icon={<ReloadOutlined />}
+                  icon={<ReloadOutlined aria-hidden />}
                   loading={scanning}
                   onClick={() => void scanReality()}
                 >
@@ -726,6 +730,7 @@ export default function QuickInboundModal({
             <Space direction="vertical" size={4} className="quick-inbound-row">
               <Typography.Text>{t('pages.inbounds.quick.clients')}</Typography.Text>
               <Select
+                aria-label={t('pages.inbounds.quick.clients')}
                 value={clientsChoice}
                 onChange={setClientsChoice}
                 options={[

@@ -95,7 +95,7 @@ export default function FrontSection() {
   return (
     <div style={{ marginBottom: 16 }}>
       <Typography.Text strong>
-        <GlobalOutlined /> {t('pages.protect.frontTitle')}
+        <GlobalOutlined aria-hidden /> {t('pages.protect.frontTitle')}
       </Typography.Text>
       <Typography.Paragraph type="secondary" style={{ margin: '4px 0 8px' }}>
         {t('pages.protect.frontDesc', { port: front.port })}
@@ -163,6 +163,7 @@ export default function FrontSection() {
       <Space orientation="vertical" size={8}>
         <Space wrap>
           <Switch
+            aria-label={t('pages.protect.frontEnable', { port })}
             checked={front.enabled}
             disabled={!front.hasCert || (!front.enabled && !!front.conflict)}
             loading={save.isPending}
@@ -173,6 +174,7 @@ export default function FrontSection() {
         <Space wrap>
           <span>{t('pages.protect.frontPort')}</span>
           <InputNumber
+            aria-label={t('pages.protect.frontPort')}
             min={1}
             max={65535}
             value={port}
@@ -195,6 +197,7 @@ export default function FrontSection() {
         </Space>
         <Space wrap>
           <Switch
+            aria-label={t('pages.protect.frontOnly', { port: front.panelPort })}
             checked={front.frontOnly}
             disabled={
               !front.enabled ||

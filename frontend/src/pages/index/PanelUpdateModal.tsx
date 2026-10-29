@@ -198,7 +198,12 @@ export default function PanelUpdateModal({
         <div className="version-list">
           <div className="version-list-item">
             <span>{t('pages.index.devChannel')}</span>
-            <Switch checked={!!devChannelEnable} loading={channelBusy} onChange={handleChannel} />
+            <Switch
+              aria-label={t('pages.index.devChannel')}
+              checked={!!devChannelEnable}
+              loading={channelBusy}
+              onChange={handleChannel}
+            />
           </div>
         </div>
 
@@ -207,6 +212,7 @@ export default function PanelUpdateModal({
             <div className="version-list-item">
               <span>{t('pages.index.autoUpdate')}</span>
               <Switch
+                aria-label={t('pages.index.autoUpdate')}
                 checked={auto.enable}
                 loading={autoBusy}
                 onChange={(enable) => void saveAuto({ enable })}
@@ -217,6 +223,7 @@ export default function PanelUpdateModal({
                 <div className="version-list-item">
                   <span>{t('pages.index.autoUpdateHour')}</span>
                   <Select
+                    aria-label={t('pages.index.autoUpdateHour')}
                     size="small"
                     value={auto.hour}
                     disabled={autoBusy}
@@ -295,7 +302,7 @@ export default function PanelUpdateModal({
             type="primary"
             disabled={!info.updateAvailable}
             onClick={updatePanel}
-            icon={<CloudDownloadOutlined />}
+            icon={<CloudDownloadOutlined aria-hidden />}
           >
             {t('pages.index.updatePanel')}
           </Button>

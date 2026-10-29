@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Button, Checkbox, Form, Input, Modal, Space, Spin, Typography } from 'antd';
 
@@ -40,6 +40,7 @@ function suggestLabel(name: string): string {
 }
 
 export default function NodeDnsModal({ node, onClose, onChanged }: Props) {
+  const uid = useId();
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [nameEdit, setNameEdit] = useState<string | null>(null);
@@ -153,11 +154,25 @@ export default function NodeDnsModal({ node, onClose, onChanged }: Props) {
           />
         )}
         <Form layout="vertical">
-          <Form.Item label={t('pages.nodes.dns.name')} extra={t('pages.nodes.dns.nameDesc')}>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="hk-a" />
-          </Form.Item>
-          <Form.Item label={t('pages.nodes.dns.ip')} extra={t('pages.nodes.dns.ipDesc')}>
+          <Form.Item
+            htmlFor={`${uid}-input-157`}
+            label={t('pages.nodes.dns.name')}
+            extra={t('pages.nodes.dns.nameDesc')}
+          >
             <Input
+              id={`${uid}-input-157`}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="hk-a"
+            />
+          </Form.Item>
+          <Form.Item
+            htmlFor={`${uid}-input-160`}
+            label={t('pages.nodes.dns.ip')}
+            extra={t('pages.nodes.dns.ipDesc')}
+          >
+            <Input
+              id={`${uid}-input-160`}
               value={ip}
               onChange={(e) => setIp(e.target.value.trim())}
               placeholder={record?.observedIp || '203.0.113.10'}

@@ -163,7 +163,13 @@ export default function LoginPage() {
     [],
   );
 
-  const themeIcon = !isDark ? <SunOutlined /> : !isUltra ? <MoonOutlined /> : <MoonFilled />;
+  const themeIcon = !isDark ? (
+    <SunOutlined aria-hidden />
+  ) : !isUltra ? (
+    <MoonOutlined aria-hidden />
+  ) : (
+    <MoonFilled aria-hidden />
+  );
 
   return (
     <ConfigProvider theme={antdThemeConfig}>
@@ -202,7 +208,7 @@ export default function LoginPage() {
                 size="large"
                 className="toolbar-btn"
                 aria-label={t('pages.settings.language')}
-                icon={<TranslationOutlined />}
+                icon={<TranslationOutlined aria-hidden />}
               />
             </Popover>
           </div>
@@ -234,7 +240,7 @@ export default function LoginPage() {
                       rules={{ validate: rhfZodValidate(LoginFormSchema.shape.username) }}
                     >
                       <Input
-                        prefix={<UserOutlined />}
+                        prefix={<UserOutlined aria-hidden />}
                         autoComplete="username"
                         size="large"
                         placeholder={t('username')}
@@ -248,7 +254,7 @@ export default function LoginPage() {
                       rules={{ validate: rhfZodValidate(LoginFormSchema.shape.password) }}
                     >
                       <Input.Password
-                        prefix={<LockOutlined />}
+                        prefix={<LockOutlined aria-hidden />}
                         autoComplete="current-password"
                         size="large"
                         placeholder={t('password')}
@@ -262,7 +268,7 @@ export default function LoginPage() {
                         rules={{ validate: rhfZodValidate(TwoFactorCodeSchema) }}
                       >
                         <Input
-                          prefix={<KeyOutlined />}
+                          prefix={<KeyOutlined aria-hidden />}
                           autoComplete="one-time-code"
                           size="large"
                           placeholder={t('twoFactorCode')}
@@ -283,7 +289,7 @@ export default function LoginPage() {
                         </Button>
                         {passkeyAvailable && (
                           <Button
-                            icon={<KeyOutlined />}
+                            icon={<KeyOutlined aria-hidden />}
                             size="large"
                             block
                             loading={passkeyBusy}

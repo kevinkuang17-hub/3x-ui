@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -74,6 +74,7 @@ export default function DecoyCard() {
 }
 
 function DecoyForm({ initial }: { initial: DecoySettings }) {
+  const uid = useId();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<SiteDraft>({
@@ -161,7 +162,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
               <Button
                 size="small"
                 danger
-                icon={<PoweroffOutlined />}
+                icon={<PoweroffOutlined aria-hidden />}
                 loading={deploy.isPending && deploy.variables?.mode === 'off'}
                 onClick={() => deploy.mutate({ ...saved, mode: 'off' })}
               >
@@ -197,7 +198,10 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
               >
                 <Space size={6}>
                   {selected && (
-                    <CheckCircleFilled style={{ color: 'var(--ant-color-primary, #1677ff)' }} />
+                    <CheckCircleFilled
+                      aria-hidden
+                      style={{ color: 'var(--ant-color-primary, #1677ff)' }}
+                    />
                   )}
                   <Typography.Text strong>{t(`pages.protect.decoyMode_${m}`)}</Typography.Text>
                   {initial.mode === m && <Tag color="green">{t('pages.protect.decoyLive')}</Tag>}
@@ -215,11 +219,13 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
         <Row gutter={16}>
           <Col xs={24} md={8}>
             <Form.Item
+              htmlFor={`${uid}-input-222`}
               label={t('pages.protect.decoySiteTitle')}
               required={needsName}
               extra={needsName ? undefined : t('pages.protect.decoyNoName')}
             >
               <Input
+                id={`${uid}-input-222`}
                 value={draft.title}
                 maxLength={80}
                 disabled={!needsName}
@@ -229,8 +235,9 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
             </Form.Item>
           </Col>
           <Col xs={24} md={10}>
-            <Form.Item label={t('pages.protect.decoyTagline')}>
+            <Form.Item htmlFor={`${uid}-input-233`} label={t('pages.protect.decoyTagline')}>
               <Input
+                id={`${uid}-input-233`}
                 value={draft.tagline}
                 maxLength={200}
                 disabled={!needsName}
@@ -240,8 +247,9 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
             </Form.Item>
           </Col>
           <Col xs={24} md={6}>
-            <Form.Item label={t('pages.protect.decoyEmail')}>
+            <Form.Item htmlFor={`${uid}-input-244`} label={t('pages.protect.decoyEmail')}>
               <Input
+                id={`${uid}-input-244`}
                 value={draft.email}
                 disabled={!needsName}
                 placeholder="info@example.com"
@@ -253,7 +261,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
         <Space wrap>
           <Button
             type="primary"
-            icon={<RocketOutlined />}
+            icon={<RocketOutlined aria-hidden />}
             disabled={!canDeploy}
             loading={deploy.isPending && deploy.variables?.mode !== 'off'}
             onClick={() => deploy.mutate(draft)}
@@ -261,7 +269,7 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
             {t('pages.protect.decoyDeploy')}
           </Button>
           <Button
-            icon={<EyeOutlined />}
+            icon={<EyeOutlined aria-hidden />}
             loading={previewMut.isPending}
             onClick={() => previewMut.mutate(draft)}
           >
@@ -279,12 +287,12 @@ function DecoyForm({ initial }: { initial: DecoySettings }) {
           {t('pages.protect.decoyUploadDesc')}
         </Typography.Paragraph>
         <Space wrap>
-          <Button icon={<UploadOutlined />} loading={uploading} onClick={upload}>
+          <Button icon={<UploadOutlined aria-hidden />} loading={uploading} onClick={upload}>
             {t('pages.protect.decoyUpload')}
           </Button>
           <Button
             disabled={!initial.customSite}
-            icon={<RocketOutlined />}
+            icon={<RocketOutlined aria-hidden />}
             loading={deploy.isPending && deploy.variables?.mode === 'custom'}
             onClick={() => deploy.mutate({ ...saved, mode: 'custom' })}
           >

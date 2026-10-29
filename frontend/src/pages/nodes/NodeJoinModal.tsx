@@ -59,7 +59,7 @@ export default function NodeJoinModal({ open, onClose, onCopied }: Props) {
             </Typography.Paragraph>
             <Button
               type="primary"
-              icon={<CopyOutlined />}
+              icon={<CopyOutlined aria-hidden />}
               onClick={async () => {
                 if (await ClipboardManager.copyText(command)) onCopied();
               }}

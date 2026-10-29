@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -131,6 +131,7 @@ function AccessForm({
   callerIp: string;
   onChanged: () => void;
 }) {
+  const uid = useId();
   const { t } = useTranslation();
   const [value, setValue] = useState(initial.split(',').filter(Boolean).join('\n'));
   const save = useMutation({
@@ -142,10 +143,12 @@ function AccessForm({
   return (
     <Form layout="vertical">
       <Form.Item
+        htmlFor={`${uid}-input-textarea-148`}
         label={t('pages.protect.accessList')}
         extra={t('pages.protect.accessYourIp', { ip: callerIp })}
       >
         <Input.TextArea
+          id={`${uid}-input-textarea-148`}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           autoSize={{ minRows: 3, maxRows: 8 }}
@@ -156,7 +159,7 @@ function AccessForm({
       <Space wrap>
         <Button
           type="primary"
-          icon={<SaveOutlined />}
+          icon={<SaveOutlined aria-hidden />}
           loading={save.isPending}
           onClick={() => save.mutate()}
         >
@@ -204,6 +207,7 @@ function CfRow({
       <Typography.Text strong>{label}</Typography.Text>
       <Space wrap style={{ display: 'flex', marginTop: 6 }}>
         <Input
+          aria-label={label}
           style={{ width: 260 }}
           value={domain}
           placeholder="panel.example.com"
@@ -214,7 +218,7 @@ function CfRow({
         />
         <Tag>{t('pages.protect.port', { port })}</Tag>
         <Button
-          icon={<ReloadOutlined />}
+          icon={<ReloadOutlined aria-hidden />}
           loading={busy}
           disabled={!domain.trim()}
           onClick={() => run('/cf/status', { domain, port })}
@@ -223,6 +227,7 @@ function CfRow({
         </Button>
         {status?.found && (
           <Switch
+            aria-label={t('pages.protect.cfHidden')}
             checked={status.proxied}
             loading={busy}
             checkedChildren={t('pages.protect.cfHidden')}
@@ -335,7 +340,7 @@ function SpeedupCard() {
           <Space wrap>
             <Button
               type="primary"
-              icon={<ThunderboltOutlined />}
+              icon={<ThunderboltOutlined aria-hidden />}
               loading={act.isPending && act.variables === 'apply'}
               onClick={() => act.mutate('apply')}
             >
@@ -402,11 +407,11 @@ function NodesCard() {
         row.allowIps === undefined ? (
           '—'
         ) : row.allowIps ? (
-          <Tag color="green" icon={<LockOutlined />}>
+          <Tag color="green" icon={<LockOutlined aria-hidden />}>
             {row.allowIps}
           </Tag>
         ) : (
-          <Tag icon={<UnlockOutlined />}>{t('pages.protect.open')}</Tag>
+          <Tag icon={<UnlockOutlined aria-hidden />}>{t('pages.protect.open')}</Tag>
         ),
     },
     {
@@ -417,7 +422,7 @@ function NodesCard() {
           <Button
             size="small"
             disabled={!row.online}
-            icon={<ThunderboltOutlined />}
+            icon={<ThunderboltOutlined aria-hidden />}
             onClick={() => act.mutate({ id: row.id, action: 'speedupApply' })}
           >
             {t('pages.protect.speedupApply')}
@@ -433,7 +438,7 @@ function NodesCard() {
             <Button
               size="small"
               disabled={!row.online}
-              icon={<UnlockOutlined />}
+              icon={<UnlockOutlined aria-hidden />}
               onClick={() => act.mutate({ id: row.id, action: 'unlock' })}
             >
               {t('pages.protect.unlock')}
@@ -442,7 +447,7 @@ function NodesCard() {
             <Button
               size="small"
               disabled={!row.online || row.allowIps === undefined}
-              icon={<EyeInvisibleOutlined />}
+              icon={<EyeInvisibleOutlined aria-hidden />}
               onClick={() => confirmLock(row)}
             >
               {t('pages.protect.lock')}
@@ -458,7 +463,7 @@ function NodesCard() {
       size="small"
       title={t('pages.protect.nodesTitle')}
       extra={
-        <Button size="small" icon={<ReloadOutlined />} onClick={() => query.refetch()}>
+        <Button size="small" icon={<ReloadOutlined aria-hidden />} onClick={() => query.refetch()}>
           {t('refresh')}
         </Button>
       }

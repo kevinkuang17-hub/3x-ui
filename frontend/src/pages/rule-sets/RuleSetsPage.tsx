@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -130,7 +130,7 @@ function GlobalRoutingTab({
       <div style={{ marginTop: 16 }}>
         <Button
           type="primary"
-          icon={<SaveOutlined />}
+          icon={<SaveOutlined aria-hidden />}
           loading={saveMut.isPending}
           onClick={() => saveMut.mutate({ ...choice, template })}
         >
@@ -142,6 +142,7 @@ function GlobalRoutingTab({
 }
 
 export default function RuleSetsPage() {
+  const uid = useId();
   usePageTitle();
   const { t } = useTranslation();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -223,7 +224,7 @@ export default function RuleSetsPage() {
               aria-label={t('edit')}
               size="small"
               type="text"
-              icon={<EditOutlined />}
+              icon={<EditOutlined aria-hidden />}
               onClick={() => setEditing({ ...row })}
             />
           </Tooltip>
@@ -234,7 +235,7 @@ export default function RuleSetsPage() {
                 size="small"
                 type="text"
                 disabled={!row.edited}
-                icon={<RollbackOutlined />}
+                icon={<RollbackOutlined aria-hidden />}
                 onClick={() => onReset(row)}
               />
             </Tooltip>
@@ -245,7 +246,7 @@ export default function RuleSetsPage() {
                 size="small"
                 type="text"
                 danger
-                icon={<DeleteOutlined />}
+                icon={<DeleteOutlined aria-hidden />}
                 onClick={() => onDelete(row)}
               />
             </Tooltip>
@@ -319,13 +320,13 @@ export default function RuleSetsPage() {
                         <div className="card-toolbar" style={{ marginBottom: 12 }}>
                           <Button
                             type="primary"
-                            icon={<PlusOutlined />}
+                            icon={<PlusOutlined aria-hidden />}
                             onClick={() => setEditing({ ...EMPTY_SET })}
                           >
                             {t('pages.ruleSets.add')}
                           </Button>
                           <Button
-                            icon={<ImportOutlined />}
+                            icon={<ImportOutlined aria-hidden />}
                             style={{ marginInlineStart: 8 }}
                             onClick={() => setImporting(true)}
                           >
@@ -376,24 +377,27 @@ export default function RuleSetsPage() {
                   title={t('pages.ruleSets.builtinEditNote')}
                 />
               )}
-              <Form.Item label={t('pages.ruleSets.name')} required>
+              <Form.Item htmlFor={`${uid}-input-380`} label={t('pages.ruleSets.name')} required>
                 <Input
+                  id={`${uid}-input-380`}
                   value={editing.name}
                   onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                   autoFocus
                 />
               </Form.Item>
               <Space wrap>
-                <Form.Item label={t('pages.ruleSets.category')}>
+                <Form.Item htmlFor={`${uid}-autocomplete-388`} label={t('pages.ruleSets.category')}>
                   <AutoComplete
+                    id={`${uid}-autocomplete-388`}
                     style={{ width: 200 }}
                     value={editing.category}
                     options={categories}
                     onChange={(v: string) => setEditing({ ...editing, category: v })}
                   />
                 </Form.Item>
-                <Form.Item label={t('pages.ruleSets.defaultPolicy')}>
+                <Form.Item htmlFor={`${uid}-select-396`} label={t('pages.ruleSets.defaultPolicy')}>
                   <Select
+                    id={`${uid}-select-396`}
                     style={{ width: 160 }}
                     value={editing.defaultPolicy}
                     options={ROUTING_POLICIES.map((p) => ({
@@ -405,11 +409,13 @@ export default function RuleSetsPage() {
                 </Form.Item>
               </Space>
               <Form.Item
+                htmlFor={`${uid}-input-textarea-412`}
                 label={t('pages.ruleSets.rules')}
                 extra={t('pages.ruleSets.rulesDesc')}
                 required
               >
                 <Input.TextArea
+                  id={`${uid}-input-textarea-412`}
                   value={editing.rules}
                   onChange={(e) => setEditing({ ...editing, rules: e.target.value })}
                   autoSize={{ minRows: 8, maxRows: 20 }}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -68,6 +68,7 @@ const FRESH_SECONDS = 15 * 60;
 const ISPS = ['telecom', 'unicom', 'mobile', 'other'];
 
 export default function IspProbesCard() {
+  const uid = useId();
   const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
@@ -172,7 +173,7 @@ export default function IspProbesCard() {
               size="small"
               type="text"
               danger
-              icon={<DeleteOutlined />}
+              icon={<DeleteOutlined aria-hidden />}
               aria-label={t('delete')}
             />
           </Popconfirm>
@@ -219,7 +220,7 @@ export default function IspProbesCard() {
       hoverable
       title={
         <Space>
-          <RadarChartOutlined />
+          <RadarChartOutlined aria-hidden />
           {t('pages.nodes.probes.title')}
         </Space>
       }
@@ -228,7 +229,7 @@ export default function IspProbesCard() {
           <Button
             size="small"
             type="primary"
-            icon={<PlusOutlined />}
+            icon={<PlusOutlined aria-hidden />}
             onClick={() => void loadEnroll(false)}
           >
             {t('pages.nodes.probes.enroll')}
@@ -353,15 +354,17 @@ export default function IspProbesCard() {
             <Typography.Paragraph type="secondary">
               {t('pages.nodes.probes.intro')}
             </Typography.Paragraph>
-            <Form.Item label={t('pages.nodes.probes.name')}>
+            <Form.Item htmlFor={`${uid}-input-357`} label={t('pages.nodes.probes.name')}>
               <Input
+                id={`${uid}-input-357`}
                 value={name}
                 placeholder={t('pages.nodes.probes.namePlaceholder')}
                 onChange={(e) => setName(e.target.value)}
               />
             </Form.Item>
-            <Form.Item label={t('pages.nodes.probes.isp')}>
+            <Form.Item htmlFor={`${uid}-select-364`} label={t('pages.nodes.probes.isp')}>
               <Select
+                id={`${uid}-select-364`}
                 value={isp}
                 onChange={setIsp}
                 options={ISPS.map((v) => ({ value: v, label: t(`pages.nodes.probes.isp_${v}`) }))}
