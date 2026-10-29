@@ -58,6 +58,8 @@ func NewProtectController(g *gin.RouterGroup) *ProtectController {
 	g.GET("/cf", a.cfInfo)
 	g.POST("/cf/status", a.cfStatus)
 	g.POST("/cf/proxied", a.cfProxied)
+	g.GET("/cf/only", a.cfOnly)
+	g.POST("/cf/only", a.setCfOnly)
 	g.GET("/nodes", a.nodes)
 	g.POST("/nodes/:id/:action", a.nodeAction)
 	return a
@@ -347,6 +349,27 @@ func (a *ProtectController) cfProxied(c *gin.Context) {
 	defer cancel()
 	st, err := a.dns.SetProxied(ctx, body.Domain, body.Port, body.On)
 	jsonMsgObj(c, I18nWeb(c, "pages.protect.saved"), st, err)
+}
+
+func (a *ProtectController) cfOnly(c *gin.Context) {
+	jsonObj(c, a.protect.CfOnly(), nil)
+}
+
+// setCfOnly limits a port to Cloudflare or reopens it; CF-Ray shows this request came through
+// Cloudflare, which is how the panel knows its admin keeps access once the port is limited.
+func (a *ProtectController) setCfOnly(c *gin.Context) {
+	var body cfProxyBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	var err error
+	if body.On {
+		err = a.protect.EnableCfOnly(body.Port, c.GetHeader("CF-Ray") != "", body.Panel)
+	} else {
+		err = a.protect.DisableCfOnly(body.Port)
+	}
+	jsonMsgObj(c, I18nWeb(c, "pages.protect.saved"), a.protect.CfOnly(), err)
 }
 
 type nodeProtectRow struct {

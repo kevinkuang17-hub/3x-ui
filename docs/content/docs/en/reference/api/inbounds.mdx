@@ -53,6 +53,23 @@ _openapi:
       title: Fetch a single inbound by numeric ID.
       url: '#fetch-a-single-inbound-by-numeric-id'
     - depth: 2
+      title: 'Inspect this server (or a node) for the one-click inbound dialog: the
+        domain and certificate it could use for VLESS TLS (certState ok,
+        missing, unreadable, expired, mismatch or unverified), whether the
+        domain resolves to the server, free TCP and UDP ports (443 first, then
+        the other Cloudflare HTTPS ports, then random ones) and the recommended
+        security (tls when domain, certificate and DNS all check out, otherwise
+        reality).'
+      url: '#inspect-this-server-or-a-node-for-the-one-click-inbound-dialog-the-domain-and-certificate-it-could-use-for-vless-tls-certstate-ok-missing-unreadable-expired-mismatch-or-unverified-whether-the-domain-resolves-to-the-server-free-tcp-and-udp-ports-443-first-then-the-other-cloudflare-https-ports-then-random-ones-and-the-recommended-security-tls-when-domain-certificate-and-dns-all-check-out-otherwise-reality'
+    - depth: 2
+      title: 'Diagnose why inbounds cannot be used (ids empty = all): whether the
+        hosting server binds the port and its ufw lets it in (TCP/UDP), whether
+        the address resolves and answers from outside, the TLS certificate, and
+        a real client connection through the inbound from this panel. Each
+        report lists findings (key, level ok/warn/error, params, fix
+        enable/firewall/clients).'
+      url: '#diagnose-why-inbounds-cannot-be-used-ids-empty--all-whether-the-hosting-server-binds-the-port-and-its-ufw-lets-it-in-tcpudp-whether-the-address-resolves-and-answers-from-outside-the-tls-certificate-and-a-real-client-connection-through-the-inbound-from-this-panel-each-report-lists-findings-key-level-okwarnerror-params-fix-enablefirewallclients'
+    - depth: 2
       title: Create a new inbound. Send the full inbound payload (protocol, port,
         settings, streamSettings, sniffing, remark, expiryTime, total, enable).
         settings, streamSettings, and sniffing may be sent as nested JSON
@@ -154,6 +171,21 @@ _openapi:
         id: return-every-protocol-url-vless-vmess-trojan-ss-hysteria-mtproto-across-all-inbounds-and-all-of-their-clients-links-are-rendered-through-the-subscription-engine-so-the-configured-remark-template-name-only-display-part-is-applied-per-client--the-same-output-the-client-infoqr-pages-use-protocols-without-a-url-form-socks-http-mixed-wireguard-dokodemo-tunnel-contribute-nothing-used-by-the-panels-export-all-inbound-links-action
       - content: Fetch a single inbound by numeric ID.
         id: fetch-a-single-inbound-by-numeric-id
+      - content: 'Inspect this server (or a node) for the one-click inbound dialog: the
+          domain and certificate it could use for VLESS TLS (certState ok,
+          missing, unreadable, expired, mismatch or unverified), whether the
+          domain resolves to the server, free TCP and UDP ports (443 first, then
+          the other Cloudflare HTTPS ports, then random ones) and the
+          recommended security (tls when domain, certificate and DNS all check
+          out, otherwise reality).'
+        id: inspect-this-server-or-a-node-for-the-one-click-inbound-dialog-the-domain-and-certificate-it-could-use-for-vless-tls-certstate-ok-missing-unreadable-expired-mismatch-or-unverified-whether-the-domain-resolves-to-the-server-free-tcp-and-udp-ports-443-first-then-the-other-cloudflare-https-ports-then-random-ones-and-the-recommended-security-tls-when-domain-certificate-and-dns-all-check-out-otherwise-reality
+      - content: 'Diagnose why inbounds cannot be used (ids empty = all): whether the
+          hosting server binds the port and its ufw lets it in (TCP/UDP),
+          whether the address resolves and answers from outside, the TLS
+          certificate, and a real client connection through the inbound from
+          this panel. Each report lists findings (key, level ok/warn/error,
+          params, fix enable/firewall/clients).'
+        id: diagnose-why-inbounds-cannot-be-used-ids-empty--all-whether-the-hosting-server-binds-the-port-and-its-ufw-lets-it-in-tcpudp-whether-the-address-resolves-and-answers-from-outside-the-tls-certificate-and-a-real-client-connection-through-the-inbound-from-this-panel-each-report-lists-findings-key-level-okwarnerror-params-fix-enablefirewallclients
       - content: Create a new inbound. Send the full inbound payload (protocol, port,
           settings, streamSettings, sniffing, remark, expiryTime, total,
           enable). settings, streamSettings, and sniffing may be sent as nested
@@ -214,7 +246,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/inbounds/list","method":"get"},{"path":"/panel/api/inbounds/list/slim","method":"get"},{"path":"/panel/api/inbounds/options","method":"get"},{"path":"/panel/api/inbounds/amneziawgKernelReadiness","method":"get"},{"path":"/panel/api/inbounds/allLinks","method":"get"},{"path":"/panel/api/inbounds/get/{id}","method":"get"},{"path":"/panel/api/inbounds/add","method":"post"},{"path":"/panel/api/inbounds/del/{id}","method":"post"},{"path":"/panel/api/inbounds/bulkDel","method":"post"},{"path":"/panel/api/inbounds/update/{id}","method":"post"},{"path":"/panel/api/inbounds/setEnable/{id}","method":"post"},{"path":"/panel/api/inbounds/{id}/subSortIndex","method":"post"},{"path":"/panel/api/inbounds/{id}/resetTraffic","method":"post"},{"path":"/panel/api/inbounds/{id}/delAllClients","method":"post"},{"path":"/panel/api/inbounds/resetAllTraffics","method":"post"},{"path":"/panel/api/inbounds/import","method":"post"},{"path":"/panel/api/inbounds/pushClientTraffics","method":"post"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"get"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"post"}]} showTitle />
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/inbounds/list","method":"get"},{"path":"/panel/api/inbounds/list/slim","method":"get"},{"path":"/panel/api/inbounds/options","method":"get"},{"path":"/panel/api/inbounds/amneziawgKernelReadiness","method":"get"},{"path":"/panel/api/inbounds/allLinks","method":"get"},{"path":"/panel/api/inbounds/get/{id}","method":"get"},{"path":"/panel/api/inbounds/recommend","method":"get"},{"path":"/panel/api/inbounds/diagnose","method":"post"},{"path":"/panel/api/inbounds/add","method":"post"},{"path":"/panel/api/inbounds/del/{id}","method":"post"},{"path":"/panel/api/inbounds/bulkDel","method":"post"},{"path":"/panel/api/inbounds/update/{id}","method":"post"},{"path":"/panel/api/inbounds/setEnable/{id}","method":"post"},{"path":"/panel/api/inbounds/{id}/subSortIndex","method":"post"},{"path":"/panel/api/inbounds/{id}/resetTraffic","method":"post"},{"path":"/panel/api/inbounds/{id}/delAllClients","method":"post"},{"path":"/panel/api/inbounds/resetAllTraffics","method":"post"},{"path":"/panel/api/inbounds/import","method":"post"},{"path":"/panel/api/inbounds/pushClientTraffics","method":"post"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"get"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"post"}]} showTitle />
     </>
   );
 }

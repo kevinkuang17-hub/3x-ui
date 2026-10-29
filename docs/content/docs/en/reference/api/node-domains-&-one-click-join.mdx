@@ -1,0 +1,95 @@
+---
+title: Node domains & one-click join
+description: 'Cloudflare DNS for nodes (needs cfApiToken and cfZone in settings)
+  and the one-command node installer. A node with a domain can change IP without
+  users updating anything: update the record by hand, or turn on cfAutoDns to
+  follow the IP each node reports in its heartbeat.'
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: Whether Cloudflare is configured, and every node-to-domain link with the
+        last published IP, the IP the node currently reports, and the last
+        error.
+      url: '#whether-cloudflare-is-configured-and-every-node-to-domain-link-with-the-last-published-ip-the-ip-the-node-currently-reports-and-the-last-error'
+    - depth: 2
+      title: Link a node to a domain (a short label is completed with the zone),
+        publish its IP as a DNS-only A record, and optionally make the domain
+        the node address. ip defaults to the IP the node reports.
+      url: '#link-a-node-to-a-domain-a-short-label-is-completed-with-the-zone-publish-its-ip-as-a-dns-only-a-record-and-optionally-make-the-domain-the-node-address-ip-defaults-to-the-ip-the-node-reports'
+    - depth: 2
+      title: Re-publish the node record, optionally with a new IP ("change IP").
+      url: '#re-publish-the-node-record-optionally-with-a-new-ip-change-ip'
+    - depth: 2
+      title: Forget the node-to-domain link. The Cloudflare record itself is left in
+        place.
+      url: '#forget-the-node-to-domain-link-the-cloudflare-record-itself-is-left-in-place'
+    - depth: 2
+      title: Mint a single-use join link valid for 24 hours. Run the returned script
+        on a new server with the full link (origin + path) as its argument.
+      url: '#mint-a-single-use-join-link-valid-for-24-hours-run-the-returned-script-on-a-new-server-with-the-full-link-origin--path-as-its-argument'
+    - depth: 2
+      title: Public, called by join-node.sh. Reserves the node name from the region
+        code (HK A, HK B, …) and, with Cloudflare configured, creates its A
+        record. Re-running returns the same reservation.
+      url: '#public-called-by-join-nodesh-reserves-the-node-name-from-the-region-code-hk-a-hk-b--and-with-cloudflare-configured-creates-its-a-record-re-running-returns-the-same-reservation'
+    - depth: 2
+      title: Public, called by join-node.sh after installing. The master probes the
+        new panel (domain with certificate checks first, then IP, then pinning
+        the certificate it presents) and adds it as a node; the ticket is used
+        up only on success. Plain http needs allowHttp. reportPath is where the
+        node reports its IP afterwards.
+      url: '#public-called-by-join-nodesh-after-installing-the-master-probes-the-new-panel-domain-with-certificate-checks-first-then-ip-then-pinning-the-certificate-it-presents-and-adds-it-as-a-node-the-ticket-is-used-up-only-on-success-plain-http-needs-allowhttp-reportpath-is-where-the-node-reports-its-ip-afterwards'
+    - depth: 2
+      title: Public, called every 5 minutes by the reporter join-node.sh installs on a
+        node with a domain. The reported IPv4 must equal the address the request
+        comes from; when it changed, the Cloudflare record is updated.
+      url: '#public-called-every-5-minutes-by-the-reporter-join-nodesh-installs-on-a-node-with-a-domain-the-reported-ipv4-must-equal-the-address-the-request-comes-from-when-it-changed-the-cloudflare-record-is-updated'
+  structuredData:
+    headings:
+      - content: Whether Cloudflare is configured, and every node-to-domain link with
+          the last published IP, the IP the node currently reports, and the last
+          error.
+        id: whether-cloudflare-is-configured-and-every-node-to-domain-link-with-the-last-published-ip-the-ip-the-node-currently-reports-and-the-last-error
+      - content: Link a node to a domain (a short label is completed with the zone),
+          publish its IP as a DNS-only A record, and optionally make the domain
+          the node address. ip defaults to the IP the node reports.
+        id: link-a-node-to-a-domain-a-short-label-is-completed-with-the-zone-publish-its-ip-as-a-dns-only-a-record-and-optionally-make-the-domain-the-node-address-ip-defaults-to-the-ip-the-node-reports
+      - content: Re-publish the node record, optionally with a new IP ("change IP").
+        id: re-publish-the-node-record-optionally-with-a-new-ip-change-ip
+      - content: Forget the node-to-domain link. The Cloudflare record itself is left in
+          place.
+        id: forget-the-node-to-domain-link-the-cloudflare-record-itself-is-left-in-place
+      - content: Mint a single-use join link valid for 24 hours. Run the returned script
+          on a new server with the full link (origin + path) as its argument.
+        id: mint-a-single-use-join-link-valid-for-24-hours-run-the-returned-script-on-a-new-server-with-the-full-link-origin--path-as-its-argument
+      - content: Public, called by join-node.sh. Reserves the node name from the region
+          code (HK A, HK B, …) and, with Cloudflare configured, creates its A
+          record. Re-running returns the same reservation.
+        id: public-called-by-join-nodesh-reserves-the-node-name-from-the-region-code-hk-a-hk-b--and-with-cloudflare-configured-creates-its-a-record-re-running-returns-the-same-reservation
+      - content: Public, called by join-node.sh after installing. The master probes the
+          new panel (domain with certificate checks first, then IP, then pinning
+          the certificate it presents) and adds it as a node; the ticket is used
+          up only on success. Plain http needs allowHttp. reportPath is where
+          the node reports its IP afterwards.
+        id: public-called-by-join-nodesh-after-installing-the-master-probes-the-new-panel-domain-with-certificate-checks-first-then-ip-then-pinning-the-certificate-it-presents-and-adds-it-as-a-node-the-ticket-is-used-up-only-on-success-plain-http-needs-allowhttp-reportpath-is-where-the-node-reports-its-ip-afterwards
+      - content: Public, called every 5 minutes by the reporter join-node.sh installs on
+          a node with a domain. The reported IPv4 must equal the address the
+          request comes from; when it changed, the Cloudflare record is updated.
+        id: public-called-every-5-minutes-by-the-reporter-join-nodesh-installs-on-a-node-with-a-domain-the-reported-ipv4-must-equal-the-address-the-request-comes-from-when-it-changed-the-cloudflare-record-is-updated
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { OpenAPIPage } = props.components ?? {};
+  return (
+    <>
+      {props.children}
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/nodes/dns/list","method":"get"},{"path":"/panel/api/nodes/dns/set","method":"post"},{"path":"/panel/api/nodes/dns/sync/{id}","method":"post"},{"path":"/panel/api/nodes/dns/unlink/{id}","method":"post"},{"path":"/panel/api/nodes/join/ticket","method":"post"},{"path":"/node-join/{token}/prepare","method":"post"},{"path":"/node-join/{token}/finish","method":"post"},{"path":"/node-ip/{key}","method":"post"}]} showTitle />
+    </>
+  );
+}

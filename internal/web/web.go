@@ -421,6 +421,7 @@ func (s *Server) startTask(restartXray bool, loc *time.Location) {
 	// Xray template version history; conservative mode rolls back a breaking edit.
 	_, _ = s.cron.AddJob(cadenceConfigHistory, job.NewConfigHistoryJob())
 	_, _ = s.cron.AddJob("@hourly", job.NewVpsRenewJob())
+	_, _ = s.cron.AddJob("@daily", job.NewCfOnlyRefreshJob())
 	// Unattended self-update at the hour set in the update dialog (off by default).
 	_, _ = s.cron.AddJob("0 7 * * * *", job.NewAutoUpdateJob())
 	// Waits for the Telegram bot to come up so the "updated" notice is not lost.

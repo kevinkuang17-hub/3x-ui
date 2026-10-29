@@ -1,0 +1,238 @@
+---
+title: Protect & speed
+description: 'Anti-detection and tuning for this server: a decoy website on
+  every path outside the secret panel/subscription paths, a panel IP allowlist,
+  Cloudflare proxying of the panel or subscription domain, and BBR network
+  tuning. On a master the nodes endpoints run the same actions on node servers.'
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: Kernel, congestion control and whether the tuning is applied.
+      url: '#kernel-congestion-control-and-whether-the-tuning-is-applied'
+    - depth: 2
+      title: Switch to BBR + fq with larger buffers and TCP Fast Open; persisted in
+        /etc/sysctl.d.
+      url: '#switch-to-bbr--fq-with-larger-buffers-and-tcp-fast-open-persisted-in-etcsysctld'
+    - depth: 2
+      title: Restore the values the tuning replaced and remove its files.
+      url: '#restore-the-values-the-tuning-replaced-and-remove-its-files'
+    - depth: 2
+      title: The panel allowlist and the caller address.
+      url: '#the-panel-allowlist-and-the-caller-address'
+    - depth: 2
+      title: Save the allowlist (IPs/CIDRs; empty allows everyone). It must include
+        the caller. Node join, ISP probe and SSO routes stay open.
+      url: '#save-the-allowlist-ipscidrs-empty-allows-everyone-it-must-include-the-caller-node-join-isp-probe-and-sso-routes-stay-open'
+    - depth: 2
+      title: Allow only the caller (a master locking its node) and loopback.
+      url: '#allow-only-the-caller-a-master-locking-its-node-and-loopback'
+    - depth: 2
+      title: Decoy website mode, title and whether a custom site is uploaded.
+      url: '#decoy-website-mode-title-and-whether-a-custom-site-is-uploaded'
+    - depth: 2
+      title: 'Deploy the decoy at once: mode off, nginx, company, logistics, tech,
+        blog, photo, maintenance or custom, with the site name, optional slogan
+        and contact email.'
+      url: '#deploy-the-decoy-at-once-mode-off-nginx-company-logistics-tech-blog-photo-maintenance-or-custom-with-the-site-name-optional-slogan-and-contact-email'
+    - depth: 2
+      title: Whether the panel is also served as a website (on 443 its address has no
+        port; port says which), whether its own port is closed, and what
+        happened at the last start.
+      url: '#whether-the-panel-is-also-served-as-a-website-on-443-its-address-has-no-port-port-says-which-whether-its-own-port-is-closed-and-what-happened-at-the-last-start'
+    - depth: 2
+      title: Switch the website (TCP port, 443 by default; 0 keeps the current one)
+        and closing the panel port; the panel restarts. Closing is refused until
+        the website runs, and the port cannot move while the panel port is
+        closed.
+      url: '#switch-the-website-tcp-port-443-by-default-0-keeps-the-current-one-and-closing-the-panel-port-the-panel-restarts-closing-is-refused-until-the-website-runs-and-the-port-cannot-move-while-the-panel-port-is-closed'
+    - depth: 2
+      title: Render a template with unsaved details; returns the HTML as obj.
+      url: '#render-a-template-with-unsaved-details-returns-the-html-as-obj'
+    - depth: 2
+      title: The deployed decoy as one HTML document (obj), for embedding as a
+        Hysteria2 inbound masquerade; fails while no decoy is deployed.
+      url: '#the-deployed-decoy-as-one-html-document-obj-for-embedding-as-a-hysteria2-inbound-masquerade-fails-while-no-decoy-is-deployed'
+    - depth: 2
+      title: Whether ufw filters this server (status) and the port rules (port, proto
+        tcp/udp) the enabled local inbounds need.
+      url: '#whether-ufw-filters-this-server-status-and-the-port-rules-port-proto-tcpudp-the-enabled-local-inbounds-need'
+    - depth: 2
+      title: 'Open ports in ufw: the given rules, or every enabled local inbound port
+        (with its tcp/udp protocol) when rules is empty. Returns the rules
+        opened.'
+      url: '#open-ports-in-ufw-the-given-rules-or-every-enabled-local-inbound-port-with-its-tcpudp-protocol-when-rules-is-empty-returns-the-rules-opened'
+    - depth: 2
+      title: "Step 1 of putting a local VLESS+REALITY inbound in front of the panel's
+        own website: moves the website to a loopback port (TCP 443 must be free
+        apart from that inbound), then restarts the panel. Returns the domain
+        used as SNI and the internal port."
+      url: '#step-1-of-putting-a-local-vlessreality-inbound-in-front-of-the-panels-own-website-moves-the-website-to-a-loopback-port-tcp-443-must-be-free-apart-from-that-inbound-then-restarts-the-panel-returns-the-domain-used-as-sni-and-the-internal-port'
+    - depth: 2
+      title: "Step 2, once the website runs on its loopback port: moves the inbound to
+        TCP 443 with the server's domain as SNI, the website as REALITY target
+        and xver 1 (visitor address passed on)."
+      url: '#step-2-once-the-website-runs-on-its-loopback-port-moves-the-inbound-to-tcp-443-with-the-servers-domain-as-sni-the-website-as-reality-target-and-xver-1-visitor-address-passed-on'
+    - depth: 2
+      title: Progress and outcome of the last certificate request, with the tail of
+        the acme.sh log.
+      url: '#progress-and-outcome-of-the-last-certificate-request-with-the-tail-of-the-acmesh-log'
+    - depth: 2
+      title: Requests a Let's Encrypt certificate for the domain through acme.sh with
+        a Cloudflare DNS challenge (the panel's Cloudflare API token), installs
+        it under /root/cert/<domain>/ and lets acme.sh renew it. usePanel also
+        makes it the panel's HTTPS certificate and restarts the panel. Runs in
+        the background; poll GET for the outcome.
+      url: '#requests-a-lets-encrypt-certificate-for-the-domain-through-acmesh-with-a-cloudflare-dns-challenge-the-panels-cloudflare-api-token-installs-it-under-rootcertdomain-and-lets-acmesh-renew-it-usepanel-also-makes-it-the-panels-https-certificate-and-restarts-the-panel-runs-in-the-background-poll-get-for-the-outcome'
+    - depth: 2
+      title: The certificate a request from the panel installed on this server,
+        checked on disk; a master reads it from its nodes for one-click
+        inbounds.
+      url: '#the-certificate-a-request-from-the-panel-installed-on-this-server-checked-on-disk-a-master-reads-it-from-its-nodes-for-one-click-inbounds'
+    - depth: 2
+      title: Whether a port is bound on this server and let in by ufw (masters ask
+        their nodes this while diagnosing).
+      url: '#whether-a-port-is-bound-on-this-server-and-let-in-by-ufw-masters-ask-their-nodes-this-while-diagnosing'
+    - depth: 2
+      title: Upload a custom site as a .zip with index.html (multipart field file).
+      url: '#upload-a-custom-site-as-a-zip-with-indexhtml-multipart-field-file'
+    - depth: 2
+      title: Panel and subscription domains/ports and whether a Cloudflare token is
+        set.
+      url: '#panel-and-subscription-domainsports-and-whether-a-cloudflare-token-is-set'
+    - depth: 2
+      title: A domain’s Cloudflare A record, proxy state, SSL mode and whether its
+        port can be proxied.
+      url: '#a-domains-cloudflare-a-record-proxy-state-ssl-mode-and-whether-its-port-can-be-proxied'
+    - depth: 2
+      title: Turn Cloudflare proxying on or off for the domain (refused on ports
+        Cloudflare does not proxy or SSL mode off/flexible).
+      url: '#turn-cloudflare-proxying-on-or-off-for-the-domain-refused-on-ports-cloudflare-does-not-proxy-or-ssl-mode-offflexible'
+    - depth: 2
+      title: Which TCP ports answer Cloudflare’s edge only, the number of Cloudflare
+        ranges in ufw and whether ufw is active with a deny default.
+      url: '#which-tcp-ports-answer-cloudflares-edge-only-the-number-of-cloudflare-ranges-in-ufw-and-whether-ufw-is-active-with-a-deny-default'
+    - depth: 2
+      title: Limit a TCP port to Cloudflare’s published IP ranges in ufw (Cloudflare
+        let in first, then the open rule removed; refreshed daily), or reopen it
+        with on=false. Needs ufw active with incoming deny; for the panel port
+        (panel=true) the request must come through Cloudflare.
+      url: '#limit-a-tcp-port-to-cloudflares-published-ip-ranges-in-ufw-cloudflare-let-in-first-then-the-open-rule-removed-refreshed-daily-or-reopen-it-with-onfalse-needs-ufw-active-with-incoming-deny-for-the-panel-port-paneltrue-the-request-must-come-through-cloudflare'
+    - depth: 2
+      title: Each node’s tuning and allowlist, asked in parallel.
+      url: '#each-nodes-tuning-and-allowlist-asked-in-parallel'
+    - depth: 2
+      title: "Run speedupApply, speedupRevert, lock (allow only this master), unlock,
+        firewallAllow, certIssue (body {domain}: request a certificate on the
+        node with this master's Cloudflare token) or certStatus on a node."
+      url: '#run-speedupapply-speeduprevert-lock-allow-only-this-master-unlock-firewallallow-certissue-body-domain-request-a-certificate-on-the-node-with-this-masters-cloudflare-token-or-certstatus-on-a-node'
+  structuredData:
+    headings:
+      - content: Kernel, congestion control and whether the tuning is applied.
+        id: kernel-congestion-control-and-whether-the-tuning-is-applied
+      - content: Switch to BBR + fq with larger buffers and TCP Fast Open; persisted in
+          /etc/sysctl.d.
+        id: switch-to-bbr--fq-with-larger-buffers-and-tcp-fast-open-persisted-in-etcsysctld
+      - content: Restore the values the tuning replaced and remove its files.
+        id: restore-the-values-the-tuning-replaced-and-remove-its-files
+      - content: The panel allowlist and the caller address.
+        id: the-panel-allowlist-and-the-caller-address
+      - content: Save the allowlist (IPs/CIDRs; empty allows everyone). It must include
+          the caller. Node join, ISP probe and SSO routes stay open.
+        id: save-the-allowlist-ipscidrs-empty-allows-everyone-it-must-include-the-caller-node-join-isp-probe-and-sso-routes-stay-open
+      - content: Allow only the caller (a master locking its node) and loopback.
+        id: allow-only-the-caller-a-master-locking-its-node-and-loopback
+      - content: Decoy website mode, title and whether a custom site is uploaded.
+        id: decoy-website-mode-title-and-whether-a-custom-site-is-uploaded
+      - content: 'Deploy the decoy at once: mode off, nginx, company, logistics, tech,
+          blog, photo, maintenance or custom, with the site name, optional
+          slogan and contact email.'
+        id: deploy-the-decoy-at-once-mode-off-nginx-company-logistics-tech-blog-photo-maintenance-or-custom-with-the-site-name-optional-slogan-and-contact-email
+      - content: Whether the panel is also served as a website (on 443 its address has
+          no port; port says which), whether its own port is closed, and what
+          happened at the last start.
+        id: whether-the-panel-is-also-served-as-a-website-on-443-its-address-has-no-port-port-says-which-whether-its-own-port-is-closed-and-what-happened-at-the-last-start
+      - content: Switch the website (TCP port, 443 by default; 0 keeps the current one)
+          and closing the panel port; the panel restarts. Closing is refused
+          until the website runs, and the port cannot move while the panel port
+          is closed.
+        id: switch-the-website-tcp-port-443-by-default-0-keeps-the-current-one-and-closing-the-panel-port-the-panel-restarts-closing-is-refused-until-the-website-runs-and-the-port-cannot-move-while-the-panel-port-is-closed
+      - content: Render a template with unsaved details; returns the HTML as obj.
+        id: render-a-template-with-unsaved-details-returns-the-html-as-obj
+      - content: The deployed decoy as one HTML document (obj), for embedding as a
+          Hysteria2 inbound masquerade; fails while no decoy is deployed.
+        id: the-deployed-decoy-as-one-html-document-obj-for-embedding-as-a-hysteria2-inbound-masquerade-fails-while-no-decoy-is-deployed
+      - content: Whether ufw filters this server (status) and the port rules (port,
+          proto tcp/udp) the enabled local inbounds need.
+        id: whether-ufw-filters-this-server-status-and-the-port-rules-port-proto-tcpudp-the-enabled-local-inbounds-need
+      - content: 'Open ports in ufw: the given rules, or every enabled local inbound
+          port (with its tcp/udp protocol) when rules is empty. Returns the
+          rules opened.'
+        id: open-ports-in-ufw-the-given-rules-or-every-enabled-local-inbound-port-with-its-tcpudp-protocol-when-rules-is-empty-returns-the-rules-opened
+      - content: "Step 1 of putting a local VLESS+REALITY inbound in front of the
+          panel's own website: moves the website to a loopback port (TCP 443
+          must be free apart from that inbound), then restarts the panel.
+          Returns the domain used as SNI and the internal port."
+        id: step-1-of-putting-a-local-vlessreality-inbound-in-front-of-the-panels-own-website-moves-the-website-to-a-loopback-port-tcp-443-must-be-free-apart-from-that-inbound-then-restarts-the-panel-returns-the-domain-used-as-sni-and-the-internal-port
+      - content: "Step 2, once the website runs on its loopback port: moves the inbound
+          to TCP 443 with the server's domain as SNI, the website as REALITY
+          target and xver 1 (visitor address passed on)."
+        id: step-2-once-the-website-runs-on-its-loopback-port-moves-the-inbound-to-tcp-443-with-the-servers-domain-as-sni-the-website-as-reality-target-and-xver-1-visitor-address-passed-on
+      - content: Progress and outcome of the last certificate request, with the tail of
+          the acme.sh log.
+        id: progress-and-outcome-of-the-last-certificate-request-with-the-tail-of-the-acmesh-log
+      - content: Requests a Let's Encrypt certificate for the domain through acme.sh
+          with a Cloudflare DNS challenge (the panel's Cloudflare API token),
+          installs it under /root/cert/<domain>/ and lets acme.sh renew it.
+          usePanel also makes it the panel's HTTPS certificate and restarts the
+          panel. Runs in the background; poll GET for the outcome.
+        id: requests-a-lets-encrypt-certificate-for-the-domain-through-acmesh-with-a-cloudflare-dns-challenge-the-panels-cloudflare-api-token-installs-it-under-rootcertdomain-and-lets-acmesh-renew-it-usepanel-also-makes-it-the-panels-https-certificate-and-restarts-the-panel-runs-in-the-background-poll-get-for-the-outcome
+      - content: The certificate a request from the panel installed on this server,
+          checked on disk; a master reads it from its nodes for one-click
+          inbounds.
+        id: the-certificate-a-request-from-the-panel-installed-on-this-server-checked-on-disk-a-master-reads-it-from-its-nodes-for-one-click-inbounds
+      - content: Whether a port is bound on this server and let in by ufw (masters ask
+          their nodes this while diagnosing).
+        id: whether-a-port-is-bound-on-this-server-and-let-in-by-ufw-masters-ask-their-nodes-this-while-diagnosing
+      - content: Upload a custom site as a .zip with index.html (multipart field file).
+        id: upload-a-custom-site-as-a-zip-with-indexhtml-multipart-field-file
+      - content: Panel and subscription domains/ports and whether a Cloudflare token is
+          set.
+        id: panel-and-subscription-domainsports-and-whether-a-cloudflare-token-is-set
+      - content: A domain’s Cloudflare A record, proxy state, SSL mode and whether its
+          port can be proxied.
+        id: a-domains-cloudflare-a-record-proxy-state-ssl-mode-and-whether-its-port-can-be-proxied
+      - content: Turn Cloudflare proxying on or off for the domain (refused on ports
+          Cloudflare does not proxy or SSL mode off/flexible).
+        id: turn-cloudflare-proxying-on-or-off-for-the-domain-refused-on-ports-cloudflare-does-not-proxy-or-ssl-mode-offflexible
+      - content: Which TCP ports answer Cloudflare’s edge only, the number of Cloudflare
+          ranges in ufw and whether ufw is active with a deny default.
+        id: which-tcp-ports-answer-cloudflares-edge-only-the-number-of-cloudflare-ranges-in-ufw-and-whether-ufw-is-active-with-a-deny-default
+      - content: Limit a TCP port to Cloudflare’s published IP ranges in ufw (Cloudflare
+          let in first, then the open rule removed; refreshed daily), or reopen
+          it with on=false. Needs ufw active with incoming deny; for the panel
+          port (panel=true) the request must come through Cloudflare.
+        id: limit-a-tcp-port-to-cloudflares-published-ip-ranges-in-ufw-cloudflare-let-in-first-then-the-open-rule-removed-refreshed-daily-or-reopen-it-with-onfalse-needs-ufw-active-with-incoming-deny-for-the-panel-port-paneltrue-the-request-must-come-through-cloudflare
+      - content: Each node’s tuning and allowlist, asked in parallel.
+        id: each-nodes-tuning-and-allowlist-asked-in-parallel
+      - content: "Run speedupApply, speedupRevert, lock (allow only this master),
+          unlock, firewallAllow, certIssue (body {domain}: request a certificate
+          on the node with this master's Cloudflare token) or certStatus on a
+          node."
+        id: run-speedupapply-speeduprevert-lock-allow-only-this-master-unlock-firewallallow-certissue-body-domain-request-a-certificate-on-the-node-with-this-masters-cloudflare-token-or-certstatus-on-a-node
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { OpenAPIPage } = props.components ?? {};
+  return (
+    <>
+      {props.children}
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/protect/speedup","method":"get"},{"path":"/panel/api/protect/speedup/apply","method":"post"},{"path":"/panel/api/protect/speedup/revert","method":"post"},{"path":"/panel/api/protect/access","method":"get"},{"path":"/panel/api/protect/access","method":"post"},{"path":"/panel/api/protect/access/lockToCaller","method":"post"},{"path":"/panel/api/protect/decoy","method":"get"},{"path":"/panel/api/protect/decoy","method":"post"},{"path":"/panel/api/protect/front","method":"get"},{"path":"/panel/api/protect/front","method":"post"},{"path":"/panel/api/protect/decoy/preview","method":"post"},{"path":"/panel/api/protect/decoy/page","method":"get"},{"path":"/panel/api/protect/firewall","method":"get"},{"path":"/panel/api/protect/firewall/allow","method":"post"},{"path":"/panel/api/protect/realitySelf/prepare","method":"post"},{"path":"/panel/api/protect/realitySelf/apply","method":"post"},{"path":"/panel/api/protect/cert/issue","method":"get"},{"path":"/panel/api/protect/cert/issue","method":"post"},{"path":"/panel/api/protect/cert/installed","method":"get"},{"path":"/panel/api/protect/portcheck","method":"post"},{"path":"/panel/api/protect/decoy/upload","method":"post"},{"path":"/panel/api/protect/cf","method":"get"},{"path":"/panel/api/protect/cf/status","method":"post"},{"path":"/panel/api/protect/cf/proxied","method":"post"},{"path":"/panel/api/protect/cf/only","method":"get"},{"path":"/panel/api/protect/cf/only","method":"post"},{"path":"/panel/api/protect/nodes","method":"get"},{"path":"/panel/api/protect/nodes/{id}/{action}","method":"post"}]} showTitle />
+    </>
+  );
+}

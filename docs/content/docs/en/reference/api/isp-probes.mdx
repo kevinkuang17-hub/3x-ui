@@ -1,0 +1,101 @@
+---
+title: ISP probes
+description: Agents inside chosen networks (home routers on a given ISP, VPSs)
+  that check every 5 minutes whether node lines are reachable from there. With
+  subLineHealth on, a line that at least two fresh probes all fail to reach is
+  hidden from subscriptions even when the master reaches it.
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: 'Probes, the lines they test (this panel’s and its nodes’), each probe’s
+        latest result per line (TCP connect, ping, whether a local proxy
+        answered) and the verdict per line: ok, port (port blocked), ip (IP
+        blocked) or blocked.'
+      url: '#probes-the-lines-they-test-this-panels-and-its-nodes-each-probes-latest-result-per-line-tcp-connect-ping-whether-a-local-proxy-answered-and-the-verdict-per-line-ok-port-port-blocked-ip-ip-blocked-or-blocked'
+    - depth: 2
+      title: 'Register a probe. Returns its path (shown once) and subUrl, the same
+        probe on the subscription server when its address is known: install with
+        curl -fsSL "<url>/agent.sh" | sh -s -- install "<url>".'
+      url: '#register-a-probe-returns-its-path-shown-once-and-suburl-the-same-probe-on-the-subscription-server-when-its-address-is-known-install-with-curl--fssl-urlagentsh--sh--s----install-url'
+    - depth: 2
+      title: Remove a probe and its results.
+      url: '#remove-a-probe-and-its-results'
+    - depth: 2
+      title: 'The shared enrollment path (and subUrl on the subscription server): one
+        command, run on any router, registers that router as a probe: curl -fsSL
+        "<url>/agent.sh" | sh -s -- enroll "<url>".'
+      url: '#the-shared-enrollment-path-and-suburl-on-the-subscription-server-one-command-run-on-any-router-registers-that-router-as-a-probe-curl--fssl-urlagentsh--sh--s----enroll-url'
+    - depth: 2
+      title: Replace the enrollment key; the old command stops registering probes.
+        Probes already registered keep working.
+      url: '#replace-the-enrollment-key-the-old-command-stops-registering-probes-probes-already-registered-keep-working'
+    - depth: 2
+      title: 'Public: the probe agent script, for the enrollment command.'
+      url: '#public-the-probe-agent-script-for-the-enrollment-command'
+    - depth: 2
+      title: 'Public, used by the agent: register the calling router (form fields
+        deviceId, name such as "中国 广东 广州 电信") and return its own probe token as
+        plain text. The same deviceId gets its existing probe back with a new
+        token.'
+      url: '#public-used-by-the-agent-register-the-calling-router-form-fields-deviceid-name-such-as-中国-广东-广州-电信-and-return-its-own-probe-token-as-plain-text-the-same-deviceid-gets-its-existing-probe-back-with-a-new-token'
+    - depth: 2
+      title: 'Public, used by the agent: plain-text targets, one "inboundId host port"
+        per line.'
+      url: '#public-used-by-the-agent-plain-text-targets-one-inboundid-host-port-per-line'
+    - depth: 2
+      title: 'Public, used by the agent: report results.'
+      url: '#public-used-by-the-agent-report-results'
+    - depth: 2
+      title: 'Public: the POSIX-sh agent script (runs on OpenWrt).'
+      url: '#public-the-posix-sh-agent-script-runs-on-openwrt'
+  structuredData:
+    headings:
+      - content: 'Probes, the lines they test (this panel’s and its nodes’), each
+          probe’s latest result per line (TCP connect, ping, whether a local
+          proxy answered) and the verdict per line: ok, port (port blocked), ip
+          (IP blocked) or blocked.'
+        id: probes-the-lines-they-test-this-panels-and-its-nodes-each-probes-latest-result-per-line-tcp-connect-ping-whether-a-local-proxy-answered-and-the-verdict-per-line-ok-port-port-blocked-ip-ip-blocked-or-blocked
+      - content: 'Register a probe. Returns its path (shown once) and subUrl, the same
+          probe on the subscription server when its address is known: install
+          with curl -fsSL "<url>/agent.sh" | sh -s -- install "<url>".'
+        id: register-a-probe-returns-its-path-shown-once-and-suburl-the-same-probe-on-the-subscription-server-when-its-address-is-known-install-with-curl--fssl-urlagentsh--sh--s----install-url
+      - content: Remove a probe and its results.
+        id: remove-a-probe-and-its-results
+      - content: 'The shared enrollment path (and subUrl on the subscription server):
+          one command, run on any router, registers that router as a probe: curl
+          -fsSL "<url>/agent.sh" | sh -s -- enroll "<url>".'
+        id: the-shared-enrollment-path-and-suburl-on-the-subscription-server-one-command-run-on-any-router-registers-that-router-as-a-probe-curl--fssl-urlagentsh--sh--s----enroll-url
+      - content: Replace the enrollment key; the old command stops registering probes.
+          Probes already registered keep working.
+        id: replace-the-enrollment-key-the-old-command-stops-registering-probes-probes-already-registered-keep-working
+      - content: 'Public: the probe agent script, for the enrollment command.'
+        id: public-the-probe-agent-script-for-the-enrollment-command
+      - content: 'Public, used by the agent: register the calling router (form fields
+          deviceId, name such as "中国 广东 广州 电信") and return its own probe token
+          as plain text. The same deviceId gets its existing probe back with a
+          new token.'
+        id: public-used-by-the-agent-register-the-calling-router-form-fields-deviceid-name-such-as-中国-广东-广州-电信-and-return-its-own-probe-token-as-plain-text-the-same-deviceid-gets-its-existing-probe-back-with-a-new-token
+      - content: 'Public, used by the agent: plain-text targets, one "inboundId host
+          port" per line.'
+        id: public-used-by-the-agent-plain-text-targets-one-inboundid-host-port-per-line
+      - content: 'Public, used by the agent: report results.'
+        id: public-used-by-the-agent-report-results
+      - content: 'Public: the POSIX-sh agent script (runs on OpenWrt).'
+        id: public-the-posix-sh-agent-script-runs-on-openwrt
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { OpenAPIPage } = props.components ?? {};
+  return (
+    <>
+      {props.children}
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/probes/matrix","method":"get"},{"path":"/panel/api/probes/add","method":"post"},{"path":"/panel/api/probes/del/{id}","method":"post"},{"path":"/panel/api/probes/enroll","method":"get"},{"path":"/panel/api/probes/enroll/reset","method":"post"},{"path":"/probe-enroll/{key}/agent.sh","method":"get"},{"path":"/probe-enroll/{key}","method":"post"},{"path":"/probe/{token}","method":"get"},{"path":"/probe/{token}","method":"post"},{"path":"/probe/{token}/agent.sh","method":"get"}]} showTitle />
+    </>
+  );
+}

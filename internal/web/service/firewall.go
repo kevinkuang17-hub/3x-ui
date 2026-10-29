@@ -57,7 +57,8 @@ func (s *ProtectService) AllowPorts(rules []FirewallRule) ([]FirewallRule, error
 		if r.Port < 1 || r.Port > 65535 || (r.Proto != "tcp" && r.Proto != "udp") {
 			return done, common.NewErrorf("not a port rule: %d/%s", r.Port, r.Proto)
 		}
-		if slices.Contains(done, r) {
+		// A Cloudflare-only port keeps answering Cloudflare alone; reopening it would expose the origin.
+		if slices.Contains(done, r) || (r.Proto == "tcp" && cfOnlyPort(r.Port)) {
 			continue
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
