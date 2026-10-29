@@ -3174,6 +3174,21 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'GET',
+        path: '/panel/api/protect/cf/only',
+        summary:
+          'Which TCP ports answer Cloudflare\u2019s edge only, the number of Cloudflare ranges in ufw and whether ufw is active with a deny default.',
+        responseSchema: 'CfOnlyStatus',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/protect/cf/only',
+        summary:
+          'Limit a TCP port to Cloudflare\u2019s published IP ranges in ufw (Cloudflare let in first, then the open rule removed; refreshed daily), or reopen it with on=false. Needs ufw active with incoming deny; for the panel port (panel=true) the request must come through Cloudflare.',
+        body: '{\n  "port": 2053,\n  "on": true,\n  "panel": true\n}',
+        responseSchema: 'CfOnlyStatus',
+      },
+      {
+        method: 'GET',
         path: '/panel/api/protect/nodes',
         summary: 'Each node’s tuning and allowlist, asked in parallel.',
       },

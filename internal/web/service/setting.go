@@ -232,6 +232,7 @@ var defaultValueMap = map[string]string{
 	"autoUpdateHour":              "4",
 	"autoUpdateNodes":             "true",
 	"autoUpdateState":             "",
+	"cfOnlyState":                 "",
 	"probeEnrollKey":              "",
 
 	// LDAP defaults
@@ -2170,3 +2171,7 @@ func (s *SettingService) GetFactoryDefaults() map[string]string {
 	}
 	return result
 }
+
+func (s *SettingService) GetCfOnlyState() (string, error) { return s.getString("cfOnlyState") }
+
+func (s *SettingService) SetCfOnlyState(v string) error { return s.setString("cfOnlyState", v) }

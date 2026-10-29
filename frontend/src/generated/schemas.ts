@@ -1896,6 +1896,50 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "CfOnlyStatus": {
+    "description": "CfOnlyStatus is which TCP ports of this server answer Cloudflare's edge only, and whether ufw\nis in a state where that holds (active, dropping what no rule allows).",
+    "properties": {
+      "active": {
+        "example": true,
+        "type": "boolean"
+      },
+      "defaultDeny": {
+        "example": true,
+        "type": "boolean"
+      },
+      "firewall": {
+        "example": "ufw",
+        "type": "string"
+      },
+      "ports": {
+        "example": [
+          2053
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "ranges": {
+        "example": 22,
+        "type": "integer"
+      },
+      "updatedAt": {
+        "example": 1767225600000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "active",
+      "defaultDeny",
+      "firewall",
+      "ports",
+      "ranges",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
   "Client": {
     "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
     "properties": {

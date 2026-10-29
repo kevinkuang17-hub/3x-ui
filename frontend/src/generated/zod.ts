@@ -489,6 +489,16 @@ export const CertIssueStatusSchema = z.object({
 });
 export type CertIssueStatus = z.infer<typeof CertIssueStatusSchema>;
 
+export const CfOnlyStatusSchema = z.object({
+  active: z.boolean(),
+  defaultDeny: z.boolean(),
+  firewall: z.string(),
+  ports: z.array(z.number().int()),
+  ranges: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type CfOnlyStatus = z.infer<typeof CfOnlyStatusSchema>;
+
 export const ClientSchema = z.object({
   adTag: z.string().optional(),
   allowedIPs: z.array(z.string()).optional(),

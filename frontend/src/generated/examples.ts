@@ -459,6 +459,16 @@ export const EXAMPLES: Record<string, unknown> = {
     "running": false,
     "step": "issue"
   },
+  "CfOnlyStatus": {
+    "active": true,
+    "defaultDeny": true,
+    "firewall": "ufw",
+    "ports": [
+      2053
+    ],
+    "ranges": 22,
+    "updatedAt": 1767225600000
+  },
   "Client": {
     "adTag": "0123456789abcdef0123456789abcdef",
     "allowedIPs": [

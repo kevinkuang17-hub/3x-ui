@@ -462,6 +462,15 @@ export interface CertIssueStatus {
   step: string;
 }
 
+export interface CfOnlyStatus {
+  active: boolean;
+  defaultDeny: boolean;
+  firewall: string;
+  ports: number[];
+  ranges: number;
+  updatedAt: number;
+}
+
 export interface Client {
   adTag?: string;
   allowedIPs?: string[];
