@@ -52,6 +52,20 @@ _openapi:
       title: Return the Clash subscription status and metadata headers without a body.
         Registered only when Clash subscriptions are enabled.
       url: '#return-the-clash-subscription-status-and-metadata-headers-without-a-body-registered-only-when-clash-subscriptions-are-enabled'
+    - depth: 2
+      title: Surge managed profile at the fixed path /surge/. Built from the same
+        proxy list as the Clash subscription (hosts, line health and group
+        routing apply); transports Surge cannot express (gRPC, xhttp, REALITY,
+        WireGuard) are skipped.
+      url: '#surge-managed-profile-at-the-fixed-path-surge-built-from-the-same-proxy-list-as-the-clash-subscription-hosts-line-health-and-group-routing-apply-transports-surge-cannot-express-grpc-xhttp-reality-wireguard-are-skipped'
+    - depth: 2
+      title: Loon profile at the fixed path /loon/ (VLESS with REALITY supported).
+        Unsupported transports are skipped.
+      url: '#loon-profile-at-the-fixed-path-loon-vless-with-reality-supported-unsupported-transports-are-skipped'
+    - depth: 2
+      title: Quantumult X server list (server_remote) at the fixed path /qx/.
+        Unsupported transports are skipped.
+      url: '#quantumult-x-server-list-server_remote-at-the-fixed-path-qx-unsupported-transports-are-skipped'
   structuredData:
     headings:
       - content: 'Return base64-encoded subscription links for all enabled clients
@@ -87,6 +101,17 @@ _openapi:
       - content: Return the Clash subscription status and metadata headers without a
           body. Registered only when Clash subscriptions are enabled.
         id: return-the-clash-subscription-status-and-metadata-headers-without-a-body-registered-only-when-clash-subscriptions-are-enabled
+      - content: Surge managed profile at the fixed path /surge/. Built from the same
+          proxy list as the Clash subscription (hosts, line health and group
+          routing apply); transports Surge cannot express (gRPC, xhttp, REALITY,
+          WireGuard) are skipped.
+        id: surge-managed-profile-at-the-fixed-path-surge-built-from-the-same-proxy-list-as-the-clash-subscription-hosts-line-health-and-group-routing-apply-transports-surge-cannot-express-grpc-xhttp-reality-wireguard-are-skipped
+      - content: Loon profile at the fixed path /loon/ (VLESS with REALITY supported).
+          Unsupported transports are skipped.
+        id: loon-profile-at-the-fixed-path-loon-vless-with-reality-supported-unsupported-transports-are-skipped
+      - content: Quantumult X server list (server_remote) at the fixed path /qx/.
+          Unsupported transports are skipped.
+        id: quantumult-x-server-list-server_remote-at-the-fixed-path-qx-unsupported-transports-are-skipped
     contents:
       - content: Responds with the bare HwidSlotStatus object, not the
           <code>{success,msg,obj}</code> panel envelope, like the other
@@ -102,7 +127,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/{subPath}{subid}","method":"get"},{"path":"/{subPath}{subid}","method":"head"},{"path":"/{subPath}{subid}/hwid-status","method":"get"},{"path":"/{subPath}{subid}/hwid-status","method":"head"},{"path":"/{jsonPath}{subid}","method":"get"},{"path":"/{jsonPath}{subid}","method":"head"},{"path":"/{clashPath}{subid}","method":"get"},{"path":"/{clashPath}{subid}","method":"head"}]} showTitle />
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/{subPath}{subid}","method":"get"},{"path":"/{subPath}{subid}","method":"head"},{"path":"/{subPath}{subid}/hwid-status","method":"get"},{"path":"/{subPath}{subid}/hwid-status","method":"head"},{"path":"/{jsonPath}{subid}","method":"get"},{"path":"/{jsonPath}{subid}","method":"head"},{"path":"/{clashPath}{subid}","method":"get"},{"path":"/{clashPath}{subid}","method":"head"},{"path":"/{surgePath}{subid}","method":"get"},{"path":"/{loonPath}{subid}","method":"get"},{"path":"/{qxPath}{subid}","method":"get"}]} showTitle />
     </>
   );
 }

@@ -1,0 +1,123 @@
+---
+title: Routing rule library
+description: Named lists of domains/IPs (banks, logistics, shipping lines, …)
+  that subscription routing picks with a destination. The global choice applies
+  to clients whose group has no routing of its own; picked sets and custom rules
+  are placed before the base template rules in Clash/Mihomo, Surge and Loon
+  subscriptions and take effect on the next refresh. Built-in sets stay
+  editable; an edited one is kept as is on upgrade.
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: All rule sets, built-in ones first (missing built-ins are added on the
+        way).
+      url: '#all-rule-sets-built-in-ones-first-missing-built-ins-are-added-on-the-way'
+    - depth: 2
+      title: 'Create (id 0) or update a rule set. rules holds one match per line: a
+        domain, an IP/CIDR or TYPE,value without a policy.'
+      url: '#create-id-0-or-update-a-rule-set-rules-holds-one-match-per-line-a-domain-an-ipcidr-or-typevalue-without-a-policy'
+    - depth: 2
+      title: Delete an admin-made rule set (built-in sets can only be restored).
+      url: '#delete-an-admin-made-rule-set-built-in-sets-can-only-be-restored'
+    - depth: 2
+      title: Restore a built-in rule set to the shipped list.
+      url: '#restore-a-built-in-rule-set-to-the-shipped-list'
+    - depth: 2
+      title: The global picks and custom rules.
+      url: '#the-global-picks-and-custom-rules'
+    - depth: 2
+      title: Save the global picks (in match order) and custom rules. Optional
+        template sets the one-click routing template (empty turns template
+        routing off); it applies to subscriptions without a restart.
+      url: '#save-the-global-picks-in-match-order-and-custom-rules-optional-template-sets-the-one-click-routing-template-empty-turns-template-routing-off-it-applies-to-subscriptions-without-a-restart'
+    - depth: 2
+      title: Policy groups a routing template (URL or inline YAML) defines, fetched if
+        remote; picks may send traffic to them, and PROXY means the first one.
+      url: '#policy-groups-a-routing-template-url-or-inline-yaml-defines-fetched-if-remote-picks-may-send-traffic-to-them-and-proxy-means-the-first-one'
+    - depth: 2
+      title: The global DNS written into Clash/Mihomo, Surge and Loon subscriptions.
+      url: '#the-global-dns-written-into-clashmihomo-surge-and-loon-subscriptions'
+    - depth: 2
+      title: 'Save the global DNS: domestic and foreign resolvers, and company lines
+        "domains = servers" whose domains resolve through company DNS (and
+        optionally connect directly).'
+      url: '#save-the-global-dns-domestic-and-foreign-resolvers-and-company-lines-domains--servers-whose-domains-resolve-through-company-dns-and-optionally-connect-directly'
+    - depth: 2
+      title: 'One client’s routing: its own rules and DNS if set, its group, and
+        source (client, group or global) — whose rules its subscription uses
+        now.'
+      url: '#one-clients-routing-its-own-rules-and-dns-if-set-its-group-and-source-client-group-or-global--whose-rules-its-subscription-uses-now'
+    - depth: 2
+      title: Give one client its own routing ahead of its group’s and the global one.
+        own false follows the group again; dns null follows the group’s or
+        global DNS.
+      url: '#give-one-client-its-own-routing-ahead-of-its-groups-and-the-global-one-own-false-follows-the-group-again-dns-null-follows-the-groups-or-global-dns'
+    - depth: 2
+      title: 'Import a Clash/Mihomo config (https url, fetched as a Clash client, or
+        pasted content): rules become rule sets per destination; importDns also
+        takes over its DNS.'
+      url: '#import-a-clashmihomo-config-https-url-fetched-as-a-clash-client-or-pasted-content-rules-become-rule-sets-per-destination-importdns-also-takes-over-its-dns'
+    - depth: 2
+      title: The Clash rules a choice would add in front of the template, without
+        saving it.
+      url: '#the-clash-rules-a-choice-would-add-in-front-of-the-template-without-saving-it'
+  structuredData:
+    headings:
+      - content: All rule sets, built-in ones first (missing built-ins are added on the
+          way).
+        id: all-rule-sets-built-in-ones-first-missing-built-ins-are-added-on-the-way
+      - content: 'Create (id 0) or update a rule set. rules holds one match per line: a
+          domain, an IP/CIDR or TYPE,value without a policy.'
+        id: create-id-0-or-update-a-rule-set-rules-holds-one-match-per-line-a-domain-an-ipcidr-or-typevalue-without-a-policy
+      - content: Delete an admin-made rule set (built-in sets can only be restored).
+        id: delete-an-admin-made-rule-set-built-in-sets-can-only-be-restored
+      - content: Restore a built-in rule set to the shipped list.
+        id: restore-a-built-in-rule-set-to-the-shipped-list
+      - content: The global picks and custom rules.
+        id: the-global-picks-and-custom-rules
+      - content: Save the global picks (in match order) and custom rules. Optional
+          template sets the one-click routing template (empty turns template
+          routing off); it applies to subscriptions without a restart.
+        id: save-the-global-picks-in-match-order-and-custom-rules-optional-template-sets-the-one-click-routing-template-empty-turns-template-routing-off-it-applies-to-subscriptions-without-a-restart
+      - content: Policy groups a routing template (URL or inline YAML) defines, fetched
+          if remote; picks may send traffic to them, and PROXY means the first
+          one.
+        id: policy-groups-a-routing-template-url-or-inline-yaml-defines-fetched-if-remote-picks-may-send-traffic-to-them-and-proxy-means-the-first-one
+      - content: The global DNS written into Clash/Mihomo, Surge and Loon subscriptions.
+        id: the-global-dns-written-into-clashmihomo-surge-and-loon-subscriptions
+      - content: 'Save the global DNS: domestic and foreign resolvers, and company lines
+          "domains = servers" whose domains resolve through company DNS (and
+          optionally connect directly).'
+        id: save-the-global-dns-domestic-and-foreign-resolvers-and-company-lines-domains--servers-whose-domains-resolve-through-company-dns-and-optionally-connect-directly
+      - content: 'One client’s routing: its own rules and DNS if set, its group, and
+          source (client, group or global) — whose rules its subscription uses
+          now.'
+        id: one-clients-routing-its-own-rules-and-dns-if-set-its-group-and-source-client-group-or-global--whose-rules-its-subscription-uses-now
+      - content: Give one client its own routing ahead of its group’s and the global
+          one. own false follows the group again; dns null follows the group’s
+          or global DNS.
+        id: give-one-client-its-own-routing-ahead-of-its-groups-and-the-global-one-own-false-follows-the-group-again-dns-null-follows-the-groups-or-global-dns
+      - content: 'Import a Clash/Mihomo config (https url, fetched as a Clash client, or
+          pasted content): rules become rule sets per destination; importDns
+          also takes over its DNS.'
+        id: import-a-clashmihomo-config-https-url-fetched-as-a-clash-client-or-pasted-content-rules-become-rule-sets-per-destination-importdns-also-takes-over-its-dns
+      - content: The Clash rules a choice would add in front of the template, without
+          saving it.
+        id: the-clash-rules-a-choice-would-add-in-front-of-the-template-without-saving-it
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { OpenAPIPage } = props.components ?? {};
+  return (
+    <>
+      {props.children}
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/ruleSets/list","method":"get"},{"path":"/panel/api/ruleSets/save","method":"post"},{"path":"/panel/api/ruleSets/del/{id}","method":"post"},{"path":"/panel/api/ruleSets/reset/{id}","method":"post"},{"path":"/panel/api/ruleSets/routing","method":"get"},{"path":"/panel/api/ruleSets/routing","method":"post"},{"path":"/panel/api/ruleSets/groups","method":"post"},{"path":"/panel/api/ruleSets/dns","method":"get"},{"path":"/panel/api/ruleSets/dns","method":"post"},{"path":"/panel/api/ruleSets/client","method":"get"},{"path":"/panel/api/ruleSets/client","method":"post"},{"path":"/panel/api/ruleSets/import","method":"post"},{"path":"/panel/api/ruleSets/preview","method":"post"}]} showTitle />
+    </>
+  );
+}
