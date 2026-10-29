@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Form, Input, Modal, Select, Switch, Table, Tag, Typography } from 'antd';
 import type { TableColumnsType } from 'antd';
@@ -37,6 +37,7 @@ export default function RoutingChoiceEditor({
   onChange,
   groups = [],
 }: Props) {
+  const uid = useId();
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string[] | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -98,6 +99,7 @@ export default function RoutingChoiceEditor({
       width: 64,
       render: (_v, row) => (
         <Switch
+          aria-label={`${t('pages.ruleSets.use')} ${row.name}`}
           size="small"
           checked={picked.has(row.id)}
           onChange={(on) => setPick(row, on ? suggestPolicy(row, groups) : null)}
@@ -145,6 +147,7 @@ export default function RoutingChoiceEditor({
         return (
           <>
             <Select
+              aria-label={`${t('pages.ruleSets.policy')} ${row.name}`}
               size="small"
               style={{ width: 200 }}
               value={policy}
@@ -176,8 +179,13 @@ export default function RoutingChoiceEditor({
           scroll={{ x: 'max-content', y: 360 }}
         />
       </Form.Item>
-      <Form.Item label={t('pages.ruleSets.extraTitle')} extra={t('pages.ruleSets.extraDesc')}>
+      <Form.Item
+        htmlFor={`${uid}-input-textarea-180`}
+        label={t('pages.ruleSets.extraTitle')}
+        extra={t('pages.ruleSets.extraDesc')}
+      >
         <Input.TextArea
+          id={`${uid}-input-textarea-180`}
           value={value.extraRules}
           onChange={(e) => onChange({ ...value, extraRules: e.target.value })}
           autoSize={{ minRows: 4, maxRows: 14 }}
@@ -187,7 +195,7 @@ export default function RoutingChoiceEditor({
           style={{ fontFamily: 'monospace' }}
         />
       </Form.Item>
-      <Button icon={<EyeOutlined />} loading={previewing} onClick={showPreview}>
+      <Button icon={<EyeOutlined aria-hidden />} loading={previewing} onClick={showPreview}>
         {t('pages.ruleSets.preview')}
       </Button>
       <Modal

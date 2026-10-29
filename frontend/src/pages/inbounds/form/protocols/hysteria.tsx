@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Form, Input, InputNumber, Select, Switch, message } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
@@ -11,6 +12,7 @@ const MASQ_PATH = ['streamSettings', 'hysteriaSettings', 'masquerade'];
 
 export default function HysteriaFields() {
   const { t } = useTranslation();
+  const uid = useId();
   const { control, setValue } = useFormContext();
   const [messageApi, messageContextHolder] = message.useMessage();
   const applyDecoy = async () => {
@@ -50,12 +52,17 @@ export default function HysteriaFields() {
         label={t('pages.inbounds.form.masqueradeSite')}
         extra={t('pages.inbounds.form.masqueradeDecoyHint')}
       >
-        <Button size="small" icon={<GlobalOutlined />} onClick={() => void applyDecoy()}>
+        <Button
+          size="small"
+          icon={<GlobalOutlined aria-hidden />}
+          onClick={() => void applyDecoy()}
+        >
           {t('pages.inbounds.form.masqueradeUseDecoy')}
         </Button>
       </Form.Item>
-      <Form.Item label={t('pages.inbounds.form.masquerade')}>
+      <Form.Item htmlFor={`${uid}-masquerade`} label={t('pages.inbounds.form.masquerade')}>
         <Switch
+          id={`${uid}-masquerade`}
           checked={!!masq}
           onChange={(checked) =>
             setValue(

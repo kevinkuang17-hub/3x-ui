@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Checkbox, Form, Input, Modal, Radio } from 'antd';
 
@@ -20,6 +20,7 @@ interface Props {
 
 // ImportModal turns an existing Clash/Mihomo config or subscription into rule sets (and its DNS).
 export default function ImportModal({ open, onClose, onImported }: Props) {
+  const uid = useId();
   const { t } = useTranslation();
   const [source, setSource] = useState<'url' | 'paste'>('url');
   const [url, setUrl] = useState('');
@@ -77,16 +78,18 @@ export default function ImportModal({ open, onClose, onImported }: Props) {
           />
         </Form.Item>
         {source === 'url' ? (
-          <Form.Item label={t('pages.ruleSets.importUrl')}>
+          <Form.Item htmlFor={`${uid}-input-81`} label={t('pages.ruleSets.importUrl')}>
             <Input
+              id={`${uid}-input-81`}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com/clash/config.yaml"
             />
           </Form.Item>
         ) : (
-          <Form.Item label={t('pages.ruleSets.importContent')}>
+          <Form.Item htmlFor={`${uid}-input-textarea-89`} label={t('pages.ruleSets.importContent')}>
             <Input.TextArea
+              id={`${uid}-input-textarea-89`}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               autoSize={{ minRows: 8, maxRows: 16 }}

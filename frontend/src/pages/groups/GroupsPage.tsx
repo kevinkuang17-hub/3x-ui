@@ -1,4 +1,4 @@
-import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -94,6 +94,7 @@ async function fetchEmailsForGroup(name: string): Promise<string[]> {
 export default function GroupsPage() {
   usePageTitle();
   const { t } = useTranslation();
+  const uid = useId();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { isMobile } = useMediaQuery();
   const [modal, modalContextHolder] = Modal.useModal();
@@ -372,47 +373,47 @@ export default function GroupsPage() {
     return [
       {
         key: 'subLinks',
-        icon: <LinkOutlined />,
+        icon: <LinkOutlined aria-hidden />,
         label: t('pages.clients.subLinksSelected', { count: row.clientCount || 0 }),
         disabled: !row.clientCount,
         onClick: () => openSubLinksFor(row),
       },
       {
         key: 'adjust',
-        icon: <ClockCircleOutlined />,
+        icon: <ClockCircleOutlined aria-hidden />,
         label: t('pages.clients.adjustSelected', { count: row.clientCount || 0 }),
         disabled: !row.clientCount,
         onClick: () => openAdjustFor(row),
       },
       {
         key: 'reset',
-        icon: <RetweetOutlined />,
+        icon: <RetweetOutlined aria-hidden />,
         label: t('pages.groups.resetTraffic'),
         disabled: !row.clientCount,
         onClick: () => onResetTraffic(row),
       },
       {
         key: 'clashRules',
-        icon: <BranchesOutlined />,
+        icon: <BranchesOutlined aria-hidden />,
         label: t('pages.groups.clashRules'),
         onClick: () => setClashRulesTarget(row),
       },
       {
         key: 'addClients',
-        icon: <UsergroupAddOutlined />,
+        icon: <UsergroupAddOutlined aria-hidden />,
         label: t('pages.groups.addToGroup'),
         onClick: () => openAddClientsFor(row),
       },
       {
         key: 'rename',
-        icon: <EditOutlined />,
+        icon: <EditOutlined aria-hidden />,
         label: t('pages.groups.rename'),
         onClick: () => openRename(row),
       },
       { type: 'divider' },
       {
         key: 'removeClients',
-        icon: <UsergroupDeleteOutlined />,
+        icon: <UsergroupDeleteOutlined aria-hidden />,
         label: t('pages.groups.removeFromGroup'),
         danger: true,
         disabled: !row.clientCount,
@@ -420,7 +421,7 @@ export default function GroupsPage() {
       },
       {
         key: 'deleteClients',
-        icon: <DeleteOutlined />,
+        icon: <DeleteOutlined aria-hidden />,
         label: t('pages.groups.deleteClients'),
         danger: true,
         disabled: !row.clientCount,
@@ -428,7 +429,7 @@ export default function GroupsPage() {
       },
       {
         key: 'delete',
-        icon: <DeleteOutlined />,
+        icon: <DeleteOutlined aria-hidden />,
         label: t('pages.groups.deleteGroupOnly'),
         danger: true,
         onClick: () => onDelete(row),
@@ -449,7 +450,7 @@ export default function GroupsPage() {
               size="small"
               type="text"
               style={{ fontSize: 16 }}
-              icon={<MoreOutlined />}
+              icon={<MoreOutlined aria-hidden />}
             />
           </Dropdown>
           <Tooltip title={t('pages.groups.rename')}>
@@ -458,7 +459,7 @@ export default function GroupsPage() {
               size="small"
               type="text"
               style={{ fontSize: 16 }}
-              icon={<EditOutlined />}
+              icon={<EditOutlined aria-hidden />}
               onClick={() => openRename(row)}
             />
           </Tooltip>
@@ -575,14 +576,14 @@ export default function GroupsPage() {
                           <Statistic
                             title={t('pages.groups.totalGroups')}
                             value={String(totalGroups)}
-                            prefix={<TagsOutlined />}
+                            prefix={<TagsOutlined aria-hidden />}
                           />
                         </Col>
                         <Col xs={12} sm={12} md={6}>
                           <Statistic
                             title={t('pages.groups.totalGroupedClients')}
                             value={String(totalClients)}
-                            prefix={<TeamOutlined />}
+                            prefix={<TeamOutlined aria-hidden />}
                           />
                         </Col>
                         <Col xs={12} sm={12} md={6}>
@@ -591,9 +592,11 @@ export default function GroupsPage() {
                             value={0}
                             formatter={() => (
                               <span>
-                                <ArrowUpOutlined /> {SizeFormatter.sizeFormat(totalUpload)}
+                                <ArrowUpOutlined aria-hidden />{' '}
+                                {SizeFormatter.sizeFormat(totalUpload)}
                                 {' / '}
-                                <ArrowDownOutlined /> {SizeFormatter.sizeFormat(totalDownload)}
+                                <ArrowDownOutlined aria-hidden />{' '}
+                                {SizeFormatter.sizeFormat(totalDownload)}
                               </span>
                             )}
                           />
@@ -602,7 +605,7 @@ export default function GroupsPage() {
                           <Statistic
                             title={t('pages.groups.totalTraffic')}
                             value={SizeFormatter.sizeFormat(totalTraffic)}
-                            prefix={<PieChartOutlined />}
+                            prefix={<PieChartOutlined aria-hidden />}
                           />
                         </Col>
                       </Row>
@@ -618,7 +621,7 @@ export default function GroupsPage() {
                           <Button
                             aria-label={t('pages.groups.addGroup')}
                             type="primary"
-                            icon={<PlusOutlined />}
+                            icon={<PlusOutlined aria-hidden />}
                             onClick={openCreate}
                           >
                             {!isMobile && t('pages.groups.addGroup')}
@@ -636,7 +639,7 @@ export default function GroupsPage() {
                         locale={{
                           emptyText: (
                             <div className="card-empty">
-                              <TagsOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                              <TagsOutlined aria-hidden style={{ fontSize: 32, marginBottom: 8 }} />
                               <div>{t('noData')}</div>
                             </div>
                           ),
@@ -661,8 +664,9 @@ export default function GroupsPage() {
           destroyOnHidden
         >
           <Form layout="vertical">
-            <Form.Item label={t('pages.groups.name')}>
+            <Form.Item label={t('pages.groups.name')} htmlFor={`${uid}-create-name`}>
               <Input
+                id={`${uid}-create-name`}
                 value={createName}
                 onChange={(e) => setCreateName(e.target.value)}
                 onPressEnter={confirmCreate}
@@ -684,8 +688,9 @@ export default function GroupsPage() {
           destroyOnHidden
         >
           <Form layout="vertical">
-            <Form.Item label={t('pages.groups.name')}>
+            <Form.Item label={t('pages.groups.name')} htmlFor={`${uid}-rename-name`}>
               <Input
+                id={`${uid}-rename-name`}
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
                 onPressEnter={confirmRename}

@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Col, Form, Input, Row, Select, Switch } from 'antd';
 
@@ -55,20 +56,31 @@ interface Props {
 
 // DnsEditor edits the DNS a profile gets: domestic/foreign resolvers and company DNS rules.
 export default function DnsEditor({ value, onChange }: Props) {
+  const uid = useId();
   const { t } = useTranslation();
   const set = (patch: Partial<DnsConfig>) => onChange({ ...value, ...patch });
   return (
     <Form layout="vertical">
-      <Form.Item label={t('pages.ruleSets.dnsEnable')} extra={t('pages.ruleSets.dnsEnableDesc')}>
-        <Switch checked={value.enable} onChange={(enable) => set({ enable })} />
+      <Form.Item
+        htmlFor={`${uid}-switch-63`}
+        label={t('pages.ruleSets.dnsEnable')}
+        extra={t('pages.ruleSets.dnsEnableDesc')}
+      >
+        <Switch
+          id={`${uid}-switch-63`}
+          checked={value.enable}
+          onChange={(enable) => set({ enable })}
+        />
       </Form.Item>
       {value.enable && (
         <>
           <Form.Item
+            htmlFor={`${uid}-input-textarea-71`}
             label={t('pages.ruleSets.dnsCompany')}
             extra={t('pages.ruleSets.dnsCompanyDesc')}
           >
             <Input.TextArea
+              id={`${uid}-input-textarea-71`}
               value={value.company}
               onChange={(e) => set({ company: e.target.value })}
               autoSize={{ minRows: 3, maxRows: 10 }}
@@ -78,6 +90,7 @@ export default function DnsEditor({ value, onChange }: Props) {
           </Form.Item>
           <Form.Item>
             <Switch
+              aria-label={t('pages.ruleSets.dnsCompanyDirect')}
               size="small"
               checked={value.companyDirect}
               onChange={(companyDirect) => set({ companyDirect })}
@@ -87,10 +100,12 @@ export default function DnsEditor({ value, onChange }: Props) {
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
+                htmlFor={`${uid}-select-93`}
                 label={t('pages.ruleSets.dnsDomestic')}
                 extra={t('pages.ruleSets.dnsDefaultHint')}
               >
                 <Select
+                  id={`${uid}-select-93`}
                   mode="tags"
                   value={value.domestic}
                   onChange={(domestic: string[]) => set({ domestic })}
@@ -102,10 +117,12 @@ export default function DnsEditor({ value, onChange }: Props) {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
+                htmlFor={`${uid}-select-108`}
                 label={t('pages.ruleSets.dnsForeign')}
                 extra={t('pages.ruleSets.dnsDefaultHint')}
               >
                 <Select
+                  id={`${uid}-select-108`}
                   mode="tags"
                   value={value.foreign}
                   onChange={(foreign: string[]) => set({ foreign })}
@@ -118,8 +135,9 @@ export default function DnsEditor({ value, onChange }: Props) {
           </Row>
           <Row gutter={16}>
             <Col xs={24} md={8}>
-              <Form.Item label={t('pages.ruleSets.dnsMode')}>
+              <Form.Item htmlFor={`${uid}-select-122`} label={t('pages.ruleSets.dnsMode')}>
                 <Select
+                  id={`${uid}-select-122`}
                   value={value.mode || 'fake-ip'}
                   onChange={(mode: string) => set({ mode })}
                   options={[
@@ -130,16 +148,24 @@ export default function DnsEditor({ value, onChange }: Props) {
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
-              <Form.Item label={t('pages.ruleSets.dnsForeignViaProxy')}>
+              <Form.Item
+                htmlFor={`${uid}-switch-134`}
+                label={t('pages.ruleSets.dnsForeignViaProxy')}
+              >
                 <Switch
+                  id={`${uid}-switch-134`}
                   checked={value.foreignViaProxy}
                   onChange={(foreignViaProxy) => set({ foreignViaProxy })}
                 />
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
-              <Form.Item label="IPv6">
-                <Switch checked={value.ipv6} onChange={(ipv6) => set({ ipv6 })} />
+              <Form.Item htmlFor={`${uid}-switch-142`} label="IPv6">
+                <Switch
+                  id={`${uid}-switch-142`}
+                  checked={value.ipv6}
+                  onChange={(ipv6) => set({ ipv6 })}
+                />
               </Form.Item>
             </Col>
           </Row>

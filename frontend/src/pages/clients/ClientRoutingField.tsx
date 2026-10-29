@@ -43,7 +43,7 @@ export default function ClientRoutingField({ email }: { email: string }) {
         )}
         <Button
           size="small"
-          icon={<BranchesOutlined />}
+          icon={<BranchesOutlined aria-hidden />}
           disabled={!data}
           onClick={() => setOpen(true)}
         >

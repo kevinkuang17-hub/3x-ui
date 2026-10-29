@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, DatePicker, Form, Input, InputNumber, Modal, Space } from 'antd';
 import dayjs from 'dayjs';
@@ -25,6 +25,7 @@ interface Props {
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
 
 export default function NodeCostModal({ node, cost, onClose, onSaved }: Props) {
+  const uid = useId();
   const { t } = useTranslation();
   const [draft, setDraft] = useState<NodeCost>(
     cost ?? { nodeId: node.id, provider: '', monthly: 0, currency: 'USD', renewAt: 0, note: '' },
@@ -74,39 +75,44 @@ export default function NodeCostModal({ node, cost, onClose, onSaved }: Props) {
       }
     >
       <Form layout="vertical">
-        <Form.Item label={t('pages.nodes.cost.provider')}>
+        <Form.Item htmlFor={`${uid}-input-78`} label={t('pages.nodes.cost.provider')}>
           <Input
+            id={`${uid}-input-78`}
             value={draft.provider}
             placeholder="Vultr / BandwagonHost / …"
             onChange={(e) => setDraft({ ...draft, provider: e.target.value })}
           />
         </Form.Item>
         <Space wrap>
-          <Form.Item label={t('pages.nodes.cost.monthly')}>
+          <Form.Item htmlFor={`${uid}-inputnumber-86`} label={t('pages.nodes.cost.monthly')}>
             <InputNumber
+              id={`${uid}-inputnumber-86`}
               min={0}
               step={0.5}
               value={draft.monthly}
               onChange={(v) => setDraft({ ...draft, monthly: Number(v ?? 0) })}
             />
           </Form.Item>
-          <Form.Item label={t('pages.nodes.cost.currency')}>
+          <Form.Item htmlFor={`${uid}-input-94`} label={t('pages.nodes.cost.currency')}>
             <Input
+              id={`${uid}-input-94`}
               style={{ width: 100 }}
               value={draft.currency}
               maxLength={8}
               onChange={(e) => setDraft({ ...draft, currency: e.target.value.toUpperCase() })}
             />
           </Form.Item>
-          <Form.Item label={t('pages.nodes.cost.renewAt')}>
+          <Form.Item htmlFor={`${uid}-datepicker-102`} label={t('pages.nodes.cost.renewAt')}>
             <DatePicker
+              id={`${uid}-datepicker-102`}
               value={draft.renewAt ? dayjs.unix(draft.renewAt) : null}
               onChange={(d) => setDraft({ ...draft, renewAt: d ? d.endOf('day').unix() : 0 })}
             />
           </Form.Item>
         </Space>
-        <Form.Item label={t('pages.plans.remark')}>
+        <Form.Item htmlFor={`${uid}-input-textarea-109`} label={t('pages.plans.remark')}>
           <Input.TextArea
+            id={`${uid}-input-textarea-109`}
             autoSize={{ minRows: 2, maxRows: 4 }}
             value={draft.note}
             onChange={(e) => setDraft({ ...draft, note: e.target.value })}

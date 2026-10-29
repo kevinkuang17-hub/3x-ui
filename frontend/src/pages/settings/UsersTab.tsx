@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -31,6 +31,7 @@ interface PanelUser {
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
 
 export default function UsersTab() {
+  const uid = useId();
   const { t } = useTranslation();
   const [editing, setEditing] = useState<{
     id: number;
@@ -84,7 +85,7 @@ export default function UsersTab() {
             {t(`pages.settings.users.role_${role}`)}
           </Tag>
           {row.primary && <Tag>{t('pages.settings.users.primary')}</Tag>}
-          {row.passkeys > 0 && <Tag icon={<KeyOutlined />}>{row.passkeys}</Tag>}
+          {row.passkeys > 0 && <Tag icon={<KeyOutlined aria-hidden />}>{row.passkeys}</Tag>}
         </Space>
       ),
     },
@@ -97,7 +98,7 @@ export default function UsersTab() {
             <Button
               size="small"
               type="text"
-              icon={<EditOutlined />}
+              icon={<EditOutlined aria-hidden />}
               aria-label={t('edit')}
               onClick={() =>
                 setEditing({ id: row.id, username: row.username, password: '', role: row.role })
@@ -114,7 +115,7 @@ export default function UsersTab() {
                 <Button
                   size="small"
                   type="text"
-                  icon={<KeyOutlined />}
+                  icon={<KeyOutlined aria-hidden />}
                   aria-label={t('pages.settings.users.clearPasskeys')}
                   title={t('pages.settings.users.clearPasskeys')}
                 />
@@ -131,7 +132,7 @@ export default function UsersTab() {
                 size="small"
                 type="text"
                 danger
-                icon={<DeleteOutlined />}
+                icon={<DeleteOutlined aria-hidden />}
                 aria-label={t('delete')}
               />
             </Popconfirm>
@@ -152,7 +153,7 @@ export default function UsersTab() {
       />
       <Button
         type="primary"
-        icon={<PlusOutlined />}
+        icon={<PlusOutlined aria-hidden />}
         style={{ marginBottom: 12 }}
         onClick={() => setEditing({ id: 0, username: '', password: '', role: 'operator' })}
       >
@@ -179,8 +180,9 @@ export default function UsersTab() {
         {editing && (
           <Form layout="vertical">
             {!editing.id && (
-              <Form.Item label={t('pages.settings.users.username')}>
+              <Form.Item htmlFor={`${uid}-input-183`} label={t('pages.settings.users.username')}>
                 <Input
+                  id={`${uid}-input-183`}
                   value={editing.username}
                   autoComplete="off"
                   onChange={(e) => setEditing({ ...editing, username: e.target.value })}
@@ -188,20 +190,24 @@ export default function UsersTab() {
               </Form.Item>
             )}
             <Form.Item
+              htmlFor={`${uid}-input-password-194`}
               label={t('pages.settings.users.password')}
               extra={editing.id ? t('pages.settings.users.passwordKeep') : undefined}
             >
               <Input.Password
+                id={`${uid}-input-password-194`}
                 value={editing.password}
                 autoComplete="new-password"
                 onChange={(e) => setEditing({ ...editing, password: e.target.value })}
               />
             </Form.Item>
             <Form.Item
+              htmlFor={`${uid}-select-204`}
               label={t('pages.settings.users.role')}
               extra={t(`pages.settings.users.roleDesc_${editing.role}`)}
             >
               <Select
+                id={`${uid}-select-204`}
                 value={editing.role}
                 onChange={(role) => setEditing({ ...editing, role })}
                 options={['operator', 'admin'].map((r) => ({

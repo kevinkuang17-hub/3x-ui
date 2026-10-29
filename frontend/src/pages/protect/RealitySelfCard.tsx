@@ -138,6 +138,7 @@ export default function RealitySelfCard() {
         <Space orientation="vertical" size={12} style={{ width: '100%' }}>
           <Space wrap>
             <Select
+              aria-label={t('pages.protect.realitySelfTitle')}
               style={{ minWidth: 240 }}
               value={chosen ?? undefined}
               onChange={setInboundId}
@@ -148,7 +149,7 @@ export default function RealitySelfCard() {
             />
             <Button
               type="primary"
-              icon={<SafetyCertificateOutlined />}
+              icon={<SafetyCertificateOutlined aria-hidden />}
               loading={running}
               disabled={chosen == null}
               onClick={() => void run()}

@@ -63,7 +63,7 @@ export default function FirewallCard() {
           </Space>
           <Button
             type="primary"
-            icon={<SafetyOutlined />}
+            icon={<SafetyOutlined aria-hidden />}
             loading={allow.isPending}
             disabled={view.rules.length === 0}
             onClick={() => allow.mutate()}

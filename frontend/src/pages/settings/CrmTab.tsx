@@ -118,7 +118,7 @@ export default function CrmTab({ allSetting, updateSetting }: CrmTabProps) {
       </SettingListItem>
 
       <Space orientation="vertical" size={8} style={{ width: '100%', marginTop: 16 }}>
-        <Button icon={<SendOutlined />} loading={testing} onClick={testWebhook}>
+        <Button icon={<SendOutlined aria-hidden />} loading={testing} onClick={testWebhook}>
           {t('pages.settings.crmWebhookTest')}
         </Button>
       </Space>
@@ -128,7 +128,7 @@ export default function CrmTab({ allSetting, updateSetting }: CrmTabProps) {
         title={t('pages.settings.crmSso')}
         description={t('pages.settings.crmSsoDesc')}
       >
-        <Button icon={<KeyOutlined />} loading={minting} onClick={mintSso}>
+        <Button icon={<KeyOutlined aria-hidden />} loading={minting} onClick={mintSso}>
           {t('pages.settings.crmSsoGenerate')}
         </Button>
       </SettingListItem>
@@ -143,7 +143,7 @@ export default function CrmTab({ allSetting, updateSetting }: CrmTabProps) {
               </Typography.Text>
               <Button
                 size="small"
-                icon={<CopyOutlined />}
+                icon={<CopyOutlined aria-hidden />}
                 aria-label={t('copy')}
                 onClick={() => ClipboardManager.copyText(ssoUrl)}
               />

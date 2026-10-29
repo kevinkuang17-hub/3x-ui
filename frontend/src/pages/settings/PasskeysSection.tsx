@@ -80,6 +80,7 @@ export default function PasskeysSection() {
       )}
       <Space wrap style={{ marginBottom: 12 }}>
         <Input
+          aria-label={t('pages.settings.passkeys.namePlaceholder')}
           value={name}
           placeholder={t('pages.settings.passkeys.namePlaceholder')}
           onChange={(e) => setName(e.target.value)}
@@ -87,7 +88,7 @@ export default function PasskeysSection() {
         />
         <Button
           type="primary"
-          icon={<KeyOutlined />}
+          icon={<KeyOutlined aria-hidden />}
           loading={busy}
           disabled={!supported}
           onClick={add}
@@ -115,14 +116,14 @@ export default function PasskeysSection() {
                   size="small"
                   type="text"
                   danger
-                  icon={<DeleteOutlined />}
+                  icon={<DeleteOutlined aria-hidden />}
                   aria-label={t('delete')}
                 />
               </Popconfirm>,
             ]}
           >
             <List.Item.Meta
-              avatar={<KeyOutlined />}
+              avatar={<KeyOutlined aria-hidden />}
               title={p.name}
               description={t('pages.settings.passkeys.meta', {
                 created: new Date(p.createdAt * 1000).toLocaleDateString(),

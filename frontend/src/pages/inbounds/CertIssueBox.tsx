@@ -96,6 +96,7 @@ export default function CertIssueBox({
       </Typography.Paragraph>
       <Space wrap size={8}>
         <Input
+          aria-label={t('pages.inbounds.quick.certIssueTitle')}
           size="small"
           value={domain}
           disabled={running}
