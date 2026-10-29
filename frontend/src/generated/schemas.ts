@@ -36,6 +36,27 @@ export const SCHEMAS: Record<string, unknown> = {
   },
   "AllSetting": {
     "properties": {
+      "cfApiToken": {
+        "type": "string"
+      },
+      "cfAutoDns": {
+        "type": "boolean"
+      },
+      "cfZone": {
+        "type": "string"
+      },
+      "crmWebhookEnable": {
+        "type": "boolean"
+      },
+      "crmWebhookEvents": {
+        "type": "string"
+      },
+      "crmWebhookSecret": {
+        "type": "string"
+      },
+      "crmWebhookUrl": {
+        "type": "string"
+      },
       "datepicker": {
         "type": "string"
       },
@@ -495,6 +516,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subKeyFile": {
         "type": "string"
       },
+      "subLineHealth": {
+        "type": "boolean"
+      },
       "subListen": {
         "type": "string"
       },
@@ -616,35 +640,18 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
-      "cfApiToken": {
-        "type": "string"
-      },
-      "cfAutoDns": {
-        "type": "boolean"
-      },
-      "cfZone": {
-        "type": "string"
-      },
-      "crmWebhookEnable": {
-        "type": "boolean"
-      },
-      "crmWebhookEvents": {
-        "type": "string"
-      },
-      "crmWebhookSecret": {
-        "type": "string"
-      },
-      "crmWebhookUrl": {
-        "type": "string"
-      },
-      "subLineHealth": {
-        "type": "boolean"
-      },
       "xrayAutoRollback": {
         "type": "boolean"
       }
     },
     "required": [
+      "cfApiToken",
+      "cfAutoDns",
+      "cfZone",
+      "crmWebhookEnable",
+      "crmWebhookEvents",
+      "crmWebhookSecret",
+      "crmWebhookUrl",
       "datepicker",
       "discordAdminIds",
       "discordBotBackup",
@@ -789,6 +796,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonURI",
       "subJsonUserAgentRegex",
       "subKeyFile",
+      "subLineHealth",
       "subListen",
       "subPath",
       "subPort",
@@ -825,20 +833,33 @@ export const SCHEMAS: Record<string, unknown> = {
       "webKeyFile",
       "webListen",
       "webPort",
-      "cfApiToken",
-      "cfAutoDns",
-      "cfZone",
-      "crmWebhookEnable",
-      "crmWebhookEvents",
-      "crmWebhookSecret",
-      "crmWebhookUrl",
-      "subLineHealth",
       "xrayAutoRollback"
     ],
     "type": "object"
   },
   "AllSettingView": {
     "properties": {
+      "cfApiToken": {
+        "type": "string"
+      },
+      "cfAutoDns": {
+        "type": "boolean"
+      },
+      "cfZone": {
+        "type": "string"
+      },
+      "crmWebhookEnable": {
+        "type": "boolean"
+      },
+      "crmWebhookEvents": {
+        "type": "string"
+      },
+      "crmWebhookSecret": {
+        "type": "string"
+      },
+      "crmWebhookUrl": {
+        "type": "string"
+      },
       "datepicker": {
         "type": "string"
       },
@@ -893,6 +914,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "boolean"
       },
       "hasApiToken": {
+        "type": "boolean"
+      },
+      "hasCfApiToken": {
+        "type": "boolean"
+      },
+      "hasCrmWebhookSecret": {
         "type": "boolean"
       },
       "hasDiscordBotToken": {
@@ -1322,6 +1349,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subKeyFile": {
         "type": "string"
       },
+      "subLineHealth": {
+        "type": "boolean"
+      },
       "subListen": {
         "type": "string"
       },
@@ -1443,41 +1473,18 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
-      "cfApiToken": {
-        "type": "string"
-      },
-      "cfAutoDns": {
-        "type": "boolean"
-      },
-      "cfZone": {
-        "type": "string"
-      },
-      "crmWebhookEnable": {
-        "type": "boolean"
-      },
-      "crmWebhookEvents": {
-        "type": "string"
-      },
-      "crmWebhookSecret": {
-        "type": "string"
-      },
-      "crmWebhookUrl": {
-        "type": "string"
-      },
-      "hasCfApiToken": {
-        "type": "boolean"
-      },
-      "hasCrmWebhookSecret": {
-        "type": "boolean"
-      },
-      "subLineHealth": {
-        "type": "boolean"
-      },
       "xrayAutoRollback": {
         "type": "boolean"
       }
     },
     "required": [
+      "cfApiToken",
+      "cfAutoDns",
+      "cfZone",
+      "crmWebhookEnable",
+      "crmWebhookEvents",
+      "crmWebhookSecret",
+      "crmWebhookUrl",
       "datepicker",
       "discordAdminIds",
       "discordBotBackup",
@@ -1495,6 +1502,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "externalTrafficInformURI",
       "happLinkEnable",
       "hasApiToken",
+      "hasCfApiToken",
+      "hasCrmWebhookSecret",
       "hasDiscordBotToken",
       "hasLdapPassword",
       "hasNordSecret",
@@ -1630,6 +1639,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonURI",
       "subJsonUserAgentRegex",
       "subKeyFile",
+      "subLineHealth",
       "subListen",
       "subPath",
       "subPort",
@@ -1666,16 +1676,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "webKeyFile",
       "webListen",
       "webPort",
-      "cfApiToken",
-      "cfAutoDns",
-      "cfZone",
-      "crmWebhookEnable",
-      "crmWebhookEvents",
-      "crmWebhookSecret",
-      "crmWebhookUrl",
-      "hasCfApiToken",
-      "hasCrmWebhookSecret",
-      "subLineHealth",
       "xrayAutoRollback"
     ],
     "type": "object"

@@ -62,6 +62,27 @@
       },
       "AllSetting": {
         "properties": {
+          "cfApiToken": {
+            "type": "string"
+          },
+          "cfAutoDns": {
+            "type": "boolean"
+          },
+          "cfZone": {
+            "type": "string"
+          },
+          "crmWebhookEnable": {
+            "type": "boolean"
+          },
+          "crmWebhookEvents": {
+            "type": "string"
+          },
+          "crmWebhookSecret": {
+            "type": "string"
+          },
+          "crmWebhookUrl": {
+            "type": "string"
+          },
           "datepicker": {
             "type": "string"
           },
@@ -521,6 +542,9 @@
           "subKeyFile": {
             "type": "string"
           },
+          "subLineHealth": {
+            "type": "boolean"
+          },
           "subListen": {
             "type": "string"
           },
@@ -642,35 +666,18 @@
             "minimum": 1,
             "type": "integer"
           },
-          "cfApiToken": {
-            "type": "string"
-          },
-          "cfAutoDns": {
-            "type": "boolean"
-          },
-          "cfZone": {
-            "type": "string"
-          },
-          "crmWebhookEnable": {
-            "type": "boolean"
-          },
-          "crmWebhookEvents": {
-            "type": "string"
-          },
-          "crmWebhookSecret": {
-            "type": "string"
-          },
-          "crmWebhookUrl": {
-            "type": "string"
-          },
-          "subLineHealth": {
-            "type": "boolean"
-          },
           "xrayAutoRollback": {
             "type": "boolean"
           }
         },
         "required": [
+          "cfApiToken",
+          "cfAutoDns",
+          "cfZone",
+          "crmWebhookEnable",
+          "crmWebhookEvents",
+          "crmWebhookSecret",
+          "crmWebhookUrl",
           "datepicker",
           "discordAdminIds",
           "discordBotBackup",
@@ -815,6 +822,7 @@
           "subJsonURI",
           "subJsonUserAgentRegex",
           "subKeyFile",
+          "subLineHealth",
           "subListen",
           "subPath",
           "subPort",
@@ -851,20 +859,33 @@
           "webKeyFile",
           "webListen",
           "webPort",
-          "cfApiToken",
-          "cfAutoDns",
-          "cfZone",
-          "crmWebhookEnable",
-          "crmWebhookEvents",
-          "crmWebhookSecret",
-          "crmWebhookUrl",
-          "subLineHealth",
           "xrayAutoRollback"
         ],
         "type": "object"
       },
       "AllSettingView": {
         "properties": {
+          "cfApiToken": {
+            "type": "string"
+          },
+          "cfAutoDns": {
+            "type": "boolean"
+          },
+          "cfZone": {
+            "type": "string"
+          },
+          "crmWebhookEnable": {
+            "type": "boolean"
+          },
+          "crmWebhookEvents": {
+            "type": "string"
+          },
+          "crmWebhookSecret": {
+            "type": "string"
+          },
+          "crmWebhookUrl": {
+            "type": "string"
+          },
           "datepicker": {
             "type": "string"
           },
@@ -919,6 +940,12 @@
             "type": "boolean"
           },
           "hasApiToken": {
+            "type": "boolean"
+          },
+          "hasCfApiToken": {
+            "type": "boolean"
+          },
+          "hasCrmWebhookSecret": {
             "type": "boolean"
           },
           "hasDiscordBotToken": {
@@ -1348,6 +1375,9 @@
           "subKeyFile": {
             "type": "string"
           },
+          "subLineHealth": {
+            "type": "boolean"
+          },
           "subListen": {
             "type": "string"
           },
@@ -1469,41 +1499,18 @@
             "minimum": 1,
             "type": "integer"
           },
-          "cfApiToken": {
-            "type": "string"
-          },
-          "cfAutoDns": {
-            "type": "boolean"
-          },
-          "cfZone": {
-            "type": "string"
-          },
-          "crmWebhookEnable": {
-            "type": "boolean"
-          },
-          "crmWebhookEvents": {
-            "type": "string"
-          },
-          "crmWebhookSecret": {
-            "type": "string"
-          },
-          "crmWebhookUrl": {
-            "type": "string"
-          },
-          "hasCfApiToken": {
-            "type": "boolean"
-          },
-          "hasCrmWebhookSecret": {
-            "type": "boolean"
-          },
-          "subLineHealth": {
-            "type": "boolean"
-          },
           "xrayAutoRollback": {
             "type": "boolean"
           }
         },
         "required": [
+          "cfApiToken",
+          "cfAutoDns",
+          "cfZone",
+          "crmWebhookEnable",
+          "crmWebhookEvents",
+          "crmWebhookSecret",
+          "crmWebhookUrl",
           "datepicker",
           "discordAdminIds",
           "discordBotBackup",
@@ -1521,6 +1528,8 @@
           "externalTrafficInformURI",
           "happLinkEnable",
           "hasApiToken",
+          "hasCfApiToken",
+          "hasCrmWebhookSecret",
           "hasDiscordBotToken",
           "hasLdapPassword",
           "hasNordSecret",
@@ -1656,6 +1665,7 @@
           "subJsonURI",
           "subJsonUserAgentRegex",
           "subKeyFile",
+          "subLineHealth",
           "subListen",
           "subPath",
           "subPort",
@@ -1692,16 +1702,6 @@
           "webKeyFile",
           "webListen",
           "webPort",
-          "cfApiToken",
-          "cfAutoDns",
-          "cfZone",
-          "crmWebhookEnable",
-          "crmWebhookEvents",
-          "crmWebhookSecret",
-          "crmWebhookUrl",
-          "hasCfApiToken",
-          "hasCrmWebhookSecret",
-          "subLineHealth",
           "xrayAutoRollback"
         ],
         "type": "object"
@@ -6247,6 +6247,150 @@
         }
       }
     },
+    "/panel/api/inbounds/recommend": {
+      "get": {
+        "tags": [
+          "Inbounds"
+        ],
+        "summary": "Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, free TCP and UDP ports (443 first, then the other Cloudflare HTTPS ports, then random ones) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).",
+        "operationId": "get_panel_api_inbounds_recommend",
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "query",
+            "required": true,
+            "description": "Node to inspect; omit for this panel’s own server.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/InboundRecommendation"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "certFile": "/root/cert/hk.example.com/fullchain.pem",
+                    "certNotAfter": 1767225600000,
+                    "certState": "ok",
+                    "decoyReady": true,
+                    "domain": "hk.example.com",
+                    "domainIps": [
+                      ""
+                    ],
+                    "firewall": "ufw",
+                    "keyFile": "/root/cert/hk.example.com/privkey.pem",
+                    "nodeId": 3,
+                    "pointsHere": true,
+                    "realityTarget": "127.0.0.1:24873",
+                    "recommended": "tls",
+                    "serverIps": [
+                      ""
+                    ],
+                    "tcpPorts": [
+                      0
+                    ],
+                    "udpPorts": [
+                      0
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/inbounds/diagnose": {
+      "post": {
+        "tags": [
+          "Inbounds"
+        ],
+        "summary": "Diagnose why inbounds cannot be used (ids empty = all): whether the hosting server binds the port and its ufw lets it in (TCP/UDP), whether the address resolves and answers from outside, the TLS certificate, and a real client connection through the inbound from this panel. Each report lists findings (key, level ok/warn/error, params, fix enable/firewall/clients).",
+        "operationId": "post_panel_api_inbounds_diagnose",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "ids": [
+                  7
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Report"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "address": "us.example.com",
+                      "delayMs": 0,
+                      "findings": [
+                        {
+                          "fix": "firewall",
+                          "key": "firewallBlocked",
+                          "level": "error",
+                          "params": {}
+                        }
+                      ],
+                      "inboundId": 7,
+                      "nodeId": 2,
+                      "ok": false,
+                      "port": 443,
+                      "protocol": "hysteria",
+                      "remark": "US A Hy2"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/inbounds/add": {
       "post": {
         "tags": [
@@ -8067,6 +8211,103 @@
                   "success": true,
                   "obj": {
                     "runId": "1735689600123456789"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/server/autoUpdate": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Unattended self-update: whether it is on, the hour it runs each day (Beijing time), whether outdated nodes are told to update too, and what the last daily check did.",
+        "operationId": "get_panel_api_server_autoUpdate",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AutoUpdateConfig"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "enable": true,
+                    "hour": 4,
+                    "lastResult": "updated:v3.10.2-k1:v3.10.2-k2",
+                    "lastRun": "2026-10-16",
+                    "nodes": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Set the unattended self-update. Turning it on also enables the panel.update Telegram notice.",
+        "operationId": "post_panel_api_server_autoUpdate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "enable": true,
+                "hour": 4,
+                "nodes": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/AutoUpdateConfig"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "enable": true,
+                    "hour": 4,
+                    "lastResult": "updated:v3.10.2-k1:v3.10.2-k2",
+                    "lastRun": "2026-10-16",
+                    "nodes": true
                   }
                 }
               }
@@ -11068,6 +11309,63 @@
               },
               "example": {
                 "name": "customer-a"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "name": "customer-a"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/groups/clashRules": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. dns sets the group's own DNS (null follows the global DNS; omitted keeps it). With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
+        "operationId": "post_panel_api_clients_groups_clashRules",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "customer-a",
+                "clashRules": "https://example.com/rules/standard.yaml",
+                "ruleSets": [
+                  {
+                    "id": 5,
+                    "policy": "PROXY"
+                  }
+                ],
+                "extraRules": "bank.example,DIRECT"
               }
             }
           }
@@ -16003,1907 +16301,6 @@
         }
       }
     },
-    "/panel/api/sub-balancers": {
-      "get": {
-        "tags": [
-          "Subscription Balancers"
-        ],
-        "summary": "List all subscription balancers in sort order (sort_order asc, id asc).",
-        "operationId": "get_panel_api_sub_balancers",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/SubBalancer"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "createdAt": 1710000000000,
-                      "enabled": true,
-                      "id": 1,
-                      "inboundIds": [
-                        1,
-                        3
-                      ],
-                      "memberWeights": {},
-                      "remark": "auto-fastest",
-                      "sortOrder": 1,
-                      "strategy": "random",
-                      "updatedAt": 1710000000000
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Subscription Balancers"
-        ],
-        "summary": "Create a subscription balancer. It appears in the JSON subscription of every client that sits on at least one selected inbound.",
-        "operationId": "post_panel_api_sub_balancers",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "remark": {
-                    "type": "string",
-                    "description": "Display label, used as the config remarks (required)."
-                  },
-                  "strategy": {
-                    "type": "string",
-                    "default": "random",
-                    "description": "Balancer strategy: \"leastLoad\", \"leastPing\", \"roundRobin\" or \"random\". Default \"random\"."
-                  },
-                  "inboundIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "integer"
-                    },
-                    "description": "Repeated form keys selecting the member inbounds (required, at least one)."
-                  },
-                  "memberWeights": {
-                    "type": "object",
-                    "description": "leastLoad only: JSON object mapping inbound id to a static weight > 0, e.g. {\"3\":0.2}. Lower weight = picked more often; absent ids weigh 1. Rejected for other strategies; entries for unselected inbounds are dropped."
-                  },
-                  "sortOrder": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "1-based position in the subscription list. Default 1."
-                  },
-                  "enabled": {
-                    "type": "boolean",
-                    "description": "Whether the balancer is emitted. Default true on create; unchanged when omitted on update."
-                  }
-                },
-                "required": [
-                  "remark",
-                  "inboundIds"
-                ]
-              },
-              "encoding": {
-                "inboundIds": {
-                  "style": "form",
-                  "explode": true
-                },
-                "memberWeights": {
-                  "contentType": "application/json"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/SubBalancer"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "createdAt": 1710000000000,
-                    "enabled": true,
-                    "id": 1,
-                    "inboundIds": [
-                      1,
-                      3
-                    ],
-                    "memberWeights": {},
-                    "remark": "auto-fastest",
-                    "sortOrder": 1,
-                    "strategy": "random",
-                    "updatedAt": 1710000000000
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/sub-balancers/{id}": {
-      "post": {
-        "tags": [
-          "Subscription Balancers"
-        ],
-        "summary": "Update a balancer by id. Accepts the same form fields as create (full-row update); omitting memberWeights clears stored weights, while omitting enabled keeps its current value.",
-        "operationId": "post_panel_api_sub_balancers_id",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "Balancer id.",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "remark": {
-                    "type": "string",
-                    "description": "Display label, used as the config remarks (required)."
-                  },
-                  "strategy": {
-                    "type": "string",
-                    "default": "random",
-                    "description": "Balancer strategy: \"leastLoad\", \"leastPing\", \"roundRobin\" or \"random\". Default \"random\"."
-                  },
-                  "inboundIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "integer"
-                    },
-                    "description": "Repeated form keys selecting the member inbounds (required, at least one)."
-                  },
-                  "memberWeights": {
-                    "type": "object",
-                    "description": "leastLoad only: JSON object mapping inbound id to a static weight > 0, e.g. {\"3\":0.2}. Lower weight = picked more often; absent ids weigh 1. Rejected for other strategies; entries for unselected inbounds are dropped."
-                  },
-                  "sortOrder": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "1-based position in the subscription list. Default 1."
-                  },
-                  "enabled": {
-                    "type": "boolean",
-                    "description": "Whether the balancer is emitted. Default true on create; unchanged when omitted on update."
-                  }
-                },
-                "required": [
-                  "remark",
-                  "inboundIds"
-                ]
-              },
-              "encoding": {
-                "inboundIds": {
-                  "style": "form",
-                  "explode": true
-                },
-                "memberWeights": {
-                  "contentType": "application/json"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/SubBalancer"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "createdAt": 1710000000000,
-                    "enabled": true,
-                    "id": 1,
-                    "inboundIds": [
-                      1,
-                      3
-                    ],
-                    "memberWeights": {},
-                    "remark": "auto-fastest",
-                    "sortOrder": 1,
-                    "strategy": "random",
-                    "updatedAt": 1710000000000
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Subscription Balancers"
-        ],
-        "summary": "Delete a balancer by id.",
-        "operationId": "delete_panel_api_sub_balancers_id",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "Balancer id.",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/SubBalancer"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "createdAt": 1710000000000,
-                    "enabled": true,
-                    "id": 1,
-                    "inboundIds": [
-                      1,
-                      3
-                    ],
-                    "memberWeights": {},
-                    "remark": "auto-fastest",
-                    "sortOrder": 1,
-                    "strategy": "random",
-                    "updatedAt": 1710000000000
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/sub-balancers/{id}/del": {
-      "post": {
-        "tags": [
-          "Subscription Balancers"
-        ],
-        "summary": "Delete a balancer by id (POST alias of DELETE for clients that cannot send DELETE).",
-        "operationId": "post_panel_api_sub_balancers_id_del",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "Balancer id.",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/SubBalancer"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "createdAt": 1710000000000,
-                    "enabled": true,
-                    "id": 1,
-                    "inboundIds": [
-                      1,
-                      3
-                    ],
-                    "memberWeights": {},
-                    "remark": "auto-fastest",
-                    "sortOrder": 1,
-                    "strategy": "random",
-                    "updatedAt": 1710000000000
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/{subPath}{subid}": {
-      "get": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return base64-encoded subscription links for all enabled clients matching the subscription ID. When the request has an Accept: text/html header or ?html=1, renders a styled info page instead. With ?format=info, returns the page view-model as JSON (traffic, expiry, online status; no links) for live polling. The path prefix is configured by subPath.",
-        "operationId": "get_subPath_subid",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "required": false,
-            "description": "Set to \"info\" to get the subscription status view-model as JSON instead of the links.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "subPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return the same status and subscription metadata headers as GET without a response body.",
-        "operationId": "head_subPath_subid",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "subPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Subscription is available. Headers match GET; no response body."
-          },
-          "404": {
-            "description": "No enabled client matches the subscription ID."
-          },
-          "500": {
-            "description": "Subscription generation failed."
-          }
-        }
-      }
-    },
-    "/{subPath}{subid}/hwid-status": {
-      "get": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return aggregate HWID device-slot usage for the subscription: whether an HWID limit is active, the limit, how many devices are registered and how many slots remain. Read-only — it never registers a device, so asking does not consume a slot. Counters only: no HWID value, email or device metadata. The path prefix is configured by subPath.",
-        "operationId": "get_subPath_subid_hwid_status",
-        "description": "Responds with the bare HwidSlotStatus object, not the <code>{success,msg,obj}</code> panel envelope, like the other subscription-server routes. With no HWID limit configured, <code>active</code> is false and every counter is 0.",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "subPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Device-slot counters for the subscription.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "active": true,
-                  "full": false,
-                  "limit": 2,
-                  "registered": 1,
-                  "remaining": 1
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/HwidSlotStatus"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No enabled client matches the subscription ID. Empty body."
-          },
-          "500": {
-            "description": "Database lookup failed. Empty body."
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return the HWID device-slot status code and headers as GET without a response body.",
-        "operationId": "head_subPath_subid_hwid_status",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "subPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Headers match GET; no response body."
-          },
-          "404": {
-            "description": "No enabled client matches the subscription ID. Empty body."
-          },
-          "500": {
-            "description": "Database lookup failed. Empty body."
-          }
-        }
-      }
-    },
-    "/{jsonPath}{subid}": {
-      "get": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return subscription as a JSON array of proxy configs (one per enabled client). Only when JSON subscription is enabled in settings. The path prefix is configured by subJsonPath.",
-        "operationId": "get_jsonPath_subid",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "jsonPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return the JSON subscription status and metadata headers without a body. Registered only when JSON subscriptions are enabled.",
-        "operationId": "head_jsonPath_subid",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "jsonPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Subscription is available. Headers match GET; no response body."
-          },
-          "404": {
-            "description": "No enabled client matches the subscription ID."
-          },
-          "500": {
-            "description": "Subscription generation failed."
-          }
-        }
-      }
-    },
-    "/{clashPath}{subid}": {
-      "get": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return subscription as a Clash/Mihomo-compatible YAML config, including configured global Clash routing rules. Only when Clash subscription is enabled in settings. The path prefix is configured by subClashPath.",
-        "operationId": "get_clashPath_subid",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "clashPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Subscription Server"
-        ],
-        "summary": "Return the Clash subscription status and metadata headers without a body. Registered only when Clash subscriptions are enabled.",
-        "operationId": "head_clashPath_subid",
-        "parameters": [
-          {
-            "name": "subid",
-            "in": "path",
-            "required": true,
-            "description": "Client subscription ID.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "clashPath",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Subscription is available. Headers match GET; no response body."
-          },
-          "404": {
-            "description": "No enabled client matches the subscription ID."
-          },
-          "500": {
-            "description": "Subscription generation failed."
-          }
-        }
-      }
-    },
-    "/ws": {
-      "get": {
-        "tags": [
-          "WebSocket"
-        ],
-        "summary": "Upgrade an HTTP connection to a WebSocket. Requires an authenticated session cookie (Bearer token auth is not supported here). Returns 101 Switching Protocols on success. The server then pushes JSON messages described below.",
-        "operationId": "get_ws",
-        "responses": {
-          "101": {
-            "description": "Switching Protocols. WebSocket messages use WebSocketEnvelope."
-          },
-          "401": {
-            "description": "No authenticated panel session cookie."
-          }
-        },
-        "security": [
-          {
-            "cookieAuth": []
-          }
-        ],
-        "x-websocket-events": [
-          {
-            "type": "status",
-            "summary": "Server health snapshot pushed every two seconds; same payload as server/status obj.",
-            "payloadSchema": {
-              "type": "object",
-              "required": [
-                "cpu",
-                "cpuCores",
-                "logicalPro",
-                "cpuSpeedMhz",
-                "mem",
-                "swap",
-                "disk",
-                "diskIO",
-                "diskTraffic",
-                "xray",
-                "amneziawg",
-                "panelVersion",
-                "panelGuid",
-                "uptime",
-                "loads",
-                "tcpCount",
-                "udpCount",
-                "netIO",
-                "netTraffic",
-                "publicIP",
-                "appStats"
-              ],
-              "properties": {
-                "cpu": {
-                  "type": "number"
-                },
-                "cpuCores": {
-                  "type": "integer"
-                },
-                "logicalPro": {
-                  "type": "integer"
-                },
-                "cpuSpeedMhz": {
-                  "type": "number"
-                },
-                "mem": {
-                  "type": "object",
-                  "required": [
-                    "current",
-                    "total"
-                  ],
-                  "properties": {
-                    "current": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "total": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "swap": {
-                  "type": "object",
-                  "required": [
-                    "current",
-                    "total"
-                  ],
-                  "properties": {
-                    "current": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "total": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "disk": {
-                  "type": "object",
-                  "required": [
-                    "current",
-                    "total"
-                  ],
-                  "properties": {
-                    "current": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "total": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "diskIO": {
-                  "type": "object",
-                  "required": [
-                    "read",
-                    "write"
-                  ],
-                  "properties": {
-                    "read": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "write": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "diskTraffic": {
-                  "type": "object",
-                  "required": [
-                    "read",
-                    "write"
-                  ],
-                  "properties": {
-                    "read": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "write": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "xray": {
-                  "type": "object",
-                  "required": [
-                    "state",
-                    "errorMsg",
-                    "version"
-                  ],
-                  "properties": {
-                    "state": {
-                      "type": "string",
-                      "enum": [
-                        "running",
-                        "stop",
-                        "error"
-                      ]
-                    },
-                    "errorMsg": {
-                      "type": "string"
-                    },
-                    "version": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "amneziawg": {
-                  "type": "object",
-                  "required": [
-                    "configured",
-                    "running"
-                  ],
-                  "properties": {
-                    "configured": {
-                      "type": "boolean"
-                    },
-                    "running": {
-                      "type": "boolean"
-                    }
-                  }
-                },
-                "panelVersion": {
-                  "type": "string"
-                },
-                "panelGuid": {
-                  "type": "string"
-                },
-                "uptime": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "loads": {
-                  "type": "array",
-                  "nullable": true,
-                  "items": {
-                    "type": "number"
-                  }
-                },
-                "tcpCount": {
-                  "type": "integer"
-                },
-                "udpCount": {
-                  "type": "integer"
-                },
-                "netIO": {
-                  "type": "object",
-                  "required": [
-                    "up",
-                    "down",
-                    "pktUp",
-                    "pktDown"
-                  ],
-                  "properties": {
-                    "up": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "down": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "pktUp": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "pktDown": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "netTraffic": {
-                  "type": "object",
-                  "required": [
-                    "sent",
-                    "recv",
-                    "pktSent",
-                    "pktRecv"
-                  ],
-                  "properties": {
-                    "sent": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "recv": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "pktSent": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "pktRecv": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                },
-                "publicIP": {
-                  "type": "object",
-                  "required": [
-                    "ipv4",
-                    "ipv6"
-                  ],
-                  "properties": {
-                    "ipv4": {
-                      "type": "string"
-                    },
-                    "ipv6": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "appStats": {
-                  "type": "object",
-                  "required": [
-                    "threads",
-                    "mem",
-                    "uptime"
-                  ],
-                  "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
-                    "mem": {
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "uptime": {
-                      "type": "integer",
-                      "format": "int64"
-                    }
-                  }
-                }
-              }
-            },
-            "example": {
-              "type": "status",
-              "payload": {
-                "cpu": 12.5,
-                "cpuCores": 4,
-                "logicalPro": 8,
-                "cpuSpeedMhz": 3200,
-                "mem": {
-                  "current": 2147483648,
-                  "total": 8589934592
-                },
-                "swap": {
-                  "current": 0,
-                  "total": 2147483648
-                },
-                "disk": {
-                  "current": 53687091200,
-                  "total": 107374182400
-                },
-                "diskIO": {
-                  "read": 1048576,
-                  "write": 2097152
-                },
-                "diskTraffic": {
-                  "read": 4096,
-                  "write": 8192
-                },
-                "xray": {
-                  "state": "running",
-                  "errorMsg": "",
-                  "version": "25.10.31"
-                },
-                "amneziawg": {
-                  "configured": false,
-                  "running": false
-                },
-                "panelVersion": "v3.x.x",
-                "panelGuid": "panel-guid",
-                "uptime": 86400,
-                "loads": [
-                  0.1,
-                  0.2,
-                  0.3
-                ],
-                "tcpCount": 24,
-                "udpCount": 8,
-                "netIO": {
-                  "up": 1048576,
-                  "down": 2097152,
-                  "pktUp": 100,
-                  "pktDown": 200
-                },
-                "netTraffic": {
-                  "sent": 4096,
-                  "recv": 8192,
-                  "pktSent": 10,
-                  "pktRecv": 20
-                },
-                "publicIP": {
-                  "ipv4": "192.0.2.1",
-                  "ipv6": "2001:db8::1"
-                },
-                "appStats": {
-                  "threads": 16,
-                  "mem": 67108864,
-                  "uptime": 3600
-                }
-              },
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "traffic",
-            "summary": "Live traffic deltas plus online, per-node and last-online maps. TUIC also sends source-tagged client deltas with their sampling interval for live speed.",
-            "payloadSchema": {
-              "type": "object",
-              "properties": {
-                "traffics": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Traffic"
-                  }
-                },
-                "clientTraffics": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ClientTraffic"
-                  }
-                },
-                "clientTrafficSource": {
-                  "type": "string",
-                  "enum": [
-                    "xray",
-                    "tuic"
-                  ],
-                  "description": "Present for native TUIC samples; omitted Xray samples default to xray."
-                },
-                "clientTrafficIntervalMs": {
-                  "type": "integer",
-                  "description": "Sampling interval used to calculate client speed, in milliseconds."
-                },
-                "nodeTraffics": {
-                  "type": "array",
-                  "nullable": true,
-                  "items": {
-                    "$ref": "#/components/schemas/Traffic"
-                  }
-                },
-                "onlineClients": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "onlineByGuid": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "activeInbounds": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "lastOnlineMap": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "integer",
-                    "format": "int64"
-                  }
-                }
-              },
-              "oneOf": [
-                {
-                  "required": [
-                    "traffics",
-                    "clientTraffics",
-                    "onlineClients",
-                    "onlineByGuid",
-                    "activeInbounds",
-                    "lastOnlineMap"
-                  ]
-                },
-                {
-                  "required": [
-                    "nodeTraffics"
-                  ]
-                },
-                {
-                  "required": [
-                    "clientTraffics",
-                    "clientTrafficSource",
-                    "clientTrafficIntervalMs"
-                  ]
-                }
-              ]
-            },
-            "example": {
-              "type": "traffic",
-              "payload": {
-                "traffics": [
-                  {
-                    "Down": 2097152,
-                    "IsInbound": true,
-                    "IsOutbound": false,
-                    "Tag": "inbound-443",
-                    "Up": 1048576
-                  }
-                ],
-                "clientTraffics": [
-                  {
-                    "down": 2097152,
-                    "email": "user1",
-                    "enable": true,
-                    "expiryTime": 1735689600000,
-                    "id": 14825,
-                    "inboundId": 1,
-                    "lastOnline": 1735680000000,
-                    "lastSubFetch": 1735680000000,
-                    "reset": 0,
-                    "resetCount": 0,
-                    "resetDay": 0,
-                    "resetMax": 0,
-                    "resetWeekday": 0,
-                    "subId": "i7tvdpeffi0hvvf1",
-                    "total": 10737418240,
-                    "up": 1048576,
-                    "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
-                  }
-                ],
-                "onlineClients": [
-                  "alice@example.com"
-                ],
-                "onlineByGuid": {
-                  "panel-guid": [
-                    "alice@example.com"
-                  ]
-                },
-                "activeInbounds": {
-                  "panel-guid": [
-                    "inbound-443"
-                  ]
-                },
-                "lastOnlineMap": {
-                  "alice@example.com": 1735689600000
-                }
-              },
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "client_stats",
-            "summary": "Absolute client counters and/or inbound summaries; snapshot says whether clients is complete or only recently active rows.",
-            "payloadSchema": {
-              "type": "object",
-              "required": [
-                "snapshot"
-              ],
-              "properties": {
-                "snapshot": {
-                  "type": "boolean"
-                },
-                "clients": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ClientTraffic"
-                  }
-                },
-                "inbounds": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/InboundTrafficSummary"
-                  }
-                }
-              },
-              "anyOf": [
-                {
-                  "required": [
-                    "clients"
-                  ]
-                },
-                {
-                  "required": [
-                    "inbounds"
-                  ]
-                }
-              ]
-            },
-            "example": {
-              "type": "client_stats",
-              "payload": {
-                "snapshot": true,
-                "clients": [
-                  {
-                    "down": 2097152,
-                    "email": "user1",
-                    "enable": true,
-                    "expiryTime": 1735689600000,
-                    "id": 14825,
-                    "inboundId": 1,
-                    "lastOnline": 1735680000000,
-                    "lastSubFetch": 1735680000000,
-                    "reset": 0,
-                    "resetCount": 0,
-                    "resetDay": 0,
-                    "resetMax": 0,
-                    "resetWeekday": 0,
-                    "subId": "i7tvdpeffi0hvvf1",
-                    "total": 10737418240,
-                    "up": 1048576,
-                    "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
-                  }
-                ],
-                "inbounds": [
-                  {
-                    "down": 2097152,
-                    "enable": true,
-                    "id": 1,
-                    "total": 10737418240,
-                    "up": 1048576
-                  }
-                ]
-              },
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "inbounds",
-            "summary": "Full inbound list after an inbound mutation, unless invalidate is used at scale.",
-            "payloadSchema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Inbound"
-              }
-            },
-            "example": {
-              "type": "inbounds",
-              "payload": [
-                {
-                  "clientStats": [
-                    {
-                      "down": 2097152,
-                      "email": "user1",
-                      "enable": true,
-                      "expiryTime": 1735689600000,
-                      "id": 14825,
-                      "inboundId": 1,
-                      "lastOnline": 1735680000000,
-                      "lastSubFetch": 1735680000000,
-                      "reset": 0,
-                      "resetCount": 0,
-                      "resetDay": 0,
-                      "resetMax": 0,
-                      "resetWeekday": 0,
-                      "subId": "i7tvdpeffi0hvvf1",
-                      "total": 10737418240,
-                      "up": 1048576,
-                      "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
-                    }
-                  ],
-                  "disableFlow": false,
-                  "down": 0,
-                  "enable": true,
-                  "excludeFromSub": false,
-                  "expiryTime": 0,
-                  "fallbackParent": null,
-                  "id": 1,
-                  "lastTrafficResetTime": 0,
-                  "listen": "",
-                  "nodeId": null,
-                  "originNodeGuid": "",
-                  "port": 443,
-                  "protocol": "vless",
-                  "remark": "VLESS-443",
-                  "settings": null,
-                  "shareAddr": "",
-                  "shareAddrStrategy": "node",
-                  "sniffing": null,
-                  "streamSettings": null,
-                  "subSortIndex": 1,
-                  "tag": "in-443-tcp",
-                  "total": 0,
-                  "trafficReset": "never",
-                  "trafficResetDay": 1,
-                  "up": 0
-                }
-              ],
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "outbounds",
-            "summary": "Current outbound traffic rows after the periodic traffic collection.",
-            "payloadSchema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/OutboundTraffics"
-              }
-            },
-            "example": {
-              "type": "outbounds",
-              "payload": [
-                {
-                  "down": 0,
-                  "id": 0,
-                  "tag": "",
-                  "total": 0,
-                  "up": 0
-                }
-              ],
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "nodes",
-            "summary": "Current node tree after the heartbeat probe cycle.",
-            "payloadSchema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/NodeView"
-              }
-            },
-            "example": {
-              "type": "nodes",
-              "payload": [
-                {
-                  "activeCount": 20,
-                  "address": "node.example.com",
-                  "allowPrivateAddress": false,
-                  "basePath": "/",
-                  "clientCount": 25,
-                  "configDirty": false,
-                  "configDirtyAt": 0,
-                  "cpuPct": 12.5,
-                  "createdAt": 1700000000,
-                  "depletedCount": 1,
-                  "disabledCount": 2,
-                  "enable": true,
-                  "guid": "node-guid",
-                  "hasApiToken": true,
-                  "id": 1,
-                  "inboundCount": 3,
-                  "inboundSyncMode": "all",
-                  "inboundTags": [
-                    "in-443-tcp"
-                  ],
-                  "lastError": "",
-                  "lastHeartbeat": 1700000000,
-                  "latencyMs": 42,
-                  "memPct": 45.2,
-                  "name": "edge-1",
-                  "netDown": 1048576,
-                  "netUp": 2097152,
-                  "onlineCount": 5,
-                  "outboundTag": "direct",
-                  "panelVersion": "v3.x.x",
-                  "parentGuid": "",
-                  "pinnedCertSha256": "",
-                  "port": 2053,
-                  "remark": "Primary edge",
-                  "scheme": "https",
-                  "status": "online",
-                  "tlsVerifyMode": "verify",
-                  "transitive": false,
-                  "unavailableMetrics": [
-                    ""
-                  ],
-                  "updatedAt": 1700003600,
-                  "uptimeSecs": 86400,
-                  "xrayError": "",
-                  "xrayState": "running",
-                  "xrayVersion": "25.10.31"
-                }
-              ],
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "notification",
-            "summary": "An in-panel notification emitted by server actions.",
-            "payloadSchema": {
-              "type": "object",
-              "required": [
-                "title",
-                "message",
-                "level"
-              ],
-              "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "level": {
-                  "type": "string",
-                  "enum": [
-                    "success",
-                    "warning"
-                  ]
-                }
-              }
-            },
-            "example": {
-              "type": "notification",
-              "payload": {
-                "title": "Xray service restarted",
-                "message": "Xray service has been restarted successfully",
-                "level": "success"
-              },
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "xray_state",
-            "summary": "Xray process state change after a stop, restart or error.",
-            "payloadSchema": {
-              "type": "object",
-              "required": [
-                "state",
-                "errorMsg"
-              ],
-              "properties": {
-                "state": {
-                  "type": "string",
-                  "enum": [
-                    "running",
-                    "stop",
-                    "error"
-                  ]
-                },
-                "errorMsg": {
-                  "type": "string"
-                }
-              }
-            },
-            "example": {
-              "type": "xray_state",
-              "payload": {
-                "state": "running",
-                "errorMsg": ""
-              },
-              "time": 1735689600000
-            }
-          },
-          {
-            "type": "invalidate",
-            "summary": "Requests a REST re-fetch. clients is an invalidate payload type, not a top-level event.",
-            "payloadSchema": {
-              "type": "object",
-              "required": [
-                "type"
-              ],
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "status",
-                    "traffic",
-                    "client_stats",
-                    "inbounds",
-                    "outbounds",
-                    "nodes",
-                    "notification",
-                    "xray_state",
-                    "clients"
-                  ]
-                }
-              }
-            },
-            "example": {
-              "type": "invalidate",
-              "payload": {
-                "type": "inbounds"
-              },
-              "time": 1735689600000
-            }
-          }
-        ]
-      }
-    },
-    "/panel/api/inbounds/recommend": {
-      "get": {
-        "tags": [
-          "Inbounds"
-        ],
-        "summary": "Inspect this server (or a node) for the one-click inbound dialog: the domain and certificate it could use for VLESS TLS (certState ok, missing, unreadable, expired, mismatch or unverified), whether the domain resolves to the server, free TCP and UDP ports (443 first, then the other Cloudflare HTTPS ports, then random ones) and the recommended security (tls when domain, certificate and DNS all check out, otherwise reality).",
-        "operationId": "get_panel_api_inbounds_recommend",
-        "parameters": [
-          {
-            "name": "nodeId",
-            "in": "query",
-            "required": true,
-            "description": "Node to inspect; omit for this panel’s own server.",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/InboundRecommendation"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "certFile": "/root/cert/hk.example.com/fullchain.pem",
-                    "certNotAfter": 1767225600000,
-                    "certState": "ok",
-                    "decoyReady": true,
-                    "domain": "hk.example.com",
-                    "domainIps": [
-                      ""
-                    ],
-                    "firewall": "ufw",
-                    "keyFile": "/root/cert/hk.example.com/privkey.pem",
-                    "nodeId": 3,
-                    "pointsHere": true,
-                    "realityTarget": "127.0.0.1:24873",
-                    "recommended": "tls",
-                    "serverIps": [
-                      ""
-                    ],
-                    "tcpPorts": [
-                      0
-                    ],
-                    "udpPorts": [
-                      0
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/inbounds/diagnose": {
-      "post": {
-        "tags": [
-          "Inbounds"
-        ],
-        "summary": "Diagnose why inbounds cannot be used (ids empty = all): whether the hosting server binds the port and its ufw lets it in (TCP/UDP), whether the address resolves and answers from outside, the TLS certificate, and a real client connection through the inbound from this panel. Each report lists findings (key, level ok/warn/error, params, fix enable/firewall/clients).",
-        "operationId": "post_panel_api_inbounds_diagnose",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "ids": [
-                  7
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Report"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": [
-                    {
-                      "address": "us.example.com",
-                      "delayMs": 0,
-                      "findings": [
-                        {
-                          "fix": "firewall",
-                          "key": "firewallBlocked",
-                          "level": "error",
-                          "params": {}
-                        }
-                      ],
-                      "inboundId": 7,
-                      "nodeId": 2,
-                      "ok": false,
-                      "port": 443,
-                      "protocol": "hysteria",
-                      "remark": "US A Hy2"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/server/autoUpdate": {
-      "get": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Unattended self-update: whether it is on, the hour it runs each day (Beijing time), whether outdated nodes are told to update too, and what the last daily check did.",
-        "operationId": "get_panel_api_server_autoUpdate",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/AutoUpdateConfig"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "enable": true,
-                    "hour": 4,
-                    "lastResult": "updated:v3.10.2-k1:v3.10.2-k2",
-                    "lastRun": "2026-10-16",
-                    "nodes": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Set the unattended self-update. Turning it on also enables the panel.update Telegram notice.",
-        "operationId": "post_panel_api_server_autoUpdate",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "enable": true,
-                "hour": 4,
-                "nodes": true
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {
-                      "$ref": "#/components/schemas/AutoUpdateConfig"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "enable": true,
-                    "hour": 4,
-                    "lastResult": "updated:v3.10.2-k1:v3.10.2-k2",
-                    "lastRun": "2026-10-16",
-                    "nodes": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/clients/groups/clashRules": {
-      "post": {
-        "tags": [
-          "Clients"
-        ],
-        "summary": "Set the Clash/Mihomo routing used by the group's members, overriding the global subscription routing. clashRules is the base template: an HTTPS URL to a remote routing document (proxy-groups / rule-providers / rules) or inline rules. Optional ruleSets (rule-library picks with DIRECT/PROXY/REJECT) and extraRules (hand-written lines) go in front of the template; omit both to keep the stored ones. dns sets the group's own DNS (null follows the global DNS; omitted keeps it). With everything empty the group follows the global setting again. Takes effect on the next subscription refresh, no Xray restart. Creates the client_groups row if the group exists only as a derived label.",
-        "operationId": "post_panel_api_clients_groups_clashRules",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              },
-              "example": {
-                "name": "customer-a",
-                "clashRules": "https://example.com/rules/standard.yaml",
-                "ruleSets": [
-                  {
-                    "id": 5,
-                    "policy": "PROXY"
-                  }
-                ],
-                "extraRules": "bank.example,DIRECT"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "obj": {
-                    "name": "customer-a"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/panel/api/probes/matrix": {
       "get": {
         "tags": [
@@ -21482,6 +19879,759 @@
         }
       }
     },
+    "/panel/api/sub-balancers": {
+      "get": {
+        "tags": [
+          "Subscription Balancers"
+        ],
+        "summary": "List all subscription balancers in sort order (sort_order asc, id asc).",
+        "operationId": "get_panel_api_sub_balancers",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SubBalancer"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "createdAt": 1710000000000,
+                      "enabled": true,
+                      "id": 1,
+                      "inboundIds": [
+                        1,
+                        3
+                      ],
+                      "memberWeights": {},
+                      "remark": "auto-fastest",
+                      "sortOrder": 1,
+                      "strategy": "random",
+                      "updatedAt": 1710000000000
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Balancers"
+        ],
+        "summary": "Create a subscription balancer. It appears in the JSON subscription of every client that sits on at least one selected inbound.",
+        "operationId": "post_panel_api_sub_balancers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remark": {
+                    "type": "string",
+                    "description": "Display label, used as the config remarks (required)."
+                  },
+                  "strategy": {
+                    "type": "string",
+                    "default": "random",
+                    "description": "Balancer strategy: \"leastLoad\", \"leastPing\", \"roundRobin\" or \"random\". Default \"random\"."
+                  },
+                  "inboundIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "Repeated form keys selecting the member inbounds (required, at least one)."
+                  },
+                  "memberWeights": {
+                    "type": "object",
+                    "description": "leastLoad only: JSON object mapping inbound id to a static weight > 0, e.g. {\"3\":0.2}. Lower weight = picked more often; absent ids weigh 1. Rejected for other strategies; entries for unselected inbounds are dropped."
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "1-based position in the subscription list. Default 1."
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Whether the balancer is emitted. Default true on create; unchanged when omitted on update."
+                  }
+                },
+                "required": [
+                  "remark",
+                  "inboundIds"
+                ]
+              },
+              "encoding": {
+                "inboundIds": {
+                  "style": "form",
+                  "explode": true
+                },
+                "memberWeights": {
+                  "contentType": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/SubBalancer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "createdAt": 1710000000000,
+                    "enabled": true,
+                    "id": 1,
+                    "inboundIds": [
+                      1,
+                      3
+                    ],
+                    "memberWeights": {},
+                    "remark": "auto-fastest",
+                    "sortOrder": 1,
+                    "strategy": "random",
+                    "updatedAt": 1710000000000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/sub-balancers/{id}": {
+      "post": {
+        "tags": [
+          "Subscription Balancers"
+        ],
+        "summary": "Update a balancer by id. Accepts the same form fields as create (full-row update); omitting memberWeights clears stored weights, while omitting enabled keeps its current value.",
+        "operationId": "post_panel_api_sub_balancers_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Balancer id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remark": {
+                    "type": "string",
+                    "description": "Display label, used as the config remarks (required)."
+                  },
+                  "strategy": {
+                    "type": "string",
+                    "default": "random",
+                    "description": "Balancer strategy: \"leastLoad\", \"leastPing\", \"roundRobin\" or \"random\". Default \"random\"."
+                  },
+                  "inboundIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "Repeated form keys selecting the member inbounds (required, at least one)."
+                  },
+                  "memberWeights": {
+                    "type": "object",
+                    "description": "leastLoad only: JSON object mapping inbound id to a static weight > 0, e.g. {\"3\":0.2}. Lower weight = picked more often; absent ids weigh 1. Rejected for other strategies; entries for unselected inbounds are dropped."
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "1-based position in the subscription list. Default 1."
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Whether the balancer is emitted. Default true on create; unchanged when omitted on update."
+                  }
+                },
+                "required": [
+                  "remark",
+                  "inboundIds"
+                ]
+              },
+              "encoding": {
+                "inboundIds": {
+                  "style": "form",
+                  "explode": true
+                },
+                "memberWeights": {
+                  "contentType": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/SubBalancer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "createdAt": 1710000000000,
+                    "enabled": true,
+                    "id": 1,
+                    "inboundIds": [
+                      1,
+                      3
+                    ],
+                    "memberWeights": {},
+                    "remark": "auto-fastest",
+                    "sortOrder": 1,
+                    "strategy": "random",
+                    "updatedAt": 1710000000000
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Subscription Balancers"
+        ],
+        "summary": "Delete a balancer by id.",
+        "operationId": "delete_panel_api_sub_balancers_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Balancer id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/SubBalancer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "createdAt": 1710000000000,
+                    "enabled": true,
+                    "id": 1,
+                    "inboundIds": [
+                      1,
+                      3
+                    ],
+                    "memberWeights": {},
+                    "remark": "auto-fastest",
+                    "sortOrder": 1,
+                    "strategy": "random",
+                    "updatedAt": 1710000000000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/sub-balancers/{id}/del": {
+      "post": {
+        "tags": [
+          "Subscription Balancers"
+        ],
+        "summary": "Delete a balancer by id (POST alias of DELETE for clients that cannot send DELETE).",
+        "operationId": "post_panel_api_sub_balancers_id_del",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Balancer id.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/SubBalancer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "createdAt": 1710000000000,
+                    "enabled": true,
+                    "id": 1,
+                    "inboundIds": [
+                      1,
+                      3
+                    ],
+                    "memberWeights": {},
+                    "remark": "auto-fastest",
+                    "sortOrder": 1,
+                    "strategy": "random",
+                    "updatedAt": 1710000000000
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{subPath}{subid}": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return base64-encoded subscription links for all enabled clients matching the subscription ID. When the request has an Accept: text/html header or ?html=1, renders a styled info page instead. With ?format=info, returns the page view-model as JSON (traffic, expiry, online status; no links) for live polling. The path prefix is configured by subPath.",
+        "operationId": "get_subPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "Set to \"info\" to get the subscription status view-model as JSON instead of the links.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return the same status and subscription metadata headers as GET without a response body.",
+        "operationId": "head_subPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription is available. Headers match GET; no response body."
+          },
+          "404": {
+            "description": "No enabled client matches the subscription ID."
+          },
+          "500": {
+            "description": "Subscription generation failed."
+          }
+        }
+      }
+    },
+    "/{subPath}{subid}/hwid-status": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return aggregate HWID device-slot usage for the subscription: whether an HWID limit is active, the limit, how many devices are registered and how many slots remain. Read-only — it never registers a device, so asking does not consume a slot. Counters only: no HWID value, email or device metadata. The path prefix is configured by subPath.",
+        "operationId": "get_subPath_subid_hwid_status",
+        "description": "Responds with the bare HwidSlotStatus object, not the <code>{success,msg,obj}</code> panel envelope, like the other subscription-server routes. With no HWID limit configured, <code>active</code> is false and every counter is 0.",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device-slot counters for the subscription.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "active": true,
+                  "full": false,
+                  "limit": 2,
+                  "registered": 1,
+                  "remaining": 1
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/HwidSlotStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No enabled client matches the subscription ID. Empty body."
+          },
+          "500": {
+            "description": "Database lookup failed. Empty body."
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return the HWID device-slot status code and headers as GET without a response body.",
+        "operationId": "head_subPath_subid_hwid_status",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Headers match GET; no response body."
+          },
+          "404": {
+            "description": "No enabled client matches the subscription ID. Empty body."
+          },
+          "500": {
+            "description": "Database lookup failed. Empty body."
+          }
+        }
+      }
+    },
+    "/{jsonPath}{subid}": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return subscription as a JSON array of proxy configs (one per enabled client). Only when JSON subscription is enabled in settings. The path prefix is configured by subJsonPath.",
+        "operationId": "get_jsonPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jsonPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return the JSON subscription status and metadata headers without a body. Registered only when JSON subscriptions are enabled.",
+        "operationId": "head_jsonPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jsonPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription is available. Headers match GET; no response body."
+          },
+          "404": {
+            "description": "No enabled client matches the subscription ID."
+          },
+          "500": {
+            "description": "Subscription generation failed."
+          }
+        }
+      }
+    },
+    "/{clashPath}{subid}": {
+      "get": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return subscription as a Clash/Mihomo-compatible YAML config, including configured global Clash routing rules. Only when Clash subscription is enabled in settings. The path prefix is configured by subClashPath.",
+        "operationId": "get_clashPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clashPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "Subscription Server"
+        ],
+        "summary": "Return the Clash subscription status and metadata headers without a body. Registered only when Clash subscriptions are enabled.",
+        "operationId": "head_clashPath_subid",
+        "parameters": [
+          {
+            "name": "subid",
+            "in": "path",
+            "required": true,
+            "description": "Client subscription ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clashPath",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription is available. Headers match GET; no response body."
+          },
+          "404": {
+            "description": "No enabled client matches the subscription ID."
+          },
+          "500": {
+            "description": "Subscription generation failed."
+          }
+        }
+      }
+    },
     "/{surgePath}{subid}": {
       "get": {
         "tags": [
@@ -21630,6 +20780,856 @@
             }
           }
         }
+      }
+    },
+    "/ws": {
+      "get": {
+        "tags": [
+          "WebSocket"
+        ],
+        "summary": "Upgrade an HTTP connection to a WebSocket. Requires an authenticated session cookie (Bearer token auth is not supported here). Returns 101 Switching Protocols on success. The server then pushes JSON messages described below.",
+        "operationId": "get_ws",
+        "responses": {
+          "101": {
+            "description": "Switching Protocols. WebSocket messages use WebSocketEnvelope."
+          },
+          "401": {
+            "description": "No authenticated panel session cookie."
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "x-websocket-events": [
+          {
+            "type": "status",
+            "summary": "Server health snapshot pushed every two seconds; same payload as server/status obj.",
+            "payloadSchema": {
+              "type": "object",
+              "required": [
+                "cpu",
+                "cpuCores",
+                "logicalPro",
+                "cpuSpeedMhz",
+                "mem",
+                "swap",
+                "disk",
+                "diskIO",
+                "diskTraffic",
+                "xray",
+                "amneziawg",
+                "panelVersion",
+                "panelGuid",
+                "uptime",
+                "loads",
+                "tcpCount",
+                "udpCount",
+                "netIO",
+                "netTraffic",
+                "publicIP",
+                "appStats"
+              ],
+              "properties": {
+                "cpu": {
+                  "type": "number"
+                },
+                "cpuCores": {
+                  "type": "integer"
+                },
+                "logicalPro": {
+                  "type": "integer"
+                },
+                "cpuSpeedMhz": {
+                  "type": "number"
+                },
+                "mem": {
+                  "type": "object",
+                  "required": [
+                    "current",
+                    "total"
+                  ],
+                  "properties": {
+                    "current": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "swap": {
+                  "type": "object",
+                  "required": [
+                    "current",
+                    "total"
+                  ],
+                  "properties": {
+                    "current": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "disk": {
+                  "type": "object",
+                  "required": [
+                    "current",
+                    "total"
+                  ],
+                  "properties": {
+                    "current": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "diskIO": {
+                  "type": "object",
+                  "required": [
+                    "read",
+                    "write"
+                  ],
+                  "properties": {
+                    "read": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "write": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "diskTraffic": {
+                  "type": "object",
+                  "required": [
+                    "read",
+                    "write"
+                  ],
+                  "properties": {
+                    "read": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "write": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "xray": {
+                  "type": "object",
+                  "required": [
+                    "state",
+                    "errorMsg",
+                    "version"
+                  ],
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "running",
+                        "stop",
+                        "error"
+                      ]
+                    },
+                    "errorMsg": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "amneziawg": {
+                  "type": "object",
+                  "required": [
+                    "configured",
+                    "running"
+                  ],
+                  "properties": {
+                    "configured": {
+                      "type": "boolean"
+                    },
+                    "running": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "panelVersion": {
+                  "type": "string"
+                },
+                "panelGuid": {
+                  "type": "string"
+                },
+                "uptime": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "loads": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "tcpCount": {
+                  "type": "integer"
+                },
+                "udpCount": {
+                  "type": "integer"
+                },
+                "netIO": {
+                  "type": "object",
+                  "required": [
+                    "up",
+                    "down",
+                    "pktUp",
+                    "pktDown"
+                  ],
+                  "properties": {
+                    "up": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "down": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "pktUp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "pktDown": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "netTraffic": {
+                  "type": "object",
+                  "required": [
+                    "sent",
+                    "recv",
+                    "pktSent",
+                    "pktRecv"
+                  ],
+                  "properties": {
+                    "sent": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recv": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "pktSent": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "pktRecv": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "publicIP": {
+                  "type": "object",
+                  "required": [
+                    "ipv4",
+                    "ipv6"
+                  ],
+                  "properties": {
+                    "ipv4": {
+                      "type": "string"
+                    },
+                    "ipv6": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "appStats": {
+                  "type": "object",
+                  "required": [
+                    "threads",
+                    "mem",
+                    "uptime"
+                  ],
+                  "properties": {
+                    "threads": {
+                      "type": "integer"
+                    },
+                    "mem": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "uptime": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            },
+            "example": {
+              "type": "status",
+              "payload": {
+                "cpu": 12.5,
+                "cpuCores": 4,
+                "logicalPro": 8,
+                "cpuSpeedMhz": 3200,
+                "mem": {
+                  "current": 2147483648,
+                  "total": 8589934592
+                },
+                "swap": {
+                  "current": 0,
+                  "total": 2147483648
+                },
+                "disk": {
+                  "current": 53687091200,
+                  "total": 107374182400
+                },
+                "diskIO": {
+                  "read": 1048576,
+                  "write": 2097152
+                },
+                "diskTraffic": {
+                  "read": 4096,
+                  "write": 8192
+                },
+                "xray": {
+                  "state": "running",
+                  "errorMsg": "",
+                  "version": "25.10.31"
+                },
+                "amneziawg": {
+                  "configured": false,
+                  "running": false
+                },
+                "panelVersion": "v3.x.x",
+                "panelGuid": "panel-guid",
+                "uptime": 86400,
+                "loads": [
+                  0.1,
+                  0.2,
+                  0.3
+                ],
+                "tcpCount": 24,
+                "udpCount": 8,
+                "netIO": {
+                  "up": 1048576,
+                  "down": 2097152,
+                  "pktUp": 100,
+                  "pktDown": 200
+                },
+                "netTraffic": {
+                  "sent": 4096,
+                  "recv": 8192,
+                  "pktSent": 10,
+                  "pktRecv": 20
+                },
+                "publicIP": {
+                  "ipv4": "192.0.2.1",
+                  "ipv6": "2001:db8::1"
+                },
+                "appStats": {
+                  "threads": 16,
+                  "mem": 67108864,
+                  "uptime": 3600
+                }
+              },
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "traffic",
+            "summary": "Live traffic deltas plus online, per-node and last-online maps. TUIC also sends source-tagged client deltas with their sampling interval for live speed.",
+            "payloadSchema": {
+              "type": "object",
+              "properties": {
+                "traffics": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Traffic"
+                  }
+                },
+                "clientTraffics": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClientTraffic"
+                  }
+                },
+                "clientTrafficSource": {
+                  "type": "string",
+                  "enum": [
+                    "xray",
+                    "tuic"
+                  ],
+                  "description": "Present for native TUIC samples; omitted Xray samples default to xray."
+                },
+                "clientTrafficIntervalMs": {
+                  "type": "integer",
+                  "description": "Sampling interval used to calculate client speed, in milliseconds."
+                },
+                "nodeTraffics": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "$ref": "#/components/schemas/Traffic"
+                  }
+                },
+                "onlineClients": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "onlineByGuid": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "activeInbounds": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "lastOnlineMap": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              },
+              "oneOf": [
+                {
+                  "required": [
+                    "traffics",
+                    "clientTraffics",
+                    "onlineClients",
+                    "onlineByGuid",
+                    "activeInbounds",
+                    "lastOnlineMap"
+                  ]
+                },
+                {
+                  "required": [
+                    "nodeTraffics"
+                  ]
+                },
+                {
+                  "required": [
+                    "clientTraffics",
+                    "clientTrafficSource",
+                    "clientTrafficIntervalMs"
+                  ]
+                }
+              ]
+            },
+            "example": {
+              "type": "traffic",
+              "payload": {
+                "traffics": [
+                  {
+                    "Down": 2097152,
+                    "IsInbound": true,
+                    "IsOutbound": false,
+                    "Tag": "inbound-443",
+                    "Up": 1048576
+                  }
+                ],
+                "clientTraffics": [
+                  {
+                    "down": 2097152,
+                    "email": "user1",
+                    "enable": true,
+                    "expiryTime": 1735689600000,
+                    "id": 14825,
+                    "inboundId": 1,
+                    "lastOnline": 1735680000000,
+                    "lastSubFetch": 1735680000000,
+                    "reset": 0,
+                    "resetCount": 0,
+                    "resetDay": 0,
+                    "resetMax": 0,
+                    "resetWeekday": 0,
+                    "subId": "i7tvdpeffi0hvvf1",
+                    "total": 10737418240,
+                    "up": 1048576,
+                    "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
+                  }
+                ],
+                "onlineClients": [
+                  "alice@example.com"
+                ],
+                "onlineByGuid": {
+                  "panel-guid": [
+                    "alice@example.com"
+                  ]
+                },
+                "activeInbounds": {
+                  "panel-guid": [
+                    "inbound-443"
+                  ]
+                },
+                "lastOnlineMap": {
+                  "alice@example.com": 1735689600000
+                }
+              },
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "client_stats",
+            "summary": "Absolute client counters and/or inbound summaries; snapshot says whether clients is complete or only recently active rows.",
+            "payloadSchema": {
+              "type": "object",
+              "required": [
+                "snapshot"
+              ],
+              "properties": {
+                "snapshot": {
+                  "type": "boolean"
+                },
+                "clients": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClientTraffic"
+                  }
+                },
+                "inbounds": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InboundTrafficSummary"
+                  }
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "clients"
+                  ]
+                },
+                {
+                  "required": [
+                    "inbounds"
+                  ]
+                }
+              ]
+            },
+            "example": {
+              "type": "client_stats",
+              "payload": {
+                "snapshot": true,
+                "clients": [
+                  {
+                    "down": 2097152,
+                    "email": "user1",
+                    "enable": true,
+                    "expiryTime": 1735689600000,
+                    "id": 14825,
+                    "inboundId": 1,
+                    "lastOnline": 1735680000000,
+                    "lastSubFetch": 1735680000000,
+                    "reset": 0,
+                    "resetCount": 0,
+                    "resetDay": 0,
+                    "resetMax": 0,
+                    "resetWeekday": 0,
+                    "subId": "i7tvdpeffi0hvvf1",
+                    "total": 10737418240,
+                    "up": 1048576,
+                    "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
+                  }
+                ],
+                "inbounds": [
+                  {
+                    "down": 2097152,
+                    "enable": true,
+                    "id": 1,
+                    "total": 10737418240,
+                    "up": 1048576
+                  }
+                ]
+              },
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "inbounds",
+            "summary": "Full inbound list after an inbound mutation, unless invalidate is used at scale.",
+            "payloadSchema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Inbound"
+              }
+            },
+            "example": {
+              "type": "inbounds",
+              "payload": [
+                {
+                  "clientStats": [
+                    {
+                      "down": 2097152,
+                      "email": "user1",
+                      "enable": true,
+                      "expiryTime": 1735689600000,
+                      "id": 14825,
+                      "inboundId": 1,
+                      "lastOnline": 1735680000000,
+                      "lastSubFetch": 1735680000000,
+                      "reset": 0,
+                      "resetCount": 0,
+                      "resetDay": 0,
+                      "resetMax": 0,
+                      "resetWeekday": 0,
+                      "subId": "i7tvdpeffi0hvvf1",
+                      "total": 10737418240,
+                      "up": 1048576,
+                      "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
+                    }
+                  ],
+                  "disableFlow": false,
+                  "down": 0,
+                  "enable": true,
+                  "excludeFromSub": false,
+                  "expiryTime": 0,
+                  "fallbackParent": null,
+                  "id": 1,
+                  "lastTrafficResetTime": 0,
+                  "listen": "",
+                  "nodeId": null,
+                  "originNodeGuid": "",
+                  "port": 443,
+                  "protocol": "vless",
+                  "remark": "VLESS-443",
+                  "settings": null,
+                  "shareAddr": "",
+                  "shareAddrStrategy": "node",
+                  "sniffing": null,
+                  "streamSettings": null,
+                  "subSortIndex": 1,
+                  "tag": "in-443-tcp",
+                  "total": 0,
+                  "trafficReset": "never",
+                  "trafficResetDay": 1,
+                  "up": 0
+                }
+              ],
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "outbounds",
+            "summary": "Current outbound traffic rows after the periodic traffic collection.",
+            "payloadSchema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OutboundTraffics"
+              }
+            },
+            "example": {
+              "type": "outbounds",
+              "payload": [
+                {
+                  "down": 0,
+                  "id": 0,
+                  "tag": "",
+                  "total": 0,
+                  "up": 0
+                }
+              ],
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "nodes",
+            "summary": "Current node tree after the heartbeat probe cycle.",
+            "payloadSchema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/NodeView"
+              }
+            },
+            "example": {
+              "type": "nodes",
+              "payload": [
+                {
+                  "activeCount": 20,
+                  "address": "node.example.com",
+                  "allowPrivateAddress": false,
+                  "basePath": "/",
+                  "clientCount": 25,
+                  "configDirty": false,
+                  "configDirtyAt": 0,
+                  "cpuPct": 12.5,
+                  "createdAt": 1700000000,
+                  "depletedCount": 1,
+                  "disabledCount": 2,
+                  "enable": true,
+                  "guid": "node-guid",
+                  "hasApiToken": true,
+                  "id": 1,
+                  "inboundCount": 3,
+                  "inboundSyncMode": "all",
+                  "inboundTags": [
+                    "in-443-tcp"
+                  ],
+                  "lastError": "",
+                  "lastHeartbeat": 1700000000,
+                  "latencyMs": 42,
+                  "memPct": 45.2,
+                  "name": "edge-1",
+                  "netDown": 1048576,
+                  "netUp": 2097152,
+                  "onlineCount": 5,
+                  "outboundTag": "direct",
+                  "panelVersion": "v3.x.x",
+                  "parentGuid": "",
+                  "pinnedCertSha256": "",
+                  "port": 2053,
+                  "remark": "Primary edge",
+                  "scheme": "https",
+                  "status": "online",
+                  "tlsVerifyMode": "verify",
+                  "transitive": false,
+                  "unavailableMetrics": [
+                    ""
+                  ],
+                  "updatedAt": 1700003600,
+                  "uptimeSecs": 86400,
+                  "xrayError": "",
+                  "xrayState": "running",
+                  "xrayVersion": "25.10.31"
+                }
+              ],
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "notification",
+            "summary": "An in-panel notification emitted by server actions.",
+            "payloadSchema": {
+              "type": "object",
+              "required": [
+                "title",
+                "message",
+                "level"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "string",
+                  "enum": [
+                    "success",
+                    "warning"
+                  ]
+                }
+              }
+            },
+            "example": {
+              "type": "notification",
+              "payload": {
+                "title": "Xray service restarted",
+                "message": "Xray service has been restarted successfully",
+                "level": "success"
+              },
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "xray_state",
+            "summary": "Xray process state change after a stop, restart or error.",
+            "payloadSchema": {
+              "type": "object",
+              "required": [
+                "state",
+                "errorMsg"
+              ],
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "running",
+                    "stop",
+                    "error"
+                  ]
+                },
+                "errorMsg": {
+                  "type": "string"
+                }
+              }
+            },
+            "example": {
+              "type": "xray_state",
+              "payload": {
+                "state": "running",
+                "errorMsg": ""
+              },
+              "time": 1735689600000
+            }
+          },
+          {
+            "type": "invalidate",
+            "summary": "Requests a REST re-fetch. clients is an invalidate payload type, not a top-level event.",
+            "payloadSchema": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "status",
+                    "traffic",
+                    "client_stats",
+                    "inbounds",
+                    "outbounds",
+                    "nodes",
+                    "notification",
+                    "xray_state",
+                    "clients"
+                  ]
+                }
+              }
+            },
+            "example": {
+              "type": "invalidate",
+              "payload": {
+                "type": "inbounds"
+              },
+              "time": 1735689600000
+            }
+          }
+        ]
       }
     }
   }
