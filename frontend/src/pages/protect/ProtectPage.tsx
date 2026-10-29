@@ -34,6 +34,7 @@ import { HttpUtil } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import AppSidebar from '@/layouts/AppSidebar';
 import { keys } from '@/api/queryKeys';
+import type { CfOnlyStatus } from '@/generated/types';
 import FirewallCard from './FirewallCard';
 import RealitySelfCard from './RealitySelfCard';
 import DecoyCard from './DecoyCard';
@@ -178,13 +179,24 @@ function CfRow({
   domain: initialDomain,
   port,
   panel,
+  cfOnly,
 }: {
   label: string;
   domain: string;
   port: number;
   panel: boolean;
+  cfOnly?: CfOnlyStatus;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const limited = !!cfOnly?.ports.includes(port);
+  const setCfOnly = useMutation({
+    mutationFn: (on: boolean) =>
+      HttpUtil.post<CfOnlyStatus>(`${API}/cf/only`, { port, on, panel }, JSON_HEADERS),
+    onSuccess: (msg) => {
+      if (msg?.obj) queryClient.setQueryData([...keys.protect.root(), 'cfOnly'], msg.obj);
+    },
+  });
   const [domain, setDomain] = useState(initialDomain);
   const [status, setStatus] = useState<CfStatus | null>(null);
   const [busy, setBusy] = useState(false);
@@ -235,7 +247,24 @@ function CfRow({
             onChange={(on) => run('/cf/proxied', { domain, port, on, panel })}
           />
         )}
+        {(limited || status?.proxied) && (
+          <Space size={6}>
+            <Switch
+              aria-label={t('pages.protect.cfOnly')}
+              checked={limited}
+              loading={setCfOnly.isPending}
+              disabled={!limited && !cfOnly?.defaultDeny}
+              onChange={(on) => setCfOnly.mutate(on)}
+            />
+            <span>{t('pages.protect.cfOnly')}</span>
+          </Space>
+        )}
       </Space>
+      {limited && (
+        <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>
+          {t('pages.protect.cfOnlyOn', { port })}
+        </Typography.Text>
+      )}
       {status && (
         <Descriptions size="small" column={{ xs: 1, sm: 2, md: 4 }} style={{ marginTop: 8 }}>
           <Descriptions.Item label={t('pages.protect.cfRecord')}>
@@ -263,11 +292,25 @@ function CloudflareCard() {
     queryKey: [...keys.protect.root(), 'cf'],
     queryFn: () => getObj<CfInfo>('/cf'),
   });
+  const cfOnlyQuery = useQuery({
+    queryKey: [...keys.protect.root(), 'cfOnly'],
+    queryFn: () => getObj<CfOnlyStatus>('/cf/only'),
+  });
   const info = query.data;
+  const cfOnly = cfOnlyQuery.data;
   const host = window.location.hostname;
   return (
     <Card size="small" title={t('pages.protect.cfTitle')}>
       <Typography.Paragraph type="secondary">{t('pages.protect.cfDesc')}</Typography.Paragraph>
+      <Typography.Paragraph type="secondary">{t('pages.protect.cfOnlyDesc')}</Typography.Paragraph>
+      {cfOnly && !cfOnly.defaultDeny && (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 12 }}
+          title={cfOnly.active ? t('pages.protect.cfOnlyDefaultAllow') : t('pages.protect.cfOnlyNoUfw')}
+        />
+      )}
       {info && !info.cfConfigured && (
         <Alert
           type="warning"
@@ -283,6 +326,7 @@ function CloudflareCard() {
             panel
             domain={info.panelDomain || (isIP(host) ? '' : host)}
             port={info.panelPort}
+            cfOnly={cfOnly}
           />
           {info.subEnable && (
             <CfRow
@@ -290,6 +334,7 @@ function CloudflareCard() {
               panel={false}
               domain={info.subDomain}
               port={info.subPort}
+              cfOnly={cfOnly}
             />
           )}
         </>

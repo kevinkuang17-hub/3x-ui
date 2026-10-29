@@ -78,6 +78,9 @@ func TestEnableCfOnlyKeepsUDPOfABothProtocolsRule(t *testing.T) {
 		t.Fatal(err)
 	}
 	calls := h.take()
+	if len(calls) < 2 {
+		t.Fatalf("ufw calls = %q", calls)
+	}
 	sameCalls(t, calls[len(calls)-2:], []string{"ufw delete allow 443", "ufw allow 443/udp"})
 }
 

@@ -115,6 +115,7 @@ func run(root, outDir string) error {
 				"DnsConfig",
 				"RuleSetPick",
 				"PortCheck",
+				"CfOnlyStatus",
 				"RealitySelfPlan",
 				"CertIssueStatus",
 				"AcmeCert",
