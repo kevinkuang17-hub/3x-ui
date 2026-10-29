@@ -99,6 +99,11 @@ jobs:
         if: steps.merge.outputs.merged == '1'
         run: |
           make dist-stub
+          # Taking upstream's go.mod on a conflict drops modules only this fork imports; tidy restores them.
+          go mod tidy
+          if ! git diff --quiet -- go.mod go.sum; then
+            git commit -q -m "sync: go mod tidy after merging upstream" -- go.mod go.sum
+          fi
           go build ./...
           go vet ./internal/... > "$RUNNER_TEMP/vet.txt" 2>&1 || { cat "$RUNNER_TEMP/vet.txt"; exit 1; }
       - name: 推送并发布
