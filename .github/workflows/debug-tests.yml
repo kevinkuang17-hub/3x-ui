@@ -1,5 +1,7 @@
 # Temporary: surfaces failing Go test output as annotations (job logs are not reachable from the dev sandbox).
 name: debug-tests
+permissions:
+  contents: write
 on:
   push:
     branches: ["dev/**"]
@@ -44,4 +46,8 @@ jobs:
           { tail -40 gen.txt; git status --short; git diff --stat; git diff | head -150; } > fail.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' fail.txt)
           echo "::error title=gen::${msg}"
+          rm -f gen.txt fail.txt
+          git config user.name gen-bot; git config user.email gen-bot@users.noreply.github.com
+          git add frontend/src/generated frontend/public/openapi.json
+          git commit -m "gen: regenerate from CI" && git push origin HEAD:${GITHUB_REF_NAME}
           exit $code
