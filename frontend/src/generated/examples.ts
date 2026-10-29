@@ -8,6 +8,13 @@ export const EXAMPLES: Record<string, unknown> = {
     "keyFile": "/root/cert/hk.example.com/privkey.pem"
   },
   "AllSetting": {
+    "cfApiToken": "",
+    "cfAutoDns": false,
+    "cfZone": "",
+    "crmWebhookEnable": false,
+    "crmWebhookEvents": "",
+    "crmWebhookSecret": "",
+    "crmWebhookUrl": "",
     "datepicker": "",
     "discordAdminIds": "",
     "discordBotBackup": false,
@@ -152,6 +159,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subJsonURI": "",
     "subJsonUserAgentRegex": "",
     "subKeyFile": "",
+    "subLineHealth": false,
     "subListen": "",
     "subPath": "",
     "subPort": 1,
@@ -188,6 +196,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "webKeyFile": "",
     "webListen": "",
     "webPort": 1,
+    "xrayAutoRollback": false
+  },
+  "AllSettingView": {
     "cfApiToken": "",
     "cfAutoDns": false,
     "cfZone": "",
@@ -195,10 +206,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "crmWebhookEvents": "",
     "crmWebhookSecret": "",
     "crmWebhookUrl": "",
-    "subLineHealth": false,
-    "xrayAutoRollback": false
-  },
-  "AllSettingView": {
     "datepicker": "",
     "discordAdminIds": "",
     "discordBotBackup": false,
@@ -216,6 +223,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "externalTrafficInformURI": "",
     "happLinkEnable": false,
     "hasApiToken": false,
+    "hasCfApiToken": false,
+    "hasCrmWebhookSecret": false,
     "hasDiscordBotToken": false,
     "hasLdapPassword": false,
     "hasNordSecret": false,
@@ -351,6 +360,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subJsonURI": "",
     "subJsonUserAgentRegex": "",
     "subKeyFile": "",
+    "subLineHealth": false,
     "subListen": "",
     "subPath": "",
     "subPort": 1,
@@ -387,16 +397,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "webKeyFile": "",
     "webListen": "",
     "webPort": 1,
-    "cfApiToken": "",
-    "cfAutoDns": false,
-    "cfZone": "",
-    "crmWebhookEnable": false,
-    "crmWebhookEvents": "",
-    "crmWebhookSecret": "",
-    "crmWebhookUrl": "",
-    "hasCfApiToken": false,
-    "hasCrmWebhookSecret": false,
-    "subLineHealth": false,
     "xrayAutoRollback": false
   },
   "AmneziaWGLogs": {
