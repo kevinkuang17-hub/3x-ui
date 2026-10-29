@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/config"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -94,7 +95,7 @@ func TestAutoUpdateOutcomeAfterRestart(t *testing.T) {
 		name, from, state string
 	}{
 		{"new version running", "3.10.1-k3", "success"},
-		{"rolled back", "3.10.2", "failed"},
+		{"rolled back", config.GetBaseVersion(), "failed"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
